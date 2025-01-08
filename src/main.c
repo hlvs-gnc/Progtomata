@@ -66,25 +66,28 @@
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
-/// @brief
+/// @brief Stack size for the button task in bytes
 #define BUTTON_TASK_STACK_SIZE 256
 
-/// @brief
+/// @brief Stack size for the blink task in bytes
 #define BLINK_TASK_STACK_SIZE 256
 
-/// @brief Blink task to toggle LEDs
-static uint32_t step = 10, delay = 50; // Initial delay and step
-const uint32_t MIN_DELAY = 10;         // Minimum delay
-const uint32_t MAX_DELAY = 250;        // Maximum delay
+/// @brief Initial step size for delay increment and initial delay value in milliseconds
+static uint32_t step = 10, delay = 50;
 
-/// @brief Button task stack
+/// @brief Minimum delay for LED blinking in milliseconds
+const uint32_t MIN_DELAY = 10;
+/// @brief Maximum delay for LED blinking in milliseconds
+const uint32_t MAX_DELAY = 250;
+
+/// @brief Stack memory allocation for the button task stored in CCM
 StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
-/// @brief Button TCB
+/// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t buttonTaskBuffer CCM_RAM;
 
-/// @brief Blink task stack
+/// @brief Stack memory allocation for the blink task stored in CCM
 StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
-/// @brief Blink TCB
+/// @brief Task control block (TCB) for the blink task stored in CCM
 StaticTask_t blinkTaskBuffer CCM_RAM;
 
 /**
@@ -133,7 +136,7 @@ int main(void) {
 
 	gpio_init();
 	lcd_screen_init();
-  
+
 	delay_ms(100);
 	lcd_commandSerial(CLEAR);
 	write_to_screen_string("LCD Test");
@@ -206,7 +209,6 @@ void vBlinkTask(void *p) {
   vTaskDelete(NULL);
 }
 
-/* Function to configure PA0 pin of as adigital input pin */
 void config_userbutton(void) {
   // Declare a variable of type struct GPIO_InitTypeDef
   GPIO_InitTypeDef GPIO_InitStructure;
