@@ -47,14 +47,18 @@
 #include <semphr.h>
 #include <task.h>
 
+// STD Library
 #include <stm32f4xx.h>
-#include <stm32f4_discovery.h>
-
 #include <stm32f4xx_tim.h>
 
+// STM32F4 Discovery
+#include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
 
+// Drivers
 #include <uart_driver.h>
+
+#include "lcd.h"
 
 // Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
@@ -88,6 +92,13 @@ int main(void) {
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+	gpio_init();
+	lcd_screen_init();
+	delay_ms(100);
+	lcd_commandSerial(CLEAR);
+	write_to_screen_string("LCD Test");
+	delay_ms(500);
 
   config_userbutton();
   leds_init();

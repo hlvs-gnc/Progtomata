@@ -69,4 +69,4 @@ extern StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE] CCM_RAM;
 extern StaticTask_t xTimerTaskTCB CCM_RAM;
 extern StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH] CCM_RAM;
 
-#endif // HOOKS_H
+#endif  // HOOKS_H_
