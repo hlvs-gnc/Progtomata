@@ -39,7 +39,6 @@
  * This work is licensed under Creative Commons 
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
- * @author Radar2000
  */
 
 #include <math.h>
@@ -54,6 +53,7 @@
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f4xx_usart.h>
 
 #include <stm32f4_discovery_audio_codec.h>
 
@@ -82,16 +82,18 @@ void buttonTask(void *p);
 void blinkTask(void *p);
 
 void config_userbutton(void);
-void init_leds(void);
+void leds_init(void);
 
-SemaphoreHandle_t xSemaphore = NULL;
-StaticSemaphore_t xMutexBuffer;
+void uart_init(void);
+void uart_send_char(char c);
+void uart_send_string(const char *str);
 
 int main(void) {
   SystemInit();
 
   config_userbutton();
-  init_leds();
+  leds_init();
+  uart_init();
 
   // Create button task
   xTaskCreateStatic(buttonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -100,6 +102,8 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(blinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
+
+  uart_send_string("System initialized\r\n");
 
   vTaskStartScheduler(); // should never return
 
@@ -174,7 +178,7 @@ void config_userbutton(void) {
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
-void init_leds(void) {
+void leds_init(void) {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
@@ -186,4 +190,48 @@ void init_leds(void) {
   STM_EVAL_LEDInit(LED5);
 
   STM_EVAL_LEDInit(LED6);
+}
+
+void uart_init(void) {
+  // Enable clocks for USART2 and GPIOA
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+  // Configure PA2 as USART2_TX and PA3 as USART2_RX
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // Connect GPIO pins to USART2 alternate function
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+
+  // Configure USART2 settings
+  USART_InitTypeDef USART_InitStruct;
+  USART_InitStruct.USART_BaudRate = 9600;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_Init(USART2, &USART_InitStruct);
+
+  // Enable USART2
+  USART_Cmd(USART2, ENABLE);
+}
+
+void uart_send_char(char c) {
+  // Wait until transmit buffer is empty
+  while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {}
+  USART_SendData(USART2, c);
+}
+
+void uart_send_string(const char *str) {
+  while (*str) {
+    uart_send_char(*str++);
+  }
 }
