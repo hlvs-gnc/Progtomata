@@ -41,8 +41,10 @@
  *
  */
 
+// System libraries
 #include <math.h>
 
+// Real-time operating system
 #include <FreeRTOS.h>
 #include <semphr.h>
 #include <task.h>
@@ -55,36 +57,72 @@
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
 
+// Peripherals
+#include <lcd.h>
+
 // Drivers
 #include <uart_driver.h>
 
-#include "lcd.h"
-
-// Macro to use CCM (Core Coupled Memory) in STM32F4
+/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
+/// @brief
 #define BUTTON_TASK_STACK_SIZE 256
+
+/// @brief
 #define BLINK_TASK_STACK_SIZE 256
 
-// Blink task to toggle LEDs
+/// @brief Blink task to toggle LEDs
 static uint32_t step = 10, delay = 50; // Initial delay and step
 const uint32_t MIN_DELAY = 10;         // Minimum delay
 const uint32_t MAX_DELAY = 250;        // Maximum delay
 
-// Button task stack
+/// @brief Button task stack
 StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
-// Button TCB
+/// @brief Button TCB
 StaticTask_t buttonTaskBuffer CCM_RAM;
 
-// Blink task stack
+/// @brief Blink task stack
 StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
-// Blink TCB
+/// @brief Blink TCB
 StaticTask_t blinkTaskBuffer CCM_RAM;
 
-void buttonTask(void *p);
-void blinkTask(void *p);
+/**
+ * @brief Handles button press events to adjust LED blink delay.
+ *
+ * Monitors the state of the user button connected to GPIOA Pin 0.
+ * If a button press is detected, it resets the blink delay to its
+ * minimum value. Designed as a FreeRTOS task that runs continuously.
+ *
+ * @param[in] p Pointer to task parameters (unused).
+ */
+void vButtonTask(void *p);
 
+/**
+ * @brief Controls LED blinking behavior with variable delay.
+ *
+ * Cycles through four LEDs connected to GPIOD Pins 12, 13, 14, and 15.
+ * Adjusts the blinking delay dynamically within defined limits.
+ * Runs as a FreeRTOS task, demonstrating time-based scheduling.
+ *
+ * @param[in] p Pointer to task parameters (unused).
+ */
+void vBlinkTask(void *p);
+
+/**
+ * @brief Configures the user button GPIO (PA0) as an input.
+ *
+ * Initializes GPIO settings, enabling input mode without pull-up or
+ * pull-down resistors. Prepares the pin to detect user button presses.
+ */
 void config_userbutton(void);
+
+/**
+ * @brief Initializes GPIO pins connected to LEDs.
+ *
+ * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
+ * proper configuration for controlling LED states.
+ */
 void leds_init(void);
 
 int main(void) {
@@ -95,6 +133,7 @@ int main(void) {
 
 	gpio_init();
 	lcd_screen_init();
+  
 	delay_ms(100);
 	lcd_commandSerial(CLEAR);
 	write_to_screen_string("LCD Test");
@@ -105,22 +144,23 @@ int main(void) {
   uart_init();
 
   // Create button task
-  xTaskCreateStatic(buttonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
+  xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
                     buttonTaskStack, &buttonTaskBuffer);
 
   // Create blink task
-  xTaskCreateStatic(blinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
+  xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
 
   uart_send_string("System initialized\r\n");
 
-  vTaskStartScheduler(); // should never return
+  vTaskStartScheduler();
 
+  // This shall never return
   for (;;) {
   }
 }
 
-void buttonTask(void *p) {
+void vButtonTask(void *p) {
   // Button task to handle user input
   uint8_t prevState = Bit_RESET;
 
@@ -140,7 +180,7 @@ void buttonTask(void *p) {
   vTaskDelete(NULL);
 }
 
-void blinkTask(void *p) {
+void vBlinkTask(void *p) {
 
   while (1) {
     STM_EVAL_LEDOn(LED3);
