@@ -21,8 +21,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32F4_DISCOVERY_AUDIOCODEC_H
-#define __STM32F4_DISCOVERY_AUDIOCODEC_H
+#ifndef LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
+#define LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
@@ -36,7 +36,7 @@
 /** @addtogroup STM32F4_DISCOVERY
   * @{
   */
-    
+
 /** @defgroup STM32F4_DISCOVERY_AUDIO_CODEC 
   * @{
   */    
@@ -54,7 +54,7 @@
              CONFIGURATION: Audio Codec Driver Configuration parameters
                                       ----------------------------------------*/
 /* Audio Transfer mode (I2S Interrupt) */
-//#define I2S_INTERRUPT                 /* Uncomment this line to enable audio transfert with I2S interrupt*/ 
+//  #define I2S_INTERRUPT                 /* Uncomment this line to enable audio transfert with I2S interrupt*/ 
 
 /* Audio Transfer mode (DMA, Interrupt or Polling) */
 #define AUDIO_MAL_MODE_NORMAL         /* Uncomment this line to enable the audio 
@@ -79,7 +79,7 @@
 /* #define USE_DEFAULT_TIMEOUT_CALLBACK */
 
 /* Enable this define to use the I2S DMA for writing into DAC register */
-//#define DAC_USE_I2S_DMA
+//  #define DAC_USE_I2S_DMA
 /*----------------------------------------------------------------------------*/
 
 /*------------------------------------
@@ -90,7 +90,7 @@
    Make sure that this define is not already declared in other files (ie. 
   stm322xg_eval.h file). It can be used in parallel by other modules. */
 #ifndef I2C_SPEED
- #define I2C_SPEED                        100000
+  #define I2C_SPEED                        100000
 #endif /* I2C_SPEED */
 
 /* Uncomment defines below to select standard for audio communication between 
@@ -106,79 +106,79 @@
 
 /* Uncomment this line to enable verifying data sent to codec after each write 
   operation */
-#define VERIFY_WRITTENDATA 
+#define VERIFY_WRITTENDATA
 /*----------------------------------------------------------------------------*/
 
 /*-----------------------------------
                     Hardware Configuration defines parameters
                                      -----------------------------------------*/
 /* Audio Reset Pin definition */
-#define AUDIO_RESET_GPIO_CLK           RCC_AHB1Periph_GPIOD  
-#define AUDIO_RESET_PIN                GPIO_Pin_4    
-#define AUDIO_RESET_GPIO               GPIOD 
-                 
+#define AUDIO_RESET_GPIO_CLK           RCC_AHB1Periph_GPIOD
+#define AUDIO_RESET_PIN                GPIO_Pin_4
+#define AUDIO_RESET_GPIO               GPIOD
+
 /* I2S peripheral configuration defines */
-#define CODEC_I2S                      SPI3
-#define CODEC_I2S_CLK                  RCC_APB1Periph_SPI3
-#define CODEC_I2S_ADDRESS              0x40003C0C
-#define CODEC_I2S_GPIO_AF              GPIO_AF_SPI3
-#define CODEC_I2S_IRQ                  SPI3_IRQn
-#define CODEC_I2S_GPIO_CLOCK           (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOA)
-#define CODEC_I2S_WS_PIN               GPIO_Pin_4
-#define CODEC_I2S_SCK_PIN              GPIO_Pin_10
-#define CODEC_I2S_SD_PIN               GPIO_Pin_12
-#define CODEC_I2S_MCK_PIN              GPIO_Pin_7
-#define CODEC_I2S_WS_PINSRC            GPIO_PinSource4
-#define CODEC_I2S_SCK_PINSRC           GPIO_PinSource10
-#define CODEC_I2S_SD_PINSRC            GPIO_PinSource12
-#define CODEC_I2S_MCK_PINSRC           GPIO_PinSource7
-#define CODEC_I2S_GPIO                 GPIOC
-#define CODEC_I2S_WS_GPIO              GPIOA
-#define CODEC_I2S_MCK_GPIO             GPIOC
-#define Audio_I2S_IRQHandler           SPI3_IRQHandler
+#define CODEC_I2S                 SPI3
+#define CODEC_I2S_CLK             RCC_APB1Periph_SPI3
+#define CODEC_I2S_ADDRESS         0x40003C0C
+#define CODEC_I2S_GPIO_AF         GPIO_AF_SPI3
+#define CODEC_I2S_IRQ             SPI3_IRQn
+#define CODEC_I2S_GPIO_CLOCK      (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOA)
+#define CODEC_I2S_WS_PIN          GPIO_Pin_4
+#define CODEC_I2S_SCK_PIN         GPIO_Pin_10
+#define CODEC_I2S_SD_PIN          GPIO_Pin_12
+#define CODEC_I2S_MCK_PIN         GPIO_Pin_7
+#define CODEC_I2S_WS_PINSRC       GPIO_PinSource4
+#define CODEC_I2S_SCK_PINSRC      GPIO_PinSource10
+#define CODEC_I2S_SD_PINSRC       GPIO_PinSource12
+#define CODEC_I2S_MCK_PINSRC      GPIO_PinSource7
+#define CODEC_I2S_GPIO            GPIOC
+#define CODEC_I2S_WS_GPIO         GPIOA
+#define CODEC_I2S_MCK_GPIO        GPIOC
+#define Audio_I2S_IRQHandler      SPI3_IRQHandler
 
 
- #define AUDIO_MAL_DMA_PERIPH_DATA_SIZE DMA_PeripheralDataSize_HalfWord
- #define AUDIO_MAL_DMA_MEM_DATA_SIZE    DMA_MemoryDataSize_HalfWord
- #define DMA_MAX_SZE                    0xFFFF
+#define AUDIO_MAL_DMA_PERIPH_DATA_SIZE DMA_PeripheralDataSize_HalfWord
+#define AUDIO_MAL_DMA_MEM_DATA_SIZE    DMA_MemoryDataSize_HalfWord
+#define DMA_MAX_SZE                    0xFFFF
 
 
- #define DAC_DHR12L1_ADDRESS            0x4000740C
- #define DAC_DHR12R1_ADDRESS            0x40007408
- #define DAC_DHR8R1_ADDRESS             0x40007410
- #define AUDIO_DAC_CHANNEL              DAC_Channel_1
+#define DAC_DHR12L1_ADDRESS            0x4000740C
+#define DAC_DHR12R1_ADDRESS            0x40007408
+#define DAC_DHR8R1_ADDRESS             0x40007410
+#define AUDIO_DAC_CHANNEL              DAC_Channel_1
 
- /* I2S DMA Stream definitions */
- #define AUDIO_I2S_DMA_CLOCK            RCC_AHB1Periph_DMA1
- #define AUDIO_I2S_DMA_STREAM           DMA1_Stream7
- #define AUDIO_I2S_DMA_DREG             CODEC_I2S_ADDRESS
- #define AUDIO_I2S_DMA_CHANNEL          DMA_Channel_0
- #define AUDIO_I2S_DMA_IRQ              DMA1_Stream7_IRQn
- #define AUDIO_I2S_DMA_FLAG_TC          DMA_FLAG_TCIF7
- #define AUDIO_I2S_DMA_FLAG_HT          DMA_FLAG_HTIF7
- #define AUDIO_I2S_DMA_FLAG_FE          DMA_FLAG_FEIF7
- #define AUDIO_I2S_DMA_FLAG_TE          DMA_FLAG_TEIF7
- #define AUDIO_I2S_DMA_FLAG_DME         DMA_FLAG_DMEIF7
+/* I2S DMA Stream definitions */
+#define AUDIO_I2S_DMA_CLOCK            RCC_AHB1Periph_DMA1
+#define AUDIO_I2S_DMA_STREAM           DMA1_Stream7
+#define AUDIO_I2S_DMA_DREG             CODEC_I2S_ADDRESS
+#define AUDIO_I2S_DMA_CHANNEL          DMA_Channel_0
+#define AUDIO_I2S_DMA_IRQ              DMA1_Stream7_IRQn
+#define AUDIO_I2S_DMA_FLAG_TC          DMA_FLAG_TCIF7
+#define AUDIO_I2S_DMA_FLAG_HT          DMA_FLAG_HTIF7
+#define AUDIO_I2S_DMA_FLAG_FE          DMA_FLAG_FEIF7
+#define AUDIO_I2S_DMA_FLAG_TE          DMA_FLAG_TEIF7
+#define AUDIO_I2S_DMA_FLAG_DME         DMA_FLAG_DMEIF7
 
- #define Audio_MAL_I2S_IRQHandler       DMA1_Stream7_IRQHandler
-
-
- /* DAC DMA Stream definitions */
- #define AUDIO_DAC_DMA_CLOCK            RCC_AHB1Periph_DMA1
- #define AUDIO_DAC_DMA_STREAM           DMA1_Stream0
- #define AUDIO_DAC_DMA_DREG             DAC_DHR12L1_ADDRESS
- #define AUDIO_DAC_DMA_CHANNEL          DMA_Channel_0
- #define AUDIO_DAC_DMA_IRQ              DMA1_Stream0_IRQn
- #define AUDIO_DAC_DMA_FLAG_TC          DMA_FLAG_TCIF0
- #define AUDIO_DAC_DMA_FLAG_HT          DMA_FLAG_HTIF0
- #define AUDIO_DAC_DMA_FLAG_FE          DMA_FLAG_FEIF0
- #define AUDIO_DAC_DMA_FLAG_TE          DMA_FLAG_TEIF0
- #define AUDIO_DAC_DMA_FLAG_DME         DMA_FLAG_DMEIF0
-
- #define Audio_MAL_DAC_IRQHandler       DMA1_Stream0_IRQHandler
+#define Audio_MAL_I2S_IRQHandler       DMA1_Stream7_IRQHandler
 
 
-/* I2C peripheral configuration defines (control interface of the audio codec) */
+/* DAC DMA Stream definitions */
+#define AUDIO_DAC_DMA_CLOCK            RCC_AHB1Periph_DMA1
+#define AUDIO_DAC_DMA_STREAM           DMA1_Stream0
+#define AUDIO_DAC_DMA_DREG             DAC_DHR12L1_ADDRESS
+#define AUDIO_DAC_DMA_CHANNEL          DMA_Channel_0
+#define AUDIO_DAC_DMA_IRQ              DMA1_Stream0_IRQn
+#define AUDIO_DAC_DMA_FLAG_TC          DMA_FLAG_TCIF0
+#define AUDIO_DAC_DMA_FLAG_HT          DMA_FLAG_HTIF0
+#define AUDIO_DAC_DMA_FLAG_FE          DMA_FLAG_FEIF0
+#define AUDIO_DAC_DMA_FLAG_TE          DMA_FLAG_TEIF0
+#define AUDIO_DAC_DMA_FLAG_DME         DMA_FLAG_DMEIF0
+
+#define Audio_MAL_DAC_IRQHandler       DMA1_Stream0_IRQHandler
+
+
+/* I2C peripheral configuration defines (control interface of the codec) */
 #define CODEC_I2C                      I2C1
 #define CODEC_I2C_CLK                  RCC_APB1Periph_I2C1
 #define CODEC_I2C_GPIO_CLOCK           RCC_AHB1Periph_GPIOB
@@ -285,7 +285,7 @@ void EVAL_AUDIO_Error_CallBack(void* pData);
    and re-initialize communication or in worst case reset all the application. */
 uint32_t Codec_TIMEOUT_UserCallback(void);
 
-#endif /* __STM32F4_DISCOVERY_AUDIOCODEC_H */
+#endif /* LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_ */
 
 /**
   * @}

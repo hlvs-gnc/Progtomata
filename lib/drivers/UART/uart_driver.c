@@ -1,0 +1,91 @@
+/**
+ * @file uart_driver.c
+ *
+ * @brief STM32F4 USART1 Driver Implementation.
+ *
+ * This file provides the implementation for initializing and utilizing USART1 
+ * for UART communication on the STM32F4 microcontroller. It supports sending 
+ * single characters and strings through the UART interface.
+ *
+ * Features:
+ * - Initializes USART1 with a baud rate of 115200.
+ * - Configures GPIO pins PA9 (TX) and PA10 (RX) for UART communication.
+ * - Provides functions for transmitting characters and strings.
+ *
+ * Dependencies:
+ * - STM32F4xx Standard Peripheral Library
+ * - GPIO and USART drivers
+ *
+ * Hardware:
+ * - Board: STM32F4-Discovery
+ * - USART1 TX: PA9
+ * - USART1 RX: PA10
+ *
+ * @note Ensure proper RCC configurations and GPIO initialization before use.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons 
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ */
+
+#include "uart_driver.h"
+
+/**
+ * @brief Initializes USART1 for UART communication.
+ *
+ * Configures GPIOA pins (PA9, PA10) for USART1 and sets the baud rate to 115200.
+ * Enables USART1 peripheral for data transmission and reception.
+ */
+void uart_init(void) {
+  // Enable USART1 clock
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+
+  // Configure GPIOA pins for USART1 TX (PA9) and RX (PA10)
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10; // PA9=TX, PA10=RX
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;           // Alternate Function
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;         // Push-pull output
+  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;           // Pull-up enabled
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // Connect GPIO pins to USART1 alternate functions
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);  // TX
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1); // RX
+
+  // USART1 Configuration
+  USART_InitTypeDef USART_InitStruct;
+
+  USART_InitStruct.USART_BaudRate = 115200;
+  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+  USART_InitStruct.USART_StopBits = USART_StopBits_1;
+  USART_InitStruct.USART_Parity = USART_Parity_No;
+  USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+
+  USART_Init(USART1, &USART_InitStruct);
+  USART_Cmd(USART1, ENABLE); // Enable USART1
+}
+
+/**
+ * @brief Transmits a single character over USART1.
+ *
+ * @param c Character to send.
+ */
+void uart_send_char(char c) {
+  // Wait until transmit buffer is empty
+  while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET) {}
+  USART_SendData(USART1, c);
+}
+
+/**
+ * @brief Transmits a string over USART1.
+ *
+ * @param str Pointer to the null-terminated string to send.
+ */
+void uart_send_string(const char *str) {
+  while (*str) {
+    uart_send_char(*str++);
+  }
+}

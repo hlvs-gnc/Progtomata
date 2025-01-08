@@ -1,0 +1,16 @@
+{
+  "name": "UART_Driver",
+  "version": "1.0.0",
+  "description": "UART Driver for STM32F4 USART1",
+  "keywords": "uart, stm32f4, usart",
+  "frameworks": "spl",
+  "platforms": "ststm32",
+  "build": {
+    "flags": [
+      "-I lib/drivers/UART"
+    ],
+    "srcFilter": [
+      "+<*>"
+    ]
+  }
+}
