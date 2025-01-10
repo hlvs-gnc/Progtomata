@@ -20,12 +20,11 @@
 //* CONNECTIONS: *
 //*------------------------------------------------------------------------------------------*
 //* LCD PINS   | NAME                      | CONNECTED TO STM32F4 Discovery Port
-//E           *
 //*------------------------------------------------------------------------------------------*
 //* 1............VSS.......................GND                       *
 //* 2............VDD.......................+5V                       *
 //* 3............CONTRAST..................POT 5K                    *
-//Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3 to GND
+//  Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3 to GND
 //* 4............RS  - Register Select.....PE3                       *
 //* 5............RW  - Read/Write..........GND                       *
 //* 6............E   - Enable..............PE5                       *
@@ -53,117 +52,89 @@ void gpio_init(void) {
   GPIO_InitTypeDef GPIO_InitStruct;
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
-  GPIO_InitStruct.GPIO_Pin = Register_Select | Enable | DB4 | DB5 | DB6 |
-                             DB7; // we want to configure 6 pins (defined above)
+  // configure 6 pins (defined above)
+  GPIO_InitStruct.GPIO_Pin = Register_Select | Enable | DB4 | DB5 | DB6 | DB7; 
   GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT; // pins are output
-  GPIO_InitStruct.GPIO_Speed =
-      GPIO_Speed_100MHz; // this sets the GPIO modules clock speed
-  GPIO_InitStruct.GPIO_OType =
-      GPIO_OType_PP; // this sets the pin type to push / pull
-  GPIO_InitStruct.GPIO_PuPd =
-      GPIO_PuPd_NOPULL; // Sets the pullup / pulldown resistors to be inactive
-  GPIO_Init(GPIOE, &GPIO_InitStruct); // this finally passes all the values to
-                                      // the GPIO_Init function which takes care
-                                      // of setting the corresponding bits
+  // this sets the GPIO modules clock speed
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+  // this sets the pin type to push/ pull
+  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+  // Sets the pullup / pulldown resistors to be inactive
+  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  // this finally passes all the values to the GPIO_Init function which takes care
+  // of setting the corresponding bits
+  GPIO_Init(GPIOE, &GPIO_InitStruct);
 }
 
 void delay_ms(int milli) {
-  int delay =
-      milli * 17612; // approximate loops per ms at 168 MHz, Debug config
-  for (; delay != 0; delay--)
-    ;
+  // approximate loops per ms at 168 MHz, Debug config
+  int delay = milli * 17612;
+  for (; delay != 0; delay--) {};
 }
 
-/*
- * pulse_enable() - a method to toggle the Enable (PE5) as data is written to
- * the LCD on the high to low transition of the signal Enable pin is initially
- * low (0)
- */
 void pulse_enable(void) {
   delay_ms(1);
   GPIOE->ODR ^= (1 << 5); // Sets enable high
+
   delay_ms(1);
   GPIOE->ODR ^= (1 << 5); // Sets enable low
 }
 
-/*
- *
- */
 void lcd_commandSerial(unsigned char command) {
 
   GPIO_ResetBits(GPIOE, Register_Select); // Register Select line low
-
-  unsigned char upper_nibble =
-      command & 0xF0; // Put upper nibble (DB7 to DB4 bits) on data lines
+  // Put upper nibble (DB7 to DB4 bits) on data lines
+  unsigned char upper_nibble = command & 0xF0; 
   GPIOE->ODR = upper_nibble << 6;
   pulse_enable();
 
-  unsigned char lower_nibble =
-      command & 0xF; // Put lower nibble (DB3 to DB0 bits) on data lines
+  // Put lower nibble (DB3 to DB0 bits) on data lines
+  unsigned char lower_nibble = command & 0xF; 
   GPIOE->ODR = lower_nibble << 10;
   pulse_enable();
 }
 
-/*
- * lcd_screen_init - a method to initialize the LCD screen using the commands
- * passed into LCD_Command Note 4 bit mode is selected
- */
 void lcd_screen_init(void) {
 
   delay_ms(100);
-
-  lcd_commandSerial(POWER_UP);     // Power up initialization for the lcd 'final
-                                   // note recommendation'
+  // Power up initialization for the lcd 'final note recommendation'
+  lcd_commandSerial(POWER_UP);
   lcd_commandSerial(FOURBIT_MODE); // Set LCD into 4 bit mode
   lcd_commandSerial(SETUP_CURSOR_BLINKING); // Turn display on and set up cursor
   lcd_commandSerial(TWOLINE_MODE);          // Set up 2 lines and character size
   lcd_commandSerial(CLEAR);                 // Clear display
 }
 
-/*
- * write_to_screen_characters - strings are written to the LCD screen as
- * characters, this method writes each character to the LCD screen
- */
 void write_to_screen_characters(unsigned char character) {
-  unsigned char upper_nibble =
-      character & 0xF0; // Put upper nibble (DB7 to DB4 bits) on data lines
+  // Put upper nibble (DB7 to DB4 bits) on data lines
+  unsigned char upper_nibble = character & 0xF0; 
   GPIOE->ODR = upper_nibble << 6;
-  GPIO_SetBits(
-      GPIOE,
-      Register_Select); // Use this pin as Register Select, needs to be high
+
+  // Use this pin as Register Select, needs to be high
+  GPIO_SetBits(GPIOE, Register_Select); 
 
   pulse_enable();
-
-  unsigned char lower_nibble =
-      character & 0xF; // Put lower nibble (DB3 to DB0 bits) on data lines
+  // Put lower nibble (DB3 to DB0 bits) on data lines
+  unsigned char lower_nibble = character & 0xF; 
   GPIOE->ODR = lower_nibble << 10;
-  GPIO_SetBits(
-      GPIOE,
-      Register_Select); // Use this pin as Register Select, needs to be high
+
+  // Use this pin as Register Select, needs to be high
+  GPIO_SetBits(GPIOE, Register_Select); 
 
   pulse_enable();
 }
 
-/*
- * write_to_screen_strings - strings are passed to this method by the user
- * The method checks if the string requires one or two lines and adjusts the
- * cursor pointer accordling The string should have a limit of up to 32 ASCII
- * characters For full character set consult LCD1.pdf in dropbox literature
- * folder for LCD screen The method breaks up the string into characters and
- * passes this to write_to_screen_characters
- */
 void write_to_screen_string(const char *instring) {
   unsigned char count = 0;
   int length = 0;
 
-  length = (unsigned)strlen(instring);
-  // char *line_2 = " ";
+  length = (unsigned int) strlen(instring);
 
-  while (instring[count]) // Until the null terminator is reached
-  {
+  // Write each character to LCD
+  while (instring[count]) {
     if (count > 15) {
       GPIO_ResetBits(GPIOE, Register_Select);
-      /*****/
+
       lcd_commandSerial(0xC0);
       for (count = 0; count < length; count++) {
         write_to_screen_characters(instring[count]);
@@ -176,9 +147,6 @@ void write_to_screen_string(const char *instring) {
   }
 }
 
-/**
- * Prints numbers to the screen
- */
 void print_double_to_screen(uint16_t data_in) {
   unsigned char characters[4] = {0};
 
@@ -203,9 +171,6 @@ void print_double_to_screen(uint16_t data_in) {
   }
 }
 
-/**
- * Prints potentiometer readings to screen
- */
 void print_pot_to_screen(uint16_t data_in) {
   unsigned char characters[3] = {0};
 
