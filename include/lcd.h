@@ -1,3 +1,18 @@
+/**
+ * @file lcd.h
+ *
+ * @brief Header file for LCD interface functions.
+ *
+ * @details This file defines initialization and control functions for
+ * managing an LCD screen using STM32F4 microcontrollers.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons 
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ *
+ * @author Radar2000
+ */
+
 #ifndef LCD_H_
 #define LCD_H_
 

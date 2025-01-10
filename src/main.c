@@ -63,32 +63,8 @@
 // Drivers
 #include <uart_driver.h>
 
-/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
-#define CCM_RAM __attribute__((section(".ccmram")))
-
-/// @brief Stack size for the button task in bytes
-#define BUTTON_TASK_STACK_SIZE 256
-
-/// @brief Stack size for the blink task in bytes
-#define BLINK_TASK_STACK_SIZE 256
-
-/// @brief Initial step size for delay increment and initial delay value in milliseconds
-static uint32_t step = 10, delay = 50;
-
-/// @brief Minimum delay for LED blinking in milliseconds
-const uint32_t MIN_DELAY = 10;
-/// @brief Maximum delay for LED blinking in milliseconds
-const uint32_t MAX_DELAY = 250;
-
-/// @brief Stack memory allocation for the button task stored in CCM
-StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
-/// @brief Task control block (TCB) for the button task stored in CCM
-StaticTask_t buttonTaskBuffer CCM_RAM;
-
-/// @brief Stack memory allocation for the blink task stored in CCM
-StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
-/// @brief Task control block (TCB) for the blink task stored in CCM
-StaticTask_t blinkTaskBuffer CCM_RAM;
+// System definitions
+#include <progtomata_system.h>
 
 /**
  * @brief Handles button press events to adjust LED blink delay.
@@ -174,7 +150,7 @@ void vButtonTask(void *p) {
     if (currentState == Bit_SET && prevState == Bit_RESET) {
       GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       // If button state changes to pressed
-      delay = MIN_DELAY; // Reset to minimum delay
+      kBlinkDelay = MIN_DELAY; // Reset to minimum delay
     }
 
     prevState = currentState;
@@ -187,22 +163,22 @@ void vBlinkTask(void *p) {
 
   while (1) {
     STM_EVAL_LEDOn(LED3);
-    vTaskDelay(delay);
+    vTaskDelay(kBlinkDelay);
 
     STM_EVAL_LEDOn(LED4);
-    vTaskDelay(delay);
+    vTaskDelay(kBlinkDelay);
 
     STM_EVAL_LEDOn(LED5);
-    vTaskDelay(delay);
+    vTaskDelay(kBlinkDelay);
 
     STM_EVAL_LEDOn(LED6);
-    vTaskDelay(delay);
+    vTaskDelay(kBlinkDelay);
 
     // Adjust delay
-    delay += step;
+    kBlinkDelay += kBlinkStep;
 
-    if (delay >= MAX_DELAY || delay <= MIN_DELAY) {
-      step = -step; // Reverse step direction
+    if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
+      kBlinkStep = -kBlinkStep; // Reverse step direction
     }
   }
 
