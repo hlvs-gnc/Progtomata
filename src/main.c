@@ -3,16 +3,16 @@
  *
  * @brief STM32F4 FreeRTOS LED Control and Button Handling Application.
  *
- * This file implements an embedded application using FreeRTOS on an STM32F4 
- * microcontroller. The application controls LEDs and responds to user button 
+ * This file implements an embedded application using FreeRTOS on an STM32F4
+ * microcontroller. The application controls LEDs and responds to user button
  * presses, demonstrating task scheduling and semaphore usage.
  *
  * @details
- * - **Button Task**: Detects button presses and resets the LED blink delay to 
+ * - **Button Task**: Detects button presses and resets the LED blink delay to
  *   the minimum value.
- * - **Blink Task**: Cycles through LEDs with variable delay, adjusting the 
+ * - **Blink Task**: Cycles through LEDs with variable delay, adjusting the
  *   delay dynamically.
- * - Uses FreeRTOS static task creation and Core Coupled Memory (CCM) for 
+ * - Uses FreeRTOS static task creation and Core Coupled Memory (CCM) for
  *   optimized performance.
  * - Implements basic input handling and GPIO initialization for STM32F4.
  *
@@ -32,11 +32,11 @@
  * - LEDs: Connected to GPIOD (Pins 12, 13, 14, 15)
  * - User Button: Connected to GPIOA (Pin 0)
  *
- * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly 
+ * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly
  *       configured before compiling the project.
  *
  * @copyright Radar2000
- * This work is licensed under Creative Commons 
+ * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
  */
@@ -110,17 +110,19 @@ int main(void) {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
-	gpio_init();
-	lcd_screen_init();
+  gpio_init();
+  lcd_screen_init();
 
-	delay_ms(100);
-	lcd_commandSerial(CLEAR);
-	write_to_screen_string("LCD Test");
-	delay_ms(500);
+  delay_ms(100);
+  lcd_commandSerial(CLEAR);
+  write_to_screen_string("LCD Test");
+  delay_ms(500);
 
   config_userbutton();
-  leds_init();
+  leds_init();      
   uart_init();
+
+  uart_send_string("System initialized\r\n");
 
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -129,9 +131,7 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
-
-  uart_send_string("System initialized\r\n");
-
+               
   vTaskStartScheduler();
 
   // This shall never return
@@ -148,9 +148,10 @@ void vButtonTask(void *p) {
     // Read state of push button and save it in "state" variable
     // If state is high, turn on LEDs
     if (currentState == Bit_SET && prevState == Bit_RESET) {
-      GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+      GPIO_SetBits(GPIOD,
+                   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       // If button state changes to pressed
-      kBlinkDelay = MIN_DELAY; // Reset to minimum delay
+      kBlinkDelay = MIN_DELAY;  // Reset to minimum delay
     }
 
     prevState = currentState;
@@ -160,25 +161,32 @@ void vButtonTask(void *p) {
 }
 
 void vBlinkTask(void *p) {
-
   while (1) {
     STM_EVAL_LEDOn(LED3);
     vTaskDelay(kBlinkDelay);
 
+    STM_EVAL_LEDOff(LED3);
+
     STM_EVAL_LEDOn(LED4);
     vTaskDelay(kBlinkDelay);
 
-    STM_EVAL_LEDOn(LED5);
-    vTaskDelay(kBlinkDelay);
+    STM_EVAL_LEDOff(LED4);
 
     STM_EVAL_LEDOn(LED6);
     vTaskDelay(kBlinkDelay);
+
+    STM_EVAL_LEDOff(LED6);
+    
+    STM_EVAL_LEDOn(LED5);
+    vTaskDelay(kBlinkDelay);
+
+    STM_EVAL_LEDOff(LED5);
 
     // Adjust delay
     kBlinkDelay += kBlinkStep;
 
     if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
-      kBlinkStep = -kBlinkStep; // Reverse step direction
+      kBlinkStep = -kBlinkStep;  // Reverse step direction
     }
   }
 

@@ -1,14 +1,14 @@
 /**
  * @file uart_driver.c
  *
- * @brief STM32F4 USART1 Driver Implementation.
+ * @brief STM32F4 USART2 Driver Implementation.
  *
- * This file provides the implementation for initializing and utilizing USART1 
+ * This file provides the implementation for initializing and utilizing USART2 
  * for UART communication on the STM32F4 microcontroller. It supports sending 
  * single characters and strings through the UART interface.
  *
  * Features:
- * - Initializes USART1 with a baud rate of 115200.
+ * - Initializes USART2 with a baud rate of 115200.
  * - Configures GPIO pins PA9 (TX) and PA10 (RX) for UART communication.
  * - Provides functions for transmitting characters and strings.
  *
@@ -18,8 +18,8 @@
  *
  * Hardware:
  * - Board: STM32F4-Discovery
- * - USART1 TX: PA9
- * - USART1 RX: PA10
+ * - USART2 TX: PA2
+ * - USART2 RX: PA3
  *
  * @note Ensure proper RCC configurations and GPIO initialization before use.
  *
@@ -31,56 +31,66 @@
 #include "uart_driver.h"
 
 /**
- * @brief Initializes USART1 for UART communication.
+ * @brief Initializes USART2 for UART communication.
  *
- * Configures GPIOA pins (PA9, PA10) for USART1 and sets the baud rate to 115200.
- * Enables USART1 peripheral for data transmission and reception.
+ * Configures GPIOA pins (PA9, PA10) for USART2 and sets the baud rate to 115200.
+ * Enables USART2 peripheral for data transmission and reception.
  */
 void uart_init(void) {
-  // Enable USART1 clock
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+  // GPIO Configuration
+  GPIO_InitTypeDef GPIO_InitStructure;
 
-  // Configure GPIOA pins for USART1 TX (PA9) and RX (PA10)
-  GPIO_InitTypeDef GPIO_InitStruct;
+  // Enable GPIOA clock (if using PA2 and PA3)
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10; // PA9=TX, PA10=RX
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;           // Alternate Function
-  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;         // Push-pull output
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;           // Pull-up enabled
-  GPIO_Init(GPIOA, &GPIO_InitStruct);
+  // Configure USART2_TX (PA2)
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2,
+                   GPIO_AF_USART2);  // Alternate function mapping
 
-  // Connect GPIO pins to USART1 alternate functions
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);  // TX
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1); // RX
+  // Configure USART2_RX (PA3)
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3,
+                   GPIO_AF_USART2);  // Alternate function mapping
 
-  // USART1 Configuration
-  USART_InitTypeDef USART_InitStruct;
+  // Enable USART2 clock
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-  USART_InitStruct.USART_BaudRate = 115200;
-  USART_InitStruct.USART_WordLength = USART_WordLength_8b;
-  USART_InitStruct.USART_StopBits = USART_StopBits_1;
-  USART_InitStruct.USART_Parity = USART_Parity_No;
-  USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-  USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  // USART2 Configuration
+  USART_InitTypeDef USART_InitStructure;
 
-  USART_Init(USART1, &USART_InitStruct);
-  USART_Cmd(USART1, ENABLE); // Enable USART1
+  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+
+  USART_Init(USART2, &USART_InitStructure);
+
+  // Enable USART2
+  USART_Cmd(USART2, ENABLE);
 }
 
 /**
- * @brief Transmits a single character over USART1.
+ * @brief Transmits a single character over USART2.
  *
  * @param c Character to send.
  */
 void uart_send_char(char c) {
   // Wait until transmit buffer is empty
-  while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET) {}
-  USART_SendData(USART1, c);
+  while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {}
+  USART_SendData(USART2, c);
 }
 
 /**
- * @brief Transmits a string over USART1.
+ * @brief Transmits a string over USART2.
  *
  * @param str Pointer to the null-terminated string to send.
  */
