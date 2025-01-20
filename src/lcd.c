@@ -51,6 +51,7 @@ uint16_t DB7 = GPIO_Pin_13;
 void gpio_init(void) {
   GPIO_InitTypeDef GPIO_InitStruct;
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
   // configure 6 pins (defined above)
   GPIO_InitStruct.GPIO_Pin = Register_Select | Enable | DB4 | DB5 | DB6 | DB7; 

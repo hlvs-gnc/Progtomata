@@ -43,6 +43,9 @@ void uart_init(void) {
   // Enable GPIOA clock (if using PA2 and PA3)
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
+  // Enable USART2 clock
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
   // Configure USART2_TX (PA2)
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
@@ -50,17 +53,12 @@ void uart_init(void) {
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2,
-                   GPIO_AF_USART2);  // Alternate function mapping
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
 
   // Configure USART2_RX (PA3)
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3,
-                   GPIO_AF_USART2);  // Alternate function mapping
-
-  // Enable USART2 clock
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
   // USART2 Configuration
   USART_InitTypeDef USART_InitStructure;
@@ -70,7 +68,7 @@ void uart_init(void) {
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
   USART_Init(USART2, &USART_InitStructure);
 

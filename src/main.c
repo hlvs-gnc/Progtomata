@@ -107,10 +107,8 @@ void leds_init(void);
 int main(void) {
   SystemInit();
 
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-
   gpio_init();
+ 
   lcd_screen_init();
 
   delay_ms(100);
@@ -123,6 +121,7 @@ int main(void) {
   uart_init();
 
   uart_send_string("System initialized\r\n");
+  uart_send_string("Create tasks\r\n");
 
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -188,6 +187,8 @@ void vBlinkTask(void *p) {
     if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
       kBlinkStep = -kBlinkStep;  // Reverse step direction
     }
+
+    uart_send_string("Blink LEDs\r\n");
   }
 
   vTaskDelete(NULL);
