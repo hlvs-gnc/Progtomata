@@ -80,7 +80,7 @@ void uart_send_string(const char *str);
  * @param value  The integer value to print (pass as long for convenience).
  * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC, PRINT_HEX).
  */
-static void uart_print_type(double value, PrintFormat_t format);
+void uart_print_type(double value, PrintFormat_t format);
 
 /**
  * @brief Transmits a formatted string over USART2.

@@ -240,7 +240,7 @@ static void print_float(double value) {
   }
 }
 
-static void uart_print_type(double value, PrintFormat_t format) {
+void uart_print_type(double value, PrintFormat_t format) {
   switch (format) {
     case PRINT_SIGNED_DEC:
       print_signed_long((long)value);

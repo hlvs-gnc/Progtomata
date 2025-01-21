@@ -106,16 +106,22 @@ void leds_init(void);
 
 int main(void) {
   SystemInit();
-
-  gpio_init();
  
+  /*
   lcd_screen_init();
 
   delay_ms(100);
   lcd_commandSerial(CLEAR);
-  write_to_screen_string("LCD Test");
+  write_to_screen_string("OUTPUT");
   delay_ms(500);
+  */
+  
+  LCD_Init();
 
+  LCD_WriteString("****************");
+  LCD_GotoXY(1, 0);
+  LCD_WriteString("*PROGTOMATA2000*");
+  
   config_userbutton();
   leds_init();      
   uart_init();
@@ -130,7 +136,7 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
-               
+         
   vTaskStartScheduler();
 
   // This shall never return
