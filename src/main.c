@@ -106,15 +106,6 @@ void leds_init(void);
 
 int main(void) {
   SystemInit();
- 
-  /*
-  lcd_screen_init();
-
-  delay_ms(100);
-  lcd_commandSerial(CLEAR);
-  write_to_screen_string("OUTPUT");
-  delay_ms(500);
-  */
   
   LCD_Init();
 
