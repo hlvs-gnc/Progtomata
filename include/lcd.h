@@ -49,10 +49,52 @@
 #define LCD_D7_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D7_PIN)
 
 // Function prototypes
+/**
+ * @brief Configures GPIO pins connected to the LCD.
+ *
+ * Prepares pins for output mode and sets them low. This is
+ * necessary before calling @ref LCD_Init().
+ */
 void LCD_GPIO_Setup(void);
+
+/**
+ * @brief Configures GPIO pins connected to the LCD.
+ *
+ * Prepares pins for output mode and sets them low. This is
+ * necessary before calling @ref LCD_Init().
+ */
+void LCD_GPIO_Setup(void);
+
+/**
+ * @brief Initializes the LCD.
+ *
+ * Initializes the LCD in 4-bit mode, sets the display to be on with
+ * a blinking cursor, and clears the display.
+ */
 void LCD_Init(void);
+
+/**
+ * @brief Clears the LCD display.
+ *
+ * Clears the display and moves the cursor to home.
+ */
 void LCD_Clear(void);
+
+/**
+ * @brief Prints a string to the LCD.
+ *
+ * Prints the string to the LCD, wrapping to the next line if necessary.
+ *
+ * @param[in] str The string to print.
+ */
 void LCD_WriteString(char *str);
+
+/**
+ * @brief Moves the LCD cursor to the specified row and column.
+ *
+ * @param[in] row The row to move to.
+ * @param[in] col The column to move to.
+ */
 void LCD_GotoXY(uint8_t row, uint8_t col);
 
 #endif  // LCD_H_

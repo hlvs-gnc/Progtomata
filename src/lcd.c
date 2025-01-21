@@ -24,8 +24,7 @@
 //* 1............VSS.......................GND                       *
 //* 2............VDD.......................+5V                       *
 //* 3............CONTRAST..................POT 5K                    *
-//  Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3 to
-//  GND
+//  Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3 to GND
 //* 4............RS  - Register Select.....PE3                       *
 //* 5............RW  - Read/Write..........GND                       *
 //* 6............E   - Enable..............PE5                       *
@@ -53,28 +52,32 @@ static void LCD_WriteNibble(uint8_t nibble) {
   // nibble is assumed to be in the low 4 bits
 
   // D4
-  if (nibble & 0x01)
+  if (nibble & 0x01) {
     LCD_D4_HIGH();
-  else
+  } else {
     LCD_D4_LOW();
+  }
 
   // D5
-  if (nibble & 0x02)
+  if (nibble & 0x02) {
     LCD_D5_HIGH();
-  else
+  } else {
     LCD_D5_LOW();
+  }
 
   // D6
-  if (nibble & 0x04)
+  if (nibble & 0x04) {
     LCD_D6_HIGH();
-  else
+  } else {
     LCD_D6_LOW();
+  }
 
   // D7
-  if (nibble & 0x08)
+  if (nibble & 0x08) {
     LCD_D7_HIGH();
-  else
+  } else {
     LCD_D7_LOW();
+  }
 
   // Pulse Enable
   LCD_E_HIGH();
@@ -131,6 +134,7 @@ void LCD_GPIO_Setup(void) {
 
 void LCD_Init(void) {
   LCD_GPIO_Setup();
+
   // Let the LCD power up
   for (volatile int i = 0; i < 500000; i++);  // ~some ms delay
 
