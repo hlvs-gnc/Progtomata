@@ -22,118 +22,79 @@
 #include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
 
-/**
- * @brief LCD command for initial power-up.
- */
-#define POWER_UP 0x33
+// --- Pin definitions ---
+#define LCD_PORT            GPIOE
+#define LCD_RS_PIN          GPIO_Pin_3
+#define LCD_E_PIN           GPIO_Pin_5
+#define LCD_D4_PIN          GPIO_Pin_10
+#define LCD_D5_PIN          GPIO_Pin_11
+#define LCD_D6_PIN          GPIO_Pin_12
+#define LCD_D7_PIN          GPIO_Pin_13
 
-/**
- * @brief LCD command to set 4-bit mode.
- */
-#define FOURBIT_MODE 0x32
+// --- Macros for setting/clearing bits ---
+#define LCD_RS_HIGH()       GPIO_SetBits(LCD_PORT, LCD_RS_PIN)
+#define LCD_RS_LOW()        GPIO_ResetBits(LCD_PORT, LCD_RS_PIN)
 
-/**
- * @brief LCD command for 8-bit mode and two-line mode.
- */
-#define EIGHTBIT_MODE 0x38
+#define LCD_E_HIGH()        GPIO_SetBits(LCD_PORT, LCD_E_PIN)
+#define LCD_E_LOW()         GPIO_ResetBits(LCD_PORT, LCD_E_PIN)
 
-/**
- * @brief LCD display on command.
- */
-#define DISPLAY 0xF
+// Helper macros to set data bits
+#define LCD_D4_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D4_PIN)
+#define LCD_D4_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D4_PIN)
+#define LCD_D5_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D5_PIN)
+#define LCD_D5_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D5_PIN)
+#define LCD_D6_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D6_PIN)
+#define LCD_D6_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D6_PIN)
+#define LCD_D7_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D7_PIN)
+#define LCD_D7_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D7_PIN)
 
+// Function prototypes
 /**
- * @brief LCD command for two-line mode.
- */
-#define TWOLINE_MODE 0x28
-
-/**
- * @brief LCD command to set up cursor without blinking.
- */
-#define SETUP_CURSOR 0x0C
-
-/**
- * @brief LCD command to set up cursor with blinking.
- */
-#define SETUP_CURSOR_BLINKING 0xF
-
-/**
- * @brief LCD command to clear the display.
- */
-#define CLEAR 0x01
-
-/**
- * @brief LCD command to move the cursor to the home position.
- */
-#define CURSOR_HOME 0x02
-
-/**
- * @brief LCD command to move the cursor to the second line.
- */
-#define LINE_TWO 0xC0
-
-/**
- * @brief Initializes GPIO pins required for the LCD interface.
- */
-void gpio_init(void);
-
-/**
- * @brief Delays execution for a specified number of milliseconds.
+ * @brief Configures GPIO pins connected to the LCD.
  *
- * @param milli Number of milliseconds to delay.
+ * Prepares pins for output mode and sets them low. This is
+ * necessary before calling @ref LCD_Init().
  */
-void delay_ms(int milli);
+void LCD_GPIO_Setup(void);
 
 /**
- * @brief Toggles the Enable pin to signal the LCD.
- */
-void pulse_enable(void);
-
-/**
- * @brief Sends a command to the LCD.
+ * @brief Configures GPIO pins connected to the LCD.
  *
- * @param command The command to send.
+ * Prepares pins for output mode and sets them low. This is
+ * necessary before calling @ref LCD_Init().
  */
-void lcd_command(unsigned char command);
+void LCD_GPIO_Setup(void);
 
 /**
- * @brief Sends a command to the LCD using a serial interface.
+ * @brief Initializes the LCD.
  *
- * @param command The command to send.
+ * Initializes the LCD in 4-bit mode, sets the display to be on with
+ * a blinking cursor, and clears the display.
  */
-void lcd_commandSerial(unsigned char command);
+void LCD_Init(void);
 
 /**
- * @brief Initializes the LCD screen with the required settings.
- */
-void lcd_screen_init(void);
-
-/**
- * @brief Writes a single character to the LCD screen.
+ * @brief Clears the LCD display.
  *
- * @param character The character to write.
+ * Clears the display and moves the cursor to home.
  */
-void write_to_screen_characters(unsigned char character);
+void LCD_Clear(void);
 
 /**
- * @brief Writes a string to the LCD screen.
+ * @brief Prints a string to the LCD.
  *
- * @param instring The string to write.
+ * Prints the string to the LCD, wrapping to the next line if necessary.
+ *
+ * @param[in] str The string to print.
  */
-void write_to_screen_string(const char *instring);
+void LCD_WriteString(char *str);
 
 /**
- * @brief Displays a numeric value on the LCD screen.
+ * @brief Moves the LCD cursor to the specified row and column.
  *
- * @param data_in The numeric value to display.
+ * @param[in] row The row to move to.
+ * @param[in] col The column to move to.
  */
-void print_double_to_screen(uint16_t data_in);
-
-/**
- * @brief Displays potentiometer readings on the LCD screen.
- *
- * @param data_in The potentiometer reading to display.
- */
-void print_pot_to_screen(uint16_t data_in);
+void LCD_GotoXY(uint8_t row, uint8_t col);
 
 #endif  // LCD_H_

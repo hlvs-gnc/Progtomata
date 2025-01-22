@@ -43,7 +43,7 @@
 /** @addtogroup STM32F4_DISCOVERY
   * @{
   */
-      
+
 /** @addtogroup STM32F4_DISCOVERY_LOW_LEVEL
   * @{
   */ 
