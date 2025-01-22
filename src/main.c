@@ -113,6 +113,19 @@ void vLCDCarouselTask(void *p);
 int main(void) {
   SystemInit();
 
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+  GPIO_SetBits(GPIOD, GPIO_Pin_5);
+  GPIO_SetBits(GPIOD, GPIO_Pin_6);
+
   LCD_Init();
 
   LCD_WriteString("****************");
@@ -134,8 +147,8 @@ int main(void) {
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
 
-  xTaskCreateStatic(vLCDCarouselTask, "LCDCarousel", CAROUSEL_TASK_STACK_SIZE,
-                    NULL, 1, carouselTaskStack, &carouselTaskBuffer);
+  xTaskCreateStatic(vLCDCarouselTask, "LCDCarousel", CAROUSEL_TASK_STACK_SIZE, NULL, 1,
+                    carouselTaskStack, &carouselTaskBuffer);
 
   vTaskStartScheduler();
 
@@ -145,28 +158,48 @@ int main(void) {
 }
 
 void vButtonTask(void *p) {
-  // Button task to handle user input
-  uint8_t prevState = Bit_RESET;
+  uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
+  uint8_t prevStatePD5 = Bit_RESET; // Previous state for PD5
+  uint8_t prevStatePD6 = Bit_RESET; // Previous state for PD6
 
   while (1) {
-    uint8_t currentState = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-    // Read state of push button and save it in "state" variable
-    // If state is high, turn on LEDs
-    if (currentState == Bit_SET && prevState == Bit_RESET) {
-      GPIO_SetBits(GPIOD,
+    // Read current states
+    uint8_t currentStatePA0 = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+    uint8_t currentStatePD5 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_5);
+    uint8_t currentStatePD6 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_6);
+
+    // Handle PA0 (onboard button)
+    if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
+            GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       // If button state changes to pressed
       kBlinkDelay = MIN_DELAY;
-      uart_print("Button pressed\r\n");
+      uart_print("Onboard button pressed\r\n");
       uart_print("Reset to minimum delay\r\n\n");
     }
+    prevStatePA0 = currentStatePA0;
 
-    prevState = currentState;
+    // Handle PD7 (Button 1)
+    if (currentStatePD5 == Bit_SET && prevStatePD5 == Bit_RESET) {
+      GPIO_ToggleBits(GPIOD, GPIO_Pin_5);  // Toggle LED on PD12
+      uart_print("Button 1 toggled LED 1\r\n");
+    }
+    prevStatePD5 = currentStatePD5;
+
+    // Handle PD8 (Button 2)
+    if (currentStatePD6 == Bit_SET && prevStatePD6 == Bit_RESET) {
+      GPIO_ToggleBits(GPIOD, GPIO_Pin_6);  // Toggle LED on PD13
+      uart_print("Button 2 toggled LED 2\r\n");
+    }
+    prevStatePD6 = currentStatePD6;
+
+    // Add a debounce delay
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 
+  // Delete the task if it ever exits
   vTaskDelete(NULL);
 }
-
 void vBlinkTask(void *p) {
   while (1) {
     STM_EVAL_LEDOn(LED3);
@@ -209,7 +242,7 @@ void vLCDCarouselTask(void *p) {
   const uint8_t displayWidth = 16;
 
   // A buffer to hold the current 16-char segment
-  char buffer[17];  // +1 for null terminator
+  char buffer[displayWidth + 1];  // +1 for null terminator
 
   // Current "starting index" for scrolling
   uint8_t offset = 0;
@@ -258,6 +291,14 @@ void config_userbutton(void) {
 
   // Initialize PA0 pins by passing port name and address of PushButton struct
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    // Enable clock for GPIOD
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+  // Configure PD7 and PD8 (new buttons) as input with internal pull-up
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  // Enable internal pull-up
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 void leds_init(void) {

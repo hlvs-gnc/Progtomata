@@ -123,7 +123,7 @@ void LCD_GPIO_Setup(void) {
                              GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 |
                              GPIO_Pin_13;         // D4..D7
   GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;      // Output
-  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;  // Speed
+  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;  // Speed
   GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;     // Push-pull
   GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;   // No pull resistors
   GPIO_Init(GPIOE, &GPIO_InitStruct);

@@ -9,7 +9,7 @@
  *
  * Features:
  * - Initializes USART2 with a baud rate of 115200.
- * - Configures GPIO pins PA9 (TX) and PA10 (RX) for UART communication.
+ * - Configures GPIO pins PA2 (TX) and PA3 (RX) for UART communication.
  * - Provides functions for transmitting characters and strings.
  *
  * Dependencies:
