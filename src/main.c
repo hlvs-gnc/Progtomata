@@ -104,27 +104,8 @@ void config_userbutton(void);
  */
 void leds_init(void);
 
-#define CAROUSEL_TASK_STACK_SIZE 128
-static StaticTask_t carouselTaskBuffer;
-static StackType_t carouselTaskStack[CAROUSEL_TASK_STACK_SIZE];
-
-void vLCDCarouselTask(void *p);
-
 int main(void) {
   SystemInit();
-
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-  GPIO_SetBits(GPIOD, GPIO_Pin_5);
-  GPIO_SetBits(GPIOD, GPIO_Pin_6);
 
   LCD_Init();
 
@@ -147,9 +128,6 @@ int main(void) {
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
 
-  xTaskCreateStatic(vLCDCarouselTask, "LCDCarousel", CAROUSEL_TASK_STACK_SIZE, NULL, 1,
-                    carouselTaskStack, &carouselTaskBuffer);
-
   vTaskStartScheduler();
 
   // This shall never return
@@ -159,14 +137,14 @@ int main(void) {
 
 void vButtonTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
-  uint8_t prevStatePD5 = Bit_RESET; // Previous state for PD5
-  uint8_t prevStatePD6 = Bit_RESET; // Previous state for PD6
+  uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
+  uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
 
   while (1) {
     // Read current states
     uint8_t currentStatePA0 = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-    uint8_t currentStatePD5 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_5);
-    uint8_t currentStatePD6 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_6);
+    uint8_t currentStatePD1 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_1);
+    uint8_t currentStatePD2 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2);
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
@@ -180,18 +158,18 @@ void vButtonTask(void *p) {
     prevStatePA0 = currentStatePA0;
 
     // Handle PD7 (Button 1)
-    if (currentStatePD5 == Bit_SET && prevStatePD5 == Bit_RESET) {
-      GPIO_ToggleBits(GPIOD, GPIO_Pin_5);  // Toggle LED on PD12
+    if (currentStatePD1 == Bit_SET && prevStatePD1 == Bit_RESET) {
+      GPIO_ToggleBits(GPIOD, GPIO_Pin_1);  // Toggle LED on PD12
       uart_print("Button 1 toggled LED 1\r\n");
     }
-    prevStatePD5 = currentStatePD5;
+    prevStatePD1 = currentStatePD1;
 
     // Handle PD8 (Button 2)
-    if (currentStatePD6 == Bit_SET && prevStatePD6 == Bit_RESET) {
-      GPIO_ToggleBits(GPIOD, GPIO_Pin_6);  // Toggle LED on PD13
+    if (currentStatePD2 == Bit_SET && prevStatePD2 == Bit_RESET) {
+      GPIO_ToggleBits(GPIOD, GPIO_Pin_2);  // Toggle LED on PD13
       uart_print("Button 2 toggled LED 2\r\n");
     }
-    prevStatePD6 = currentStatePD6;
+    prevStatePD2 = currentStatePD2;
 
     // Add a debounce delay
     vTaskDelay(pdMS_TO_TICKS(50));
@@ -236,46 +214,6 @@ void vBlinkTask(void *p) {
   vTaskDelete(NULL);
 }
 
-void vLCDCarouselTask(void *p) {
-  static char text[] = "*PROGTOMATA2000*";
-  // The display is 16 characters wide
-  const uint8_t displayWidth = 16;
-
-  // A buffer to hold the current 16-char segment
-  char buffer[displayWidth + 1];  // +1 for null terminator
-
-  // Current "starting index" for scrolling
-  uint8_t offset = 0;
-
-  // Calculate length of the text (excluding trailing null)
-  // or just rely on the size of text[] if you prefer
-  uint8_t textLen = strlen(text);
-
-  while (1) {
-    // For each position on the LCD's 16 chars:
-    for (uint8_t i = 0; i < displayWidth; i++) {
-      // The character to show at position i is from text[(offset + i) %
-      // textLen].
-      buffer[i] = text[(offset + i) % textLen];
-    }
-    buffer[displayWidth] = '\0';  // Null-terminate
-
-    // Go to row 0, column 0
-    LCD_GotoXY(1, 0);
-    // Print the 16-char segment
-    LCD_WriteString(buffer);
-
-    // Increment offset to shift by one
-    offset = (offset + 1) % textLen;
-
-    // Delay a bit to control scroll speed (e.g., 300 ms)
-    vTaskDelay(pdMS_TO_TICKS(250));
-  }
-
-  // If the task ever ends, delete itself
-  vTaskDelete(NULL);
-}
-
 void config_userbutton(void) {
   // Declare a variable of type struct GPIO_InitTypeDef
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -292,17 +230,17 @@ void config_userbutton(void) {
   // Initialize PA0 pins by passing port name and address of PushButton struct
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    // Enable clock for GPIOD
+  // Enable clock for GPIOD
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
   // Configure PD7 and PD8 (new buttons) as input with internal pull-up
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  // Enable internal pull-up
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 void leds_init(void) {
-  // Initialize LEDs
+  // Initialize board LEDs
   STM_EVAL_LEDInit(LED3);
 
   STM_EVAL_LEDInit(LED4);
@@ -310,4 +248,17 @@ void leds_init(void) {
   STM_EVAL_LEDInit(LED5);
 
   STM_EVAL_LEDInit(LED6);
+
+  // External LEDs
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+  GPIO_SetBits(GPIOD, GPIO_Pin_5);
+  GPIO_SetBits(GPIOD, GPIO_Pin_6);
 }
