@@ -104,17 +104,23 @@ void config_userbutton(void);
  */
 void leds_init(void);
 
+#define CAROUSEL_TASK_STACK_SIZE 128
+static StaticTask_t carouselTaskBuffer;
+static StackType_t carouselTaskStack[CAROUSEL_TASK_STACK_SIZE];
+
+void vLCDCarouselTask(void *p);
+
 int main(void) {
   SystemInit();
-  
+
   LCD_Init();
 
   LCD_WriteString("****************");
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
-  
+
   config_userbutton();
-  leds_init();      
+  leds_init();
   uart_init();
 
   uart_send_string("System initialized\r\n");
@@ -127,7 +133,10 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
-         
+
+  xTaskCreateStatic(vLCDCarouselTask, "LCDCarousel", CAROUSEL_TASK_STACK_SIZE,
+                    NULL, 1, carouselTaskStack, &carouselTaskBuffer);
+
   vTaskStartScheduler();
 
   // This shall never return
@@ -148,7 +157,7 @@ void vButtonTask(void *p) {
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       // If button state changes to pressed
       kBlinkDelay = MIN_DELAY;
-      uart_print("Button pressed\r\n");      
+      uart_print("Button pressed\r\n");
       uart_print("Reset to minimum delay\r\n\n");
     }
 
@@ -174,7 +183,7 @@ void vBlinkTask(void *p) {
     vTaskDelay(kBlinkDelay);
 
     STM_EVAL_LEDOff(LED6);
-    
+
     STM_EVAL_LEDOn(LED5);
     vTaskDelay(kBlinkDelay);
 
@@ -186,11 +195,51 @@ void vBlinkTask(void *p) {
     if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
       kBlinkStep = -kBlinkStep;  // Reverse step direction
     }
-    
+
     uart_send_string("Blink LEDs\r\n");
     uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
   }
 
+  vTaskDelete(NULL);
+}
+
+void vLCDCarouselTask(void *p) {
+  static char text[] = "*PROGTOMATA2000*";
+  // The display is 16 characters wide
+  const uint8_t displayWidth = 16;
+
+  // A buffer to hold the current 16-char segment
+  char buffer[17];  // +1 for null terminator
+
+  // Current "starting index" for scrolling
+  uint8_t offset = 0;
+
+  // Calculate length of the text (excluding trailing null)
+  // or just rely on the size of text[] if you prefer
+  uint8_t textLen = strlen(text);
+
+  while (1) {
+    // For each position on the LCD's 16 chars:
+    for (uint8_t i = 0; i < displayWidth; i++) {
+      // The character to show at position i is from text[(offset + i) %
+      // textLen].
+      buffer[i] = text[(offset + i) % textLen];
+    }
+    buffer[displayWidth] = '\0';  // Null-terminate
+
+    // Go to row 0, column 0
+    LCD_GotoXY(1, 0);
+    // Print the 16-char segment
+    LCD_WriteString(buffer);
+
+    // Increment offset to shift by one
+    offset = (offset + 1) % textLen;
+
+    // Delay a bit to control scroll speed (e.g., 300 ms)
+    vTaskDelay(pdMS_TO_TICKS(250));
+  }
+
+  // If the task ever ends, delete itself
   vTaskDelete(NULL);
 }
 
