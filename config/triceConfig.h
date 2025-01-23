@@ -27,8 +27,6 @@ extern "C" {
 #define TRICE_BUFFER TRICE_DOUBLE_BUFFER
 #endif
 
-#define TRICE_UARTA
-
 #ifndef TRICE_UARTA_MIN_ID
 #define TRICE_UARTA_MIN_ID 0 //!< TRICE_UARTA_MIN_ID, if > 0, is the smalles ID routed to UARTA.
 #endif
@@ -46,7 +44,7 @@ extern "C" {
 #endif
 
 #ifndef TRICE_DEFERRED_UARTA
-#define TRICE_DEFERRED_UARTA 1 //!< TRICE_DEFERRED_UARTA enables a user defined deferred trice write over TRICE_UARTA.
+#define TRICE_DEFERRED_UARTA 0 //!< TRICE_DEFERRED_UARTA enables a user defined deferred trice write over TRICE_UARTA.
 #endif
 
 #ifndef TRICE_DEFERRED_UARTB
@@ -66,7 +64,7 @@ extern "C" {
 #endif
 
 #ifndef TRICE_DEFERRED_AUXILIARY32
-#define TRICE_DEFERRED_AUXILIARY32 0 //!< TRICE_DEFERRED_AUXILIARY32 enables a user defined deferred trice write.
+#define TRICE_DEFERRED_AUXILIARY32 1 //!< TRICE_DEFERRED_AUXILIARY32 enables a user defined deferred trice write.
 #endif
 
 #ifndef TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING

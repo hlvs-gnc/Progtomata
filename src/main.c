@@ -68,7 +68,7 @@
 #include <progtomata_system.h>
 
 // Information logging
-#include <trice.h>
+#include <trace.h>
 
 /**
  * @brief Handles button press events to adjust LED blink delay.
@@ -124,9 +124,9 @@ int main(void) {
   uart_send_string("System initialized\r\n");
   uart_send_string("Create tasks\r\n");
 
-  TriceInit();
+  TraceInit();
 
-  Trice0(iD(2740), "OK"); // ok, iD is added
+  Trice0(iD(2740), "OK");
 
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -222,10 +222,15 @@ void vBlinkTask(void *p) {
     // Adjust delay
     kBlinkDelay += kBlinkStep;
 
-    if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
+    if (kBlinkDelay >= MAX_DELAY) {
       kBlinkStep -= MIN_DELAY;  // Reverse step direction
+
+    } else if (kBlinkDelay < MIN_DELAY || kBlinkStep == 0) {
+      kBlinkDelay = MIN_DELAY;
+      kBlinkStep = MIN_DELAY;
     }
 
+    Trice0(iD(5954), "Blink LEDs");
     uart_send_string("Blink LEDs\r\n");
     uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
   }
