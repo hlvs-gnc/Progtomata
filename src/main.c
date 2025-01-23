@@ -159,6 +159,7 @@ void vButtonTask(void *p) {
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
       GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
+      kBlinkStep = MIN_DELAY;
       uart_print("Onboard button pressed\r\n");
       uart_print("Reset to minimum delay\r\n\n");
     }
@@ -222,7 +223,7 @@ void vBlinkTask(void *p) {
     kBlinkDelay += kBlinkStep;
 
     if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
-      kBlinkStep = -kBlinkStep;  // Reverse step direction
+      kBlinkStep -= MIN_DELAY;  // Reverse step direction
     }
 
     uart_send_string("Blink LEDs\r\n");
@@ -277,7 +278,4 @@ void leds_init(void) {
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-  // GPIO_SetBits(GPIOD, GPIO_Pin_5);
-  // GPIO_SetBits(GPIOD, GPIO_Pin_6);
 }
