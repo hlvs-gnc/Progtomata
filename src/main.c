@@ -43,6 +43,7 @@
 
 // System libraries
 #include <math.h>
+#include <stdbool.h>
 
 // Real-time operating system
 #include <FreeRTOS.h>
@@ -65,6 +66,9 @@
 
 // System definitions
 #include <progtomata_system.h>
+
+// Information logging
+#include <trice.h>
 
 /**
  * @brief Handles button press events to adjust LED blink delay.
@@ -120,6 +124,10 @@ int main(void) {
   uart_send_string("System initialized\r\n");
   uart_send_string("Create tasks\r\n");
 
+  TriceInit();
+
+  Trice0(iD(2740), "OK"); // ok, iD is added
+
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
                     buttonTaskStack, &buttonTaskBuffer);
@@ -139,6 +147,7 @@ void vButtonTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
   uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
   uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
+  bool led_state[2] = {false, false};
 
   while (1) {
     // Read current states
@@ -148,26 +157,34 @@ void vButtonTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-            GPIO_SetBits(GPIOD,
-                   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-      // If button state changes to pressed
+      GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       uart_print("Onboard button pressed\r\n");
       uart_print("Reset to minimum delay\r\n\n");
     }
     prevStatePA0 = currentStatePA0;
 
-    // Handle PD7 (Button 1)
-    if (currentStatePD1 == Bit_SET && prevStatePD1 == Bit_RESET) {
-      GPIO_ToggleBits(GPIOD, GPIO_Pin_1);  // Toggle LED on PD12
-      uart_print("Button 1 toggled LED 1\r\n");
+    // Handle PD1 (Button 1)
+    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET && !led_state[0]) {
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);  // Turn ON LED1 (PD5)
+      led_state[0] = true;
+      uart_print("LED1 ON\r\n");
+    } else if (currentStatePD1 == Bit_RESET && led_state[0]) {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_5);  // Turn OFF LED1 (PD5)
+      led_state[0] = false;
+      uart_print("LED1 OFF\r\n");
     }
     prevStatePD1 = currentStatePD1;
 
-    // Handle PD8 (Button 2)
-    if (currentStatePD2 == Bit_SET && prevStatePD2 == Bit_RESET) {
-      GPIO_ToggleBits(GPIOD, GPIO_Pin_2);  // Toggle LED on PD13
-      uart_print("Button 2 toggled LED 2\r\n");
+    // Handle PD2 (Button 2)
+    if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET && !led_state[1]) {
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);  // Turn ON LED2 (PD6)
+      led_state[1] = true;
+      uart_print("LED2 ON\r\n");
+    } else if (currentStatePD2 == Bit_RESET && led_state[1]) {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_6);  // Turn OFF LED1 (PD5)
+      led_state[1] = false;
+      uart_print("LED2 OFF\r\n");
     }
     prevStatePD2 = currentStatePD2;
 
@@ -178,6 +195,7 @@ void vButtonTask(void *p) {
   // Delete the task if it ever exits
   vTaskDelete(NULL);
 }
+
 void vBlinkTask(void *p) {
   while (1) {
     STM_EVAL_LEDOn(LED3);
@@ -215,6 +233,9 @@ void vBlinkTask(void *p) {
 }
 
 void config_userbutton(void) {
+  // Enable clock for GPIOD
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
   // Declare a variable of type struct GPIO_InitTypeDef
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -230,10 +251,8 @@ void config_userbutton(void) {
   // Initialize PA0 pins by passing port name and address of PushButton struct
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  // Enable clock for GPIOD
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-
-  // Configure PD7 and PD8 (new buttons) as input with internal pull-up
+  // Configure PD1 and PD2 (new buttons) as input with internal pull-up
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  // Enable internal pull-up
   GPIO_Init(GPIOD, &GPIO_InitStructure);
@@ -259,6 +278,6 @@ void leds_init(void) {
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-  GPIO_SetBits(GPIOD, GPIO_Pin_5);
-  GPIO_SetBits(GPIOD, GPIO_Pin_6);
+  // GPIO_SetBits(GPIOD, GPIO_Pin_5);
+  // GPIO_SetBits(GPIOD, GPIO_Pin_6);
 }
