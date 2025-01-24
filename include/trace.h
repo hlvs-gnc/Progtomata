@@ -24,10 +24,6 @@ extern "C" {
 
 #include <trice.h>
 
-uint16_t TimeSample16(void);
-
-uint32_t TimeSample32(void);
-
 /*!
  * \brief Initialize the trace system.
  *

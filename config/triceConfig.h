@@ -8,11 +8,14 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <stm32f4xx.h>
+
 #ifndef TRICE_CLEAN
 // TRICE_CLEAN, when found in triceConfig.h is set to 0 with command "trice insert".
 // and set to 1 with command "trice clean" to get rid of
 // potential editor warnings in the trice clean state.
-#define TRICE_CLEAN 0
+#define TRICE_CLEAN 0 // Do not define this at an other place! But you can delete this here.
 #endif
 
 #ifndef TRICE_OFF
@@ -21,13 +24,14 @@ extern "C" {
 #define TRICE_OFF 0
 #endif
 
-#define TRICE_DEFERRED_OUTPUT 1
-
-#define TRICE_BUFFER TRICE_DOUBLE_BUFFER
+#define TriceStamp16 ((uint16_t)(DWT->CYCCNT & 0xFFFF))
+#define TriceStamp32 (DWT->CYCCNT)
 
 #define TRICE_DEFERRED_UARTA 1
-
 #define TRICE_UARTA USART2
+
+#define TRICE_DEFERRED_OUTPUT 1
+#define TRICE_BUFFER TRICE_RING_BUFFER
 
 #define TRICE_DEFERRED_OUT_FRAMING TRICE_FRAMING_TCOBS
 
@@ -223,7 +227,7 @@ extern "C" {
 //! \li When TRICE_BUFFER == TRICE_STATIC_BUFFER this value is not used.
 //! \li When TRICE_BUFFER == TRICE_DOUBLE_BUFFER, this is the sum of both half buffers.
 //! \li When TRICE_BUFFER == TRICE_RING_BUFFER, this is the whole buffer.
-#define TRICE_DEFERRED_BUFFER_SIZE 1024
+#define TRICE_DEFERRED_BUFFER_SIZE 4096
 #endif
 
 #ifndef TRICE_RING_BUFFER_SIZE
@@ -429,7 +433,7 @@ extern "C" {
 //! SYSTICKVAL runs from 99 999 999 to 0 and you see just the lower 16 bit as time stamp, what may be confusing. With a
 //! 64 MHz clock, everything is fine, because 63999 is still a 16-bit value. When using DWT_CYCCNT on MCU clocks > 65 MHz,
 //! displaying only the lower 2 bytes is ok, because this 32-bit counter runs circular without being resetted.
-#define SYSTICKVAL (*(volatile uint32_t*)0xE000E018UL)
+#define SYSTICKVAL (*(volatile uint32_t*)DWT->CYCCNT)
 
 #else
 

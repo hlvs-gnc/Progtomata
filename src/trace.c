@@ -13,11 +13,12 @@
  */
 
 #include <trace.h>
+#include <uart_driver.h>
 
 /*!
  * \brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
  */
-#define TRICE_TASK_INTERVAL (10)
+#define TRICE_TASK_INTERVAL (1000)
 
 /*!
  * \brief Stack size and priority for the Trice task.
@@ -43,23 +44,16 @@ StaticTask_t traceTaskBuffer CCM_RAM;
  */
 static bool g_isTraceInitialized = false;
 
-uint16_t TimeSample16(void) {
-  return (uint16_t)(TIM2->CNT & 0xFFFF);
+void DWT_Init(void) {
+  // Enable trace and debug block
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+  // Reset the cycle counter
+  DWT->CYCCNT = 0;
+
+  // Enable the cycle counter
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
-
-uint32_t TimeSample32(void) {
-  return (uint32_t)(TIM2->CNT);
-}
-
-#ifndef TriceStamp16
-//! Use SysTick->VAL as a 16-bit timestamp
-#define TriceStamp16 (uint16_t)(TimeSample16())  // Lower 16 bits of SysTick->VAL
-#endif
-
-#ifndef TriceStamp32
-//! Use SysTick->VAL as a 32-bit timestamp (extended with SysTick->CTRL)
-#define TriceStamp32 (uint32_t)(TimeSample32())  // Combine SysTick->VAL and CTRL
-#endif
 
 /*!
  * \brief The FreeRTOS task that periodically invokes TriceTransfer().
@@ -72,7 +66,10 @@ static void vTriceTask(void* pvParameters) {
   for (;;) {
     // Wait for the given interval
     vTaskDelay(TRICE_TASK_INTERVAL);
- 
+
+    // uart_print("TriceStamp16: %d\r\n", TriceStamp16);
+    // uart_print("TriceStamp32: %d\r\n", TriceStamp32);
+
     // Every loop, call TriceTransfer() to handle deferred output
     TriceTransfer();
   }
@@ -87,6 +84,8 @@ static void vTriceTask(void* pvParameters) {
  *   - Ensures it only happens once.
  */
 void TraceInit(void) {
+  DWT_Init();
+
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL, 1,
