@@ -7,14 +7,26 @@
  *   in deferred mode and creating the associated FreeRTOS task.
  */
 
-#ifndef TRACE_H
-#define TRACE_H
+#ifndef TRACE_H_
+#define TRACE_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <stdbool.h>
+#include <stdio.h>
+
+#include <stm32f4xx.h>
+
+#include <FreeRTOS.h>
+#include <task.h>
+
 #include <trice.h>
+
+uint16_t TimeSample16(void);
+
+uint32_t TimeSample32(void);
 
 /*!
  * \brief Initialize the trace system.
@@ -30,4 +42,4 @@ void TraceInit(void);
 }
 #endif
 
-#endif // TRACE_H
+#endif // TRACE_H_

@@ -111,22 +111,21 @@ void leds_init(void);
 int main(void) {
   SystemInit();
 
-  LCD_Init();
-
-  LCD_WriteString("****************");
-  LCD_GotoXY(1, 0);
-  LCD_WriteString("*PROGTOMATA2000*");
-
   config_userbutton();
   leds_init();
   uart_init();
 
-  uart_send_string("System initialized\r\n");
-  uart_send_string("Create tasks\r\n");
+  LCD_Init();
 
   TraceInit();
 
-  Trice0(iD(2740), "OK");
+  LCD_GotoXY(0, 0);
+  LCD_WriteString("****************");
+  LCD_GotoXY(1, 0);
+  LCD_WriteString("*PROGTOMATA2000*");
+
+  // uart_send_string("System initialized\r\n");
+  // uart_send_string("Create tasks\r\n");
 
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -135,7 +134,7 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
-
+  
   vTaskStartScheduler();
 
   // This shall never return
@@ -144,9 +143,9 @@ int main(void) {
 }
 
 void vButtonTask(void *p) {
-  uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
-  uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
-  uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
+  uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
+  uint8_t prevStatePD1 = Bit_RESET;  // Previous state for PD1
+  uint8_t prevStatePD2 = Bit_RESET;  // Previous state for PD2
   bool led_state[2] = {false, false};
 
   while (1) {
@@ -157,35 +156,45 @@ void vButtonTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+      GPIO_SetBits(GPIOD,
+                   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
       uart_print("Onboard button pressed\r\n");
       uart_print("Reset to minimum delay\r\n\n");
+      Trice(iD(2674), "Onboard button pressed");
+      Trice(iD(5105), "Reset to minimum delay");
     }
     prevStatePA0 = currentStatePA0;
 
     // Handle PD1 (Button 1)
-    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET && !led_state[0]) {
+    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET &&
+        !led_state[0]) {
       GPIO_SetBits(GPIOD, GPIO_Pin_5);  // Turn ON LED1 (PD5)
       led_state[0] = true;
       uart_print("LED1 ON\r\n");
+      Trice(iD(6501), "LED1 ON");
     } else if (currentStatePD1 == Bit_RESET && led_state[0]) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_5);  // Turn OFF LED1 (PD5)
       led_state[0] = false;
       uart_print("LED1 OFF\r\n");
+      Trice(iD(6685), "LED1 OFF");
     }
     prevStatePD1 = currentStatePD1;
 
     // Handle PD2 (Button 2)
-    if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET && !led_state[1]) {
+    if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET &&
+        !led_state[1]) {
       GPIO_SetBits(GPIOD, GPIO_Pin_6);  // Turn ON LED2 (PD6)
       led_state[1] = true;
       uart_print("LED2 ON\r\n");
+      Trice(iD(2106), "LED2 OFF");
+
     } else if (currentStatePD2 == Bit_RESET && led_state[1]) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_6);  // Turn OFF LED1 (PD5)
       led_state[1] = false;
       uart_print("LED2 OFF\r\n");
+      Trice(iD(2152), "LED2 OFF");
     }
     prevStatePD2 = currentStatePD2;
 
@@ -230,9 +239,9 @@ void vBlinkTask(void *p) {
       kBlinkStep = MIN_DELAY;
     }
 
-    Trice0(iD(5954), "Blink LEDs");
-    uart_send_string("Blink LEDs\r\n");
-    uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
+    Trice(iD(6709), "Blink LEDs test");
+    // uart_send_string("Blink LEDs\r\n");
+    // uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
   }
 
   vTaskDelete(NULL);
@@ -277,7 +286,8 @@ void leds_init(void) {
   // External LEDs
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |
+                                GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

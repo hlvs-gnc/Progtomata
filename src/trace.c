@@ -12,17 +12,12 @@
  * (creating it if it doesn’t exist) and write TRICE data to it.
  */
 
-#include <FreeRTOS.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <task.h>
 #include <trace.h>
 
 /*!
  * \brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
- * \note  10,000 ticks at 1kHz tick rate is ~10 seconds, adjust for your needs.
  */
-#define TRICE_TASK_INTERVAL (10000)
+#define TRICE_TASK_INTERVAL (10)
 
 /*!
  * \brief Stack size and priority for the Trice task.
@@ -39,18 +34,32 @@
 
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
+
 /// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t traceTaskBuffer CCM_RAM;
-
-/*!
- * \brief Global file pointer for "trices.raw". NULL until we open it.
- */
-static FILE* g_logFilePtr = NULL;
 
 /*!
  * \brief Flag to ensure TraceInit() is only called once.
  */
 static bool g_isTraceInitialized = false;
+
+uint16_t TimeSample16(void) {
+  return (uint16_t)(TIM2->CNT & 0xFFFF);
+}
+
+uint32_t TimeSample32(void) {
+  return (uint32_t)(TIM2->CNT);
+}
+
+#ifndef TriceStamp16
+//! Use SysTick->VAL as a 16-bit timestamp
+#define TriceStamp16 (uint16_t)(TimeSample16())  // Lower 16 bits of SysTick->VAL
+#endif
+
+#ifndef TriceStamp32
+//! Use SysTick->VAL as a 32-bit timestamp (extended with SysTick->CTRL)
+#define TriceStamp32 (uint32_t)(TimeSample32())  // Combine SysTick->VAL and CTRL
+#endif
 
 /*!
  * \brief The FreeRTOS task that periodically invokes TriceTransfer().
@@ -58,14 +67,14 @@ static bool g_isTraceInitialized = false;
  * \param pvParameters Not used in this example.
  */
 static void vTriceTask(void* pvParameters) {
-  (void)pvParameters;  // Unused parameter
+  (void) pvParameters;  // Unused parameter
 
   for (;;) {
-    // Every loop, call TriceTransfer() to handle deferred output
-    TriceTransfer();
-
     // Wait for the given interval
     vTaskDelay(TRICE_TASK_INTERVAL);
+ 
+    // Every loop, call TriceTransfer() to handle deferred output
+    TriceTransfer();
   }
 }
 
@@ -79,54 +88,10 @@ static void vTriceTask(void* pvParameters) {
  */
 void TraceInit(void) {
   if (!g_isTraceInitialized) {
-    // Initialize the Trice system
-    TriceInit();
-
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL, 1,
-                    traceTaskStack, &traceTaskBuffer);
+                      traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }
 }
-
-/*!
- * \brief The actual function that writes TRICE data (32-bit words) in deferred
- * mode.
- *
- * \param[in] enc   Pointer to an array of 32-bit words to write.
- * \param[in] count Number of 32-bit words in \p enc.
- *
- * \note  On a microcontroller without a native file system, you might replace
- * this with writing to a UART, or storing in memory, etc.
- */
-static void NonBlockingDeferredWrite32AuxImpl(const uint32_t* enc,
-                                              unsigned count) {
-  // If the file is not yet open, open it in append mode (creates if not
-  // existing).
-  if (g_logFilePtr == NULL) {
-    g_logFilePtr = fopen("trices.raw", "ab");
-    if (g_logFilePtr == NULL) {
-      // Could not open file; handle error as needed (log, assert, etc.)
-      return;
-    }
-  }
-
-  // Write 'count' 32-bit words
-  size_t written = fwrite(enc, sizeof(uint32_t), count, g_logFilePtr);
-  if (written < count) {
-    // Handle partial write or error
-    // e.g., log or handle in an application-specific way
-  }
-
-  // Flush so data is physically written; might remove for performance reasons
-  fflush(g_logFilePtr);
-}
-
-/*!
- * \brief A global function pointer expected by the Trice library.
- *
- * \details We assign it to point to our implementation
- *          (\c NonBlockingDeferredWrite32AuxImpl).
- */
-Write32AuxiliaryFn_t UserNonBlockingDeferredWrite32AuxiliaryFn = NonBlockingDeferredWrite32AuxImpl;

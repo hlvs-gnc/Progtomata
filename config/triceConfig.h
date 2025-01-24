@@ -21,11 +21,15 @@ extern "C" {
 #define TRICE_OFF 0
 #endif
 
-#ifndef TRICE_BUFFER
-//! TRICE_BUFFER ...
-//! ...
+#define TRICE_DEFERRED_OUTPUT 1
+
 #define TRICE_BUFFER TRICE_DOUBLE_BUFFER
-#endif
+
+#define TRICE_DEFERRED_UARTA 1
+
+#define TRICE_UARTA USART2
+
+#define TRICE_DEFERRED_OUT_FRAMING TRICE_FRAMING_TCOBS
 
 #ifndef TRICE_UARTA_MIN_ID
 #define TRICE_UARTA_MIN_ID 0 //!< TRICE_UARTA_MIN_ID, if > 0, is the smalles ID routed to UARTA.
@@ -64,7 +68,7 @@ extern "C" {
 #endif
 
 #ifndef TRICE_DEFERRED_AUXILIARY32
-#define TRICE_DEFERRED_AUXILIARY32 1 //!< TRICE_DEFERRED_AUXILIARY32 enables a user defined deferred trice write.
+#define TRICE_DEFERRED_AUXILIARY32 0 //!< TRICE_DEFERRED_AUXILIARY32 enables a user defined deferred trice write.
 #endif
 
 #ifndef TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING
@@ -105,18 +109,6 @@ extern "C" {
 #define TRICE_CONFIG_WARNINGS 1 //!< TRICE_CONFIG_WARNINGS == 0 can suppress some unwanted configuration warnings. Set to 0 only if you know what you are doing.
 #endif
 
-#ifndef TriceStamp16
-//! TriceStamp16 returns a 16-bit value to stamp `Id` TRICE and `Trice` macros. Usually it is a timestamp, but could also be a destination address or a counter for example.
-//! The user has to provide this value. Defining a macro here, instead of providing a function has significant speed impact.
-#define TriceStamp16 0xbe16
-#endif
-
-#ifndef TriceStamp32
-//! TriceStamp32 returns a 32-bit value to stamp `ID` TRICE and `TRice` macros. Usually it is a timestamp, but could also be a destination address or a counter for example.
-//! The user has to provide this value. Defining a macro here, instead of providing a function has significant speed impact.
-#define TriceStamp32 0xfeed3322
-#endif
-
 #ifndef TRICE_PROTECT
 //! The TRICE_PROTECT switch is only relevant for the deferred trice modes TRICE_DOUBLE_BUFFER and TRICE_RING_BUFFER.
 //! The trice library works well, when less data are produced in the average than transmittable and when in the double buffer case the TriceTransfer
@@ -147,7 +139,7 @@ extern "C" {
 //! - TRICE_MULTI_PACK_MODE packs several trice messages before adding a 0-delimiter byte. This reduces the transmit byte count. In case of a lost package several Trices can get lost.
 //! - When using encryption, the TRICE_MULTI_PACK_MODE can significantly reduce the transmit byte count, because in TRICE_SINGLE_PACK_MODE each Trice message gets extended
 //! with 1 to 7 padding bytes before encryption. TRICE_MULTI_PACK_MODE is not possible for TRICE_STACK_BUFFER and TRICE_STATIC_BUFFER (direct mode).
-#define TRICE_DEFERRED_TRANSFER_MODE TRICE_MULTI_PACK_MODE
+#define TRICE_DEFERRED_TRANSFER_MODE TRICE_SINGLE_PACK_MODE
 #endif
 
 #ifndef TRICE_RING_BUFFER_OVERFLOW_WATCH
@@ -171,7 +163,7 @@ extern "C" {
 //! Setting TRICE_BUFFER to TRICE_RING_BUFFER or TRICE_DOUBLE_BUFFER demands TRICE_DEFERRED_OUTPUT == 1.
 //! TRICE_BUFFER == TRICE_STACK_BUFFER or TRICE_BUFFER == TRICE_STATIC_BUFFER needs TRICE_DEFERRED_OUTPUT == 0.
 //! When TRICE_BUFFER == TRICE_RING_BUFFER or TRICE_BUFFER == TRICE_DOUBLE_BUFFER for deferred output, additional direct output can be on.
-#define TRICE_DEFERRED_OUTPUT 1
+#define TRICE_DEFERRED_OUTPUT 0
 #endif
 
 #ifndef TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING
@@ -265,7 +257,7 @@ extern "C" {
 //! - TRICE_FRAMING_TCOBS: Recommended for UART transfer and trice tool visualization.
 //! - TRICE_FRAMING_COBS: The trice tool needs switch `-pf COBS`. Useful with XTEA or to decode the binary trice date with Python or an other language.
 //! - TRICE_FRAMING_NONE: The trice tool needs switch `-pf none`. This mode may be helpful if you write your own trice viewer without a decoder.
-#define TRICE_DEFERRED_OUT_FRAMING TRICE_FRAMING_TCOBS
+#define TRICE_DEFERRED_OUT_FRAMING TRICE_FRAMING_NONE
 #endif
 
 #ifndef XTEA_ENCRYPT_KEY
@@ -296,7 +288,7 @@ extern "C" {
 #ifndef TRICE_DIAGNOSTICS
 //! With TRICE_DIAGNOSTICS == 0, additional trice diagnostics code is removed.
 //! During development TRICE_DIAGNOSTICS == 1 helps to optimize the trice buffer sizes.
-#define TRICE_DIAGNOSTICS 1
+#define TRICE_DIAGNOSTICS 0
 #endif
 
 #ifndef TRICE_DIRECT_SEGGER_RTT_8BIT_WRITE
@@ -352,7 +344,7 @@ extern "C" {
 //! TRICE_CYCLE_COUNTER adds a cycle counter to each trice message.
 //! If 0, do not add cycle counter. The TRICE macros are a bit faster. Lost TRICEs are not detectable by the trice tool. The cycle counter byte ist statically 0xC0.
 //! If 1, add an 8-bit cycle counter. The TRICE macros are a bit slower. Lost TRICEs are detectable by the trice tool. The cycle counter byte changes (recommended).
-#define TRICE_CYCLE_COUNTER 1
+#define TRICE_CYCLE_COUNTER 0
 #endif
 
 // Compiler Adaption:

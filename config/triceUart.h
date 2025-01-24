@@ -1,6 +1,11 @@
-/*! \file triceUart.h
-\author Thomas.Hoehenleitner [at] seerose.net
-*******************************************************************************/
+/*!
+ * \file triceUart.h
+ * \brief Deferred-mode UART adapter for Trice using STM32 SPL drivers
+ *
+ * In your project, define TRICE_DEFERRED_UARTA or TRICE_DEFERRED_UARTB as 1 to
+ * enable the corresponding UART functionality. Also define TRICE_UARTA (e.g.,
+ * USART1) and/or TRICE_UARTB (e.g., USART2) to match your hardware setup.
+ */
 
 #ifndef TRICE_UART_H_
 #define TRICE_UART_H_
@@ -9,73 +14,70 @@
 extern "C" {
 #endif
 
-#include "trice.h"
+#include <triceConfig.h>
 
-TRICE_INLINE void ToggleOpticalFeedbackLED(void) {
-  // LL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-}
+// SPL includes for STM32F407
+#include <stm32f4xx_gpio.h>
+#include <stm32f4xx_usart.h>
+
+/**
+ * @brief Toggle an LED for feedback (optional).
+ *
+ * Modify this to match your actual LED GPIO pin and port.
+ */
+void ToggleOpticalFeedbackLED(void);
 
 #if TRICE_DEFERRED_UARTA == 1
 
-//! Check if a new byte can be written into trice transmit register.
-//! \retval 0 == not empty
-//! \retval !0 == empty
-//! User must provide this function.
-TRICE_INLINE uint32_t triceTxDataRegisterEmptyUartA(void) {
-  //return LL_USART_IsActiveFlag_TXE(TRICE_UARTA);
-}
+/**
+ * @brief Check if a new byte can be written into the UARTA transmit register.
+ * @return Non-zero if the TX register is empty, 0 if it is not.
+ */
+uint32_t triceTxDataRegisterEmptyUartA(void);
 
-//! Write value v into trice transmit register.
-//! \param v byte to transmit
-//! User must provide this function.
-TRICE_INLINE void triceTransmitData8UartA(uint8_t v) {
-  //LL_USART_TransmitData8(TRICE_UARTA, v);
-  //ToggleOpticalFeedbackLED();
-}
+/**
+ * @brief Write a byte into the UARTA transmit register.
+ * @param v Byte to transmit
+ */
+void triceTransmitData8UartA(uint8_t v);
 
-//! Allow interrupt for empty trice data transmit register.
-//! User must provide this function.
-TRICE_INLINE void triceEnableTxEmptyInterruptUartA(void) {
-  //LL_USART_EnableIT_TXE(TRICE_UARTA);
-}
+/**
+ * @brief Enable the "TX data register empty" interrupt for UARTA.
+ */
+void triceEnableTxEmptyInterruptUartA(void);
 
-//! Disallow interrupt for empty trice data transmit register.
-//! User must provide this function.
-TRICE_INLINE void triceDisableTxEmptyInterruptUartA(void) {
-  //LL_USART_DisableIT_TXE(TRICE_UARTA);
-}
-#endif  // #if TRICE_DEFERRED_UARTA == 1
+/**
+ * @brief Disable the "TX data register empty" interrupt for UARTA.
+ */
+void triceDisableTxEmptyInterruptUartA(void);
+
+#endif  // TRICE_DEFERRED_UARTA
 
 #if TRICE_DEFERRED_UARTB == 1
 
-//! Check if a new byte can be written into trice transmit register.
-//! \retval 0 == not empty
-//! \retval !0 == empty
-//! User must provide this function.
-TRICE_INLINE uint32_t triceTxDataRegisterEmptyUartB(void) {
-  return LL_USART_IsActiveFlag_TXE(TRICE_UARTB);
-}
+/**
+ * @brief Check if a new byte can be written into the UARTB transmit register.
+ * @return Non-zero if the TX register is empty, 0 if it is not.
+ */
+TRICE_INLINE uint32_t triceTxDataRegisterEmptyUartB(void);
 
-//! Write value v into trice transmit register.
-//! \param v byte to transmit
-//! User must provide this function.
-TRICE_INLINE void triceTransmitData8UartB(uint8_t v) {
-  LL_USART_TransmitData8(TRICE_UARTB, v);
-  ToggleOpticalFeedbackLED();
-}
+/**
+ * @brief Write a byte into the UARTB transmit register.
+ * @param v Byte to transmit
+ */
+TRICE_INLINE void triceTransmitData8UartB(uint8_t v);
 
-//! Allow interrupt for empty trice data transmit register.
-//! User must provide this function.
-TRICE_INLINE void triceEnableTxEmptyInterruptUartB(void) {
-  LL_USART_EnableIT_TXE(TRICE_UARTB);
-}
+/**
+ * @brief Enable the "TX data register empty" interrupt for UARTB.
+ */
+TRICE_INLINE void triceEnableTxEmptyInterruptUartB(void);
 
-//! Disallow interrupt for empty trice data transmit register.
-//! User must provide this function.
-TRICE_INLINE void triceDisableTxEmptyInterruptUartB(void) {
-  LL_USART_DisableIT_TXE(TRICE_UARTB);
-}
-#endif  // #if TRICE_DEFERRED_UARTB == 1
+/**
+ * @brief Disable the "TX data register empty" interrupt for UARTB.
+ */
+TRICE_INLINE void triceDisableTxEmptyInterruptUartB(void);
+
+#endif  // TRICE_DEFERRED_UARTB
 
 #ifdef __cplusplus
 }
