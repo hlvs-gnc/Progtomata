@@ -1,0 +1,114 @@
+{
+	"1014": {
+		"Type": "TRice",
+		"Strg": "LED2 OFF"
+	},
+	"1086": {
+		"Type": "TRice",
+		"Strg": "LED1 ON"
+	},
+	"1342": {
+		"Type": "TRICE32",
+		"Strg": "info:PROGTOMATA2000\\n"
+	},
+	"1808": {
+		"Type": "TRICE32",
+		"Strg": "LED2 OFF"
+	},
+	"1982": {
+		"Type": "TRice",
+		"Strg": "att:🐁 Blink LEDs cycle\\n"
+	},
+	"2276": {
+		"Type": "TRice",
+		"Strg": "att:🐁 Speedy Gonzales a  32-bit time stamp\\n"
+	},
+	"2422": {
+		"Type": "TRice",
+		"Strg": "info:PROGTOMATA2000\\n"
+	},
+	"2795": {
+		"Type": "TRICE",
+		"Strg": "info:PROGTOMATA2000\\n"
+	},
+	"3011": {
+		"Type": "TRice",
+		"Strg": "info: 🐁 PROGTOMATA2000 System initialized\\n"
+	},
+	"3251": {
+		"Type": "TRice",
+		"Strg": "LED1 OFF"
+	},
+	"3406": {
+		"Type": "TRICE",
+		"Strg": "LED1 OFF"
+	},
+	"4217": {
+		"Type": "TRICE",
+		"Strg": "LED2 OFF"
+	},
+	"4237": {
+		"Type": "TRICE32",
+		"Strg": "LED2 OFF"
+	},
+	"4410": {
+		"Type": "TRice",
+		"Strg": "Onboard button pressed"
+	},
+	"4696": {
+		"Type": "TRICE32",
+		"Strg": "Onboard button pressed"
+	},
+	"5023": {
+		"Type": "TRICE",
+		"Strg": "Onboard button pressed"
+	},
+	"5242": {
+		"Type": "TRICE",
+		"Strg": "Reset to minimum delay"
+	},
+	"5517": {
+		"Type": "TRICE",
+		"Strg": "Blink LEDs cycle"
+	},
+	"5816": {
+		"Type": "TRICE",
+		"Strg": "LED1 ON"
+	},
+	"5918": {
+		"Type": "TRICE32",
+		"Strg": "Reset to minimum delay"
+	},
+	"6122": {
+		"Type": "TRice",
+		"Strg": "att:🐁 Speedy Gonzales a  32-bit time stamp\\n"
+	},
+	"6359": {
+		"Type": "TRICE32",
+		"Strg": "LED1 OFF"
+	},
+	"6413": {
+		"Type": "TRice",
+		"Strg": "Reset to minimum delay"
+	},
+	"6531": {
+		"Type": "TRice",
+		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
+	},
+	"6874": {
+		"Type": "TRICE",
+		"Strg": "LED2 OFF"
+	},
+	"7552": {
+		"Type": "TRice",
+		"Strg": "LED2 OFF"
+	},
+	"7563": {
+		"Type": "TRICE32",
+		"Strg": "LED1 ON"
+	},
+	"7664": {
+		"Type": "TRICE32",
+		"Strg": "Blink LEDs cycle"
+	}
+}

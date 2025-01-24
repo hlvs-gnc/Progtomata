@@ -13,12 +13,11 @@
  */
 
 #include <trace.h>
-#include <uart_driver.h>
 
 /*!
  * \brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
  */
-#define TRICE_TASK_INTERVAL (1000)
+#define TRICE_TASK_INTERVAL (100)
 
 /*!
  * \brief Stack size and priority for the Trice task.
@@ -88,8 +87,8 @@ void TraceInit(void) {
 
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
-    xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL, 1,
-                      traceTaskStack, &traceTaskBuffer);
+    xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL,
+                      configTIMER_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }
