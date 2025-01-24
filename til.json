@@ -1,11 +1,31 @@
 {
+	"1111": {
+		"Type": "TRice",
+		"Strg": "Audio codec initialization failed!\\n"
+	},
+	"1234": {
+		"Type": "TRice",
+		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
+	},
+	"1539": {
+		"Type": "TRice",
+		"Strg": "error:Test playback failed\\n"
+	},
 	"2089": {
 		"Type": "TRice",
 		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
 	},
+	"2542": {
+		"Type": "TRice",
+		"Strg": "error: Semaphore creation failed\\n"
+	},
 	"3996": {
 		"Type": "TRice",
 		"Strg": "LED2 OFF\\n"
+	},
+	"4444": {
+		"Type": "TRice",
+		"Strg": "error: Test playback failed\\n"
 	},
 	"4528": {
 		"Type": "TRice",
@@ -19,9 +39,17 @@
 		"Type": "TRice",
 		"Strg": "LED2 OFF\\n"
 	},
+	"5254": {
+		"Type": "TRice",
+		"Strg": "msg: Audio setup complete\\n"
+	},
 	"5676": {
 		"Type": "TRice",
 		"Strg": "Onboard button pressed\\n"
+	},
+	"5678": {
+		"Type": "TRice",
+		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
 	},
 	"6226": {
 		"Type": "TRice",
@@ -35,9 +63,17 @@
 		"Type": "TRice",
 		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
 	},
+	"7317": {
+		"Type": "TRice",
+		"Strg": "msg: Audio codec initialization failed\\n"
+	},
 	"7369": {
 		"Type": "TRice",
 		"Strg": "LED2 ON\\n"
+	},
+	"7714": {
+		"Type": "TRice",
+		"Strg": "msg: Audio codec initialization failed!\\n"
 	},
 	"7750": {
 		"Type": "TRice",

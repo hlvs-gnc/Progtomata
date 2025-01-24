@@ -27,6 +27,12 @@
 /// @brief Stack size for the blink task in bytes
 #define BLINK_TASK_STACK_SIZE 256
 
+/// @brief Stack size for the playback task in bytes
+#define PLAYBACK_TASK_STACK_SIZE 512
+
+/// @brief Stack size for the modify task in bytes
+#define MODIFY_TASK_STACK_SIZE 512
+
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
 static uint32_t kBlinkStep = 10, kBlinkDelay = 50;
@@ -41,9 +47,24 @@ StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
 /// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t buttonTaskBuffer CCM_RAM;
 
+TaskHandle_t buttonTaskHandle;
+
 /// @brief Stack memory allocation for the blink task stored in CCM
 StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
 /// @brief Task control block (TCB) for the blink task stored in CCM
 StaticTask_t blinkTaskBuffer CCM_RAM;
+TaskHandle_t blinkTaskHandle;
+
+/// @brief Stack memory allocation for the playback task stored in CCM
+StackType_t playbackTaskStack[PLAYBACK_TASK_STACK_SIZE] CCM_RAM;
+/// @brief Task control block (TCB) for the playback task stored in CCM
+StaticTask_t playbackTaskBuffer CCM_RAM;
+TaskHandle_t playbackTaskHandle;
+
+/// @brief Stack memory allocation for the modify task stored in CCM
+StackType_t modifyTaskStack[MODIFY_TASK_STACK_SIZE] CCM_RAM;
+/// @brief Task control block (TCB) for the modify task stored in CCM
+StaticTask_t modifyTaskBuffer CCM_RAM;
+TaskHandle_t modifyTaskHandle;
 
 #endif  // PROGTOMATA_SYSTEM_H_
