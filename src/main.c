@@ -123,8 +123,8 @@ int main(void) {
   LCD_WriteString("*PROGTOMATA2000*");
 
   TraceInit();
-  
-	TRice(iD(6531), "info: 🐛 PROGTOMATA2000 System initialized\n");
+
+  TRice(iD(7167), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   // Create button task
   xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
@@ -133,7 +133,7 @@ int main(void) {
   // Create blink task
   xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
                     blinkTaskStack, &blinkTaskBuffer);
-  
+
   vTaskStartScheduler();
 
   // This shall never return
@@ -159,10 +159,8 @@ void vButtonTask(void *p) {
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
-      // uart_print("Onboard button pressed\r\n");
-      // uart_print("Reset to minimum delay\r\n\n");
-      TRice(iD(4410), "Onboard button pressed");
-      TRice(iD(6413), "Reset to minimum delay");
+      TRice(iD(5676), "Onboard button pressed\n");
+      TRice(iD(4528), "Reset blink to minimum delay\n");
     }
     prevStatePA0 = currentStatePA0;
 
@@ -171,13 +169,11 @@ void vButtonTask(void *p) {
         !led_state[0]) {
       GPIO_SetBits(GPIOD, GPIO_Pin_5);  // Turn ON LED1 (PD5)
       led_state[0] = true;
-      // uart_print("LED1 ON\r\n");
-      TRice(iD(1086), "LED1 ON");
+      TRice(iD(6959), "LED1 ON\n");
     } else if (currentStatePD1 == Bit_RESET && led_state[0]) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_5);  // Turn OFF LED1 (PD5)
       led_state[0] = false;
-      // uart_print("LED1 OFF\r\n");
-      TRice(iD(3251), "LED1 OFF");
+      TRice(iD(7750), "LED1 OFF\n");
     }
     prevStatePD1 = currentStatePD1;
 
@@ -186,14 +182,12 @@ void vButtonTask(void *p) {
         !led_state[1]) {
       GPIO_SetBits(GPIOD, GPIO_Pin_6);  // Turn ON LED2 (PD6)
       led_state[1] = true;
-      // uart_print("LED2 ON\r\n");
-      TRice(iD(1014), "LED2 OFF");
+      TRice(iD(7369), "LED2 ON\n");
 
     } else if (currentStatePD2 == Bit_RESET && led_state[1]) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_6);  // Turn OFF LED1 (PD5)
       led_state[1] = false;
-      //uart_print("LED2 OFF\r\n");
-      TRice(iD(7552), "LED2 OFF");
+      TRice(iD(3996), "LED2 OFF\n");
     }
     prevStatePD2 = currentStatePD2;
 
@@ -237,8 +231,7 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
     }
-    TRice(iD(1982), "att:🐁 Blink LEDs cycle\n");
-    // uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
+    TRice(iD(2089), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n", kBlinkStep, kBlinkDelay);
   }
 
   vTaskDelete(NULL);
