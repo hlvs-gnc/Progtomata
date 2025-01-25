@@ -72,14 +72,15 @@
 
 // Audio samples
 #include <fxTom.h>
-#include <hihat.h>
-#include <kick.h>
 #include <snare.h>
+#include <kick.h>
+#include <hihat.h>
 
 #define SOUNDSIZE (6044)    // size of sample16bits ie snare
 #define SOUNDSIZE2 (12701)  // size of fxTom
 #define SOUNDSIZE3 (12690)  // size of kick
 #define SOUNDSIZE4 (14736)  // size of hihat
+// TOTAL SIZE: 46171
 #define BUFFERSIZE (32768)
 
 int16_t playbackBuffer[32768];
@@ -164,12 +165,12 @@ uint32_t Codec_TIMEOUT_UserCallback(void) {
 }
 
 // Audio sample
-extern const uint16_t sampleAudio[]; // Example audio sample array (must be provided externally)
-extern const uint32_t sampleAudioSize; // Size of the audio sample
+extern const uint16_t
+    sampleAudio[];  // Example audio sample array (must be provided externally)
+extern const uint32_t sampleAudioSize;  // Size of the audio sample
 
 void SystemClock_Config(void);
 void Delay(volatile uint32_t delay);
-
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -181,7 +182,8 @@ void SystemClock_Config(void) {
   // Wait for HSE to be ready
   while (RCC_WaitForHSEStartUp() == ERROR);
 
-  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7); // PLL config: HSE, VCO 336MHz
+  // PLL config: HSE, VCO 336MHz
+  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);  
   RCC_PLLCmd(ENABLE);
 
   // Wait for PLL to be ready
@@ -239,18 +241,22 @@ int main(void) {
   TRice(iD(5254), "msg: Audio setup complete\n");
 
   // Create button task
-  buttonTaskHandle = xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
-                    buttonTaskStack, &buttonTaskBuffer);
+  buttonTaskHandle =
+      xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL,
+                        1, buttonTaskStack, &buttonTaskBuffer);
 
   // Create blink task
-  blinkTaskHandle = xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
-                    blinkTaskStack, &blinkTaskBuffer);
+  blinkTaskHandle =
+      xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
+                        blinkTaskStack, &blinkTaskBuffer);
 
-  playbackTaskHandle = xTaskCreateStatic(vPlaybackTask, "PlayTask", PLAYBACK_TASK_STACK_SIZE, NULL, 1,
-                    playbackTaskStack, &playbackTaskBuffer);
+  playbackTaskHandle =
+      xTaskCreateStatic(vPlaybackTask, "PlayTask", PLAYBACK_TASK_STACK_SIZE,
+                        NULL, 1, playbackTaskStack, &playbackTaskBuffer);
 
-  modifyTaskHandle = xTaskCreateStatic(vModifyBuffer, "ModifyTask", MODIFY_TASK_STACK_SIZE, NULL, 1,
-                    modifyTaskStack, &modifyTaskBuffer);
+  modifyTaskHandle =
+      xTaskCreateStatic(vModifyBuffer, "ModifyTask", MODIFY_TASK_STACK_SIZE,
+                        NULL, 1, modifyTaskStack, &modifyTaskBuffer);
 
   // vTaskSuspend(vModifyBuffer);
   vTaskStartScheduler();  // This shall never return
@@ -285,7 +291,7 @@ void vButtonTask(void *p) {
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
       playbackBuffer[0] = snare[0];  // Example: Load snare sound
-      xSemaphoreGive(xSemaphore);   // Signal playback task
+      xSemaphoreGive(xSemaphore);    // Signal playback task
       TRice(iD(1234), "Button 1 pressed: Triggering playback for Sound 1\n");
     }
     prevStatePD1 = currentStatePD1;
@@ -294,7 +300,7 @@ void vButtonTask(void *p) {
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       // Trigger playback task for Sound 2
       playbackBuffer[0] = fxTom[0];  // Example: Load fxTom sound
-      xSemaphoreGive(xSemaphore);   // Signal playback task
+      xSemaphoreGive(xSemaphore);    // Signal playback task
       TRice(iD(5678), "Button 2 pressed: Triggering playback for Sound 2\n");
     }
     prevStatePD2 = currentStatePD2;
@@ -391,7 +397,7 @@ void vModifyBuffer(void *pvparameters) {
           }
         }
         break;
-      
+
       case (1):
         for (i = 0; i < 32768; ++i) {
           playbackBuffer[i] = 0;
