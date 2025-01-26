@@ -82,6 +82,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* Add a section for the playback buffer in FLASH */
+  .audio_buffer :
+  {
+    _audio_buffer_start = .;       /* Start address of the section */
+    KEEP(*(.audio_buffer))         /* Keep all .audio_buffer sections */
+    _audio_buffer_end = .;         /* End address of the section */
+  } >FLASH
+
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
   .ARM : {
     __exidx_start = .;

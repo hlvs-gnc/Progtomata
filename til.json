@@ -1,82 +1,82 @@
 {
-	"1055": {
+	"1007": {
 		"Type": "TRice",
-		"Strg": "Onboard button pressed\\n"
+		"Strg": "error: Direct Mode Error\\n"
 	},
-	"1315": {
+	"1515": {
 		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_HalfTransfer_CallBack\\n"
+		"Strg": "error: EVAL_AUDIO_Error_CallBack. Position: %d\\n"
 	},
-	"2005": {
+	"2241": {
 		"Type": "TRice",
-		"Strg": "error: FIFO Error occurred\\n"
+		"Strg": "EVAL_AUDIO_TransferComplete_CallBack. pBuffer: %d; Size: %d\\n"
 	},
-	"2242": {
-		"Type": "TRice",
-		"Strg": "error: Semaphore creation failed\\n"
-	},
-	"2565": {
-		"Type": "TRice",
-		"Strg": "error: Transfer Error occurred\\n"
-	},
-	"2617": {
-		"Type": "TRice",
-		"Strg": "error: Direct Mode Error occurred\\n"
-	},
-	"2837": {
-		"Type": "TRice",
-		"Strg": "error: Direct Mode Error occurred\\n"
-	},
-	"2965": {
-		"Type": "TRice",
-		"Strg": "Codec_TIMEOUT_UserCallback\\n"
-	},
-	"3348": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
-	},
-	"3461": {
-		"Type": "TRice",
-		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
-	},
-	"3512": {
-		"Type": "TRice",
-		"Strg": "Reset blink to minimum delay\\n"
-	},
-	"3666": {
-		"Type": "TRice",
-		"Strg": "msg: Audio codec initialization failed\\n"
-	},
-	"3902": {
-		"Type": "TRice",
-		"Strg": "error: EVAL_AUDIO_Error_CallBack. Position: %p\\n"
-	},
-	"4194": {
+	"2757": {
 		"Type": "TRice",
 		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
 	},
-	"4305": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_TransferComplete_CallBack\\n"
-	},
-	"5146": {
-		"Type": "TRice",
-		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
-	},
-	"5877": {
-		"Type": "TRice",
-		"Strg": "error: FIFO Error occurred\\n"
-	},
-	"6138": {
-		"Type": "TRice",
-		"Strg": "msg: Audio setup complete\\n"
-	},
-	"6317": {
+	"3047": {
 		"Type": "TRice",
 		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
 	},
-	"6495": {
+	"3148": {
 		"Type": "TRice",
-		"Strg": "error: Transfer Error occurred\\n"
+		"Strg": "msg: Audio setup complete\\n"
+	},
+	"3190": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_HalfTransfer_CallBack\\n"
+	},
+	"4022": {
+		"Type": "TRice",
+		"Strg": "error: Direct Mode Error\\n"
+	},
+	"4023": {
+		"Type": "TRice",
+		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+	},
+	"4175": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
+	},
+	"4368": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
+	},
+	"4793": {
+		"Type": "TRice",
+		"Strg": "Reset blink to minimum delay\\n"
+	},
+	"5209": {
+		"Type": "TRice",
+		"Strg": "error: Semaphore creation failed\\n"
+	},
+	"5236": {
+		"Type": "TRice",
+		"Strg": "msg: Audio codec initialization failed\\n"
+	},
+	"5253": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
+	},
+	"5841": {
+		"Type": "TRice",
+		"Strg": "Onboard button pressed\\n"
+	},
+	"6516": {
+		"Type": "TRice",
+		"Strg": "error: FIFO Error\\n"
+	},
+	"7076": {
+		"Type": "TRice",
+		"Strg": "Codec_TIMEOUT_UserCallback\\n"
+	},
+	"7370": {
+		"Type": "TRice",
+		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
+	},
+	"7885": {
+		"Type": "TRice",
+		"Strg": "error: FIFO Error\\n"
 	}
 }
