@@ -138,6 +138,9 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 ===============================================================================================================================*/
 
 /* Includes ------------------------------------------------------------------*/
+
+#include <trice.h>
+
 #include "stm32f4_discovery_audio_codec.h"
 
 #include "misc.h"
@@ -541,19 +544,29 @@ static void Audio_MAL_IRQHandler(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-  /* FIFO Error interrupt */
-  if ((DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE) !=
-       RESET) ||
-      (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE) !=
-       RESET) ||
-      (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
-       RESET))
+  uint32_t dmaErrorFlags = 0;
 
-  {
+  /* FIFO Error interrupt */
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
+    TRice(iD(7907), "Transfer Error occurred\n");
+    dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
+  }
+
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
+    TRice(iD(7816), "FIFO Error occurred\n");
+    dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
+  }
+
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
+    TRice(iD(7978), "Direct Mode Error occurred\n");
+    dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
+  }
+  /* If any errors occurred, invoke the callback and clear the flags */
+  if (dmaErrorFlags != 0) {
     /* Manage the error generated on DMA FIFO: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_Error_CallBack((uint32_t *)&pAddr);
+    EVAL_AUDIO_Error_CallBack((uint32_t *)&CurrentPos);
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE |

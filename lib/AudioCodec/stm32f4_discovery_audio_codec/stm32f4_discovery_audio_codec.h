@@ -70,7 +70,7 @@
 /* #define AUDIO_MAL_DMA_IT_HT_EN */
 
 // Uncomment this line to enable DMA Transfer Error interrupt
-/* #define AUDIO_MAL_DMA_IT_TE_EN */
+#define AUDIO_MAL_DMA_IT_TE_EN
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */

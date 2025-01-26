@@ -1,54 +1,78 @@
 {
-	"1028": {
-		"Type": "TRice",
-		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
-	},
-	"1253": {
-		"Type": "TRice",
-		"Strg": "Reset blink to minimum delay\\n"
-	},
-	"2163": {
-		"Type": "TRice",
-		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
-	},
-	"2498": {
-		"Type": "TRice",
-		"Strg": "Onboard button pressed\\n"
-	},
-	"3188": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_Error_CallBack\\n"
-	},
-	"3401": {
-		"Type": "TRice",
-		"Strg": "error: Semaphore creation failed\\n"
-	},
-	"3487": {
-		"Type": "TRice",
-		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
-	},
-	"3658": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
-	},
-	"3817": {
-		"Type": "TRice",
-		"Strg": "msg: Audio codec initialization failed\\n"
-	},
-	"5285": {
+	"1111": {
 		"Type": "TRice",
 		"Strg": "EVAL_AUDIO_TransferComplete_CallBack\\n"
 	},
-	"6233": {
+	"1772": {
+		"Type": "TRice",
+		"Strg": "Reset blink to minimum delay\\n"
+	},
+	"1779": {
+		"Type": "TRice",
+		"Strg": "Transfer Error occurred\\n"
+	},
+	"2032": {
+		"Type": "TRice",
+		"Strg": "msg: Audio codec initialization failed\\n"
+	},
+	"2376": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_Error_CallBack. Position: %p\\n"
+	},
+	"2630": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
+	},
+	"2790": {
 		"Type": "TRice",
 		"Strg": "Codec_TIMEOUT_UserCallback\\n"
 	},
-	"6300": {
+	"3244": {
+		"Type": "TRice",
+		"Strg": "FIFO Error occurred\\n"
+	},
+	"3821": {
+		"Type": "TRice",
+		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
+	},
+	"4696": {
+		"Type": "TRice",
+		"Strg": "Onboard button pressed\\n"
+	},
+	"4878": {
+		"Type": "TRice",
+		"Strg": "error: Semaphore creation failed\\n"
+	},
+	"4990": {
+		"Type": "TRice",
+		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+	},
+	"5128": {
+		"Type": "TRice",
+		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
+	},
+	"5292": {
+		"Type": "TRice",
+		"Strg": "Direct Mode Error occurred\\n"
+	},
+	"6614": {
 		"Type": "TRice",
 		"Strg": "msg: Audio setup complete\\n"
 	},
-	"7431": {
+	"7555": {
 		"Type": "TRice",
-		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
+	},
+	"7816": {
+		"Type": "TRice",
+		"Strg": "FIFO Error occurred\\n"
+	},
+	"7907": {
+		"Type": "TRice",
+		"Strg": "Transfer Error occurred\\n"
+	},
+	"7978": {
+		"Type": "TRice",
+		"Strg": "Direct Mode Error occurred\\n"
 	}
 }

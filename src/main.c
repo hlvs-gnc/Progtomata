@@ -72,11 +72,11 @@
 
 // Audio samples
 #include <fxTom.h>
-#include <snare.h>
-#include <kick.h>
 #include <hihat.h>
+#include <kick.h>
+#include <snare.h>
 
-#define SOUNDSIZE1 (6044)    // size of snare
+#define SOUNDSIZE1 (6044)   // size of snare
 #define SOUNDSIZE2 (12701)  // size of fxTom
 #define SOUNDSIZE3 (12690)  // size of kick
 #define SOUNDSIZE4 (14736)  // size of hihat
@@ -149,7 +149,7 @@ void SystemClock_Config(void) {
   while (RCC_WaitForHSEStartUp() == ERROR);
 
   // PLL config: HSE, VCO 336MHz
-  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);  
+  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
   RCC_PLLCmd(ENABLE);
 
   // Wait for PLL to be ready
@@ -182,20 +182,20 @@ int main(void) {
 
   TraceInit();
 
-  TRice(iD(3487), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(3821), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   xSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
   if (xSemaphore == NULL) {
     // Handle error: Semaphore creation failed
-    TRice(iD(3401), "error: Semaphore creation failed\n");
+    TRice(iD(4878), "error: Semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, 22050) != 0) {
-    TRice(iD(3817), "msg: Audio codec initialization failed\n");
+    TRice(iD(2032), "msg: Audio codec initialization failed\n");
   }
 
-  TRice(iD(6300), "msg: Audio setup complete\n");
+  TRice(iD(6614), "msg: Audio setup complete\n");
 
   // Create button task
   buttonTaskHandle =
@@ -235,24 +235,24 @@ void vButtonTask(void *p) {
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
-      TRice(iD(2498), "Onboard button pressed\n");
-      TRice(iD(1253), "Reset blink to minimum delay\n");
+      TRice(iD(4696), "Onboard button pressed\n");
+      TRice(iD(1772), "Reset blink to minimum delay\n");
     }
     prevStatePA0 = currentStatePA0;
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
-      TRice(iD(1028), "Button 1 pressed: Triggering playback for Sound 1\n");
-      EVAL_AUDIO_Play((uint16_t *)snare, 6044);
+      TRice(iD(7555), "Button 1 pressed: Triggering playback for Sound 1\n");
+      EVAL_AUDIO_Play((uint16_t *)&snare, 6044 * 2);
     }
     prevStatePD1 = currentStatePD1;
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       // Trigger playback task for Sound 2
-      TRice(iD(7431), "Button 2 pressed: Triggering playback for Sound 2\n");
-      EVAL_AUDIO_Play((uint16_t *)fxTom, 12701);
+      TRice(iD(4990), "Button 2 pressed: Triggering playback for Sound 2\n");
+      EVAL_AUDIO_Play((uint16_t *)&fxTom, 12701 * 2);
     }
     prevStatePD2 = currentStatePD2;
 
@@ -296,7 +296,7 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
     }
-    TRice(iD(2163), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+    TRice(iD(5128), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
           kBlinkStep, kBlinkDelay);
   }
 
@@ -365,7 +365,7 @@ void leds_init(void) {
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(3658), "EVAL_AUDIO_GetSampleCallBack\n");
+  TRice(iD(2630), "EVAL_AUDIO_GetSampleCallBack\n");
   return 1;
 }
 
@@ -374,18 +374,17 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  (void) pBuffer;
-  (void) Size;
+  (void)pBuffer;
+  (void)Size;
 
-  TRice(iD(5285), "EVAL_AUDIO_TransferComplete_CallBack\n");
+  TRice(iD(1111), "EVAL_AUDIO_TransferComplete_CallBack\n");
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
-  (void) pData;
-  TRice(iD(3188), "EVAL_AUDIO_Error_CallBack\n");
+  TRice(iD(2376), "EVAL_AUDIO_Error_CallBack. Position: %p\n", pData);
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(6233), "Codec_TIMEOUT_UserCallback\n");
+  TRice(iD(2790), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }
