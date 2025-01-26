@@ -392,23 +392,25 @@ void leds_init(void) {
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-uint16_t EVAL_AUDIO_GetSampleCallBack(void) { return 1; }
+uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
+  TRice(iD(1975), "EVAL_AUDIO_GetSampleCallBack\n");
+  return 1;
+}
 
 /*
  * Called when buffer has been played out
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  vTaskResume(modifyTaskHandle);
-  xSemaphoreGive(xSemaphore);
   status = 0;
+  TRice(iD(3989), "EVAL_AUDIO_TransferComplete_CallBack\n");
 }
 
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {}
-
-void EVAL_AUDIO_Error_CallBack(void *pData) { while (1); }
+void EVAL_AUDIO_Error_CallBack(void *pData) {
+  TRice(iD(6126), "EVAL_AUDIO_Error_CallBack\n");
+}
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  while (1);
+  TRice(iD(4868), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }

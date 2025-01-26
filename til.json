@@ -11,6 +11,10 @@
 		"Type": "TRice",
 		"Strg": "error:Test playback failed\\n"
 	},
+	"1975": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
+	},
 	"2089": {
 		"Type": "TRice",
 		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
@@ -18,6 +22,10 @@
 	"2542": {
 		"Type": "TRice",
 		"Strg": "error: Semaphore creation failed\\n"
+	},
+	"3989": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_TransferComplete_CallBack\\n"
 	},
 	"3996": {
 		"Type": "TRice",
@@ -30,6 +38,10 @@
 	"4528": {
 		"Type": "TRice",
 		"Strg": "Reset blink to minimum delay\\n"
+	},
+	"4868": {
+		"Type": "TRice",
+		"Strg": "Codec_TIMEOUT_UserCallback\\n"
 	},
 	"4877": {
 		"Type": "TRice",
@@ -50,6 +62,10 @@
 	"5678": {
 		"Type": "TRice",
 		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+	},
+	"6126": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_Error_CallBack\\n"
 	},
 	"6226": {
 		"Type": "TRice",
