@@ -82,14 +82,6 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  /* Add audio_samples section to FLASH */
-  .audio_samples :
-  {
-    . = ALIGN(4);
-    KEEP(*(.audio_samples))  /* Keep all data in .audio_samples */
-    . = ALIGN(4);
-  } >FLASH
-
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
   .ARM : {
     __exidx_start = .;

@@ -76,14 +76,14 @@
 #include <kick.h>
 #include <hihat.h>
 
-#define SOUNDSIZE (6044)    // size of sample16bits ie snare
+#define SOUNDSIZE1 (6044)    // size of snare
 #define SOUNDSIZE2 (12701)  // size of fxTom
 #define SOUNDSIZE3 (12690)  // size of kick
 #define SOUNDSIZE4 (14736)  // size of hihat
-// TOTAL SIZE: 46171
+// TOTAL SIZE: 92,342
 #define BUFFERSIZE (32768)
 
-int16_t playbackBuffer[32768];
+int16_t playbackBuffer[BUFFERSIZE];
 
 uint64_t u64IdleTicksCnt = 0;  // Counts when the OS has no task to execute.
 uint64_t tickTime = 0;         // Counts OS ticks (default = 1000Hz).
@@ -143,34 +143,7 @@ void config_userbutton(void);
  */
 void leds_init(void);
 
-uint16_t EVAL_AUDIO_GetSampleCallBack(void) { return 1; }
-
-/*
- * Called when buffer has been played out
- * Releases semaphore and wakes up task which modifies the buffer
- */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  vTaskResume(modifyTaskHandle);
-  xSemaphoreGive(xSemaphore);
-  status = 0;
-}
-
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {}
-
-void EVAL_AUDIO_Error_CallBack(void *pData) { while (1); }
-
-uint32_t Codec_TIMEOUT_UserCallback(void) {
-  while (1);
-  return 1;
-}
-
-// Audio sample
-extern const uint16_t
-    sampleAudio[];  // Example audio sample array (must be provided externally)
-extern const uint32_t sampleAudioSize;  // Size of the audio sample
-
 void SystemClock_Config(void);
-void Delay(volatile uint32_t delay);
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -224,15 +197,6 @@ int main(void) {
     TRice(iD(2542), "error: Semaphore creation failed\n");
   }
 
-  uint16_t i = 0;
-  for (; i < 32768; ++i) {
-    if (i < SOUNDSIZE) {
-      playbackBuffer[i] = snare[i];
-    } else {
-      playbackBuffer[i] = 0;
-    }
-  }
-
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, 22050) != 0) {
     TRice(iD(7317), "msg: Audio codec initialization failed\n");
@@ -254,11 +218,6 @@ int main(void) {
       xTaskCreateStatic(vPlaybackTask, "PlayTask", PLAYBACK_TASK_STACK_SIZE,
                         NULL, 1, playbackTaskStack, &playbackTaskBuffer);
 
-  modifyTaskHandle =
-      xTaskCreateStatic(vModifyBuffer, "ModifyTask", MODIFY_TASK_STACK_SIZE,
-                        NULL, 1, modifyTaskStack, &modifyTaskBuffer);
-
-  // vTaskSuspend(vModifyBuffer);
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
@@ -290,7 +249,15 @@ void vButtonTask(void *p) {
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
-      playbackBuffer[0] = snare[0];  // Example: Load snare sound
+      int i = 0;
+      for (; i < BUFFERSIZE; ++i) {
+        if (i < SOUNDSIZE1) {
+          playbackBuffer[i] = (int16_t) (snare[i]- 32768);
+        } else {
+          playbackBuffer[i] = 0;
+        }
+      }
+
       xSemaphoreGive(xSemaphore);    // Signal playback task
       TRice(iD(1234), "Button 1 pressed: Triggering playback for Sound 1\n");
     }
@@ -299,7 +266,14 @@ void vButtonTask(void *p) {
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       // Trigger playback task for Sound 2
-      playbackBuffer[0] = fxTom[0];  // Example: Load fxTom sound
+      int i = 0;
+      for (; i < BUFFERSIZE; ++i) {
+        if (i < SOUNDSIZE2) {
+          playbackBuffer[i] = (int16_t) (fxTom[i]- 32768);
+        } else {
+          playbackBuffer[i] = 0;
+        }
+      }
       xSemaphoreGive(xSemaphore);    // Signal playback task
       TRice(iD(5678), "Button 2 pressed: Triggering playback for Sound 2\n");
     }
@@ -370,91 +344,6 @@ void vPlaybackTask(void *pvparameters) {
   }
 }
 
-/*
- * Loads sound into the playback buffer
- * First loads sound into the array
- * Then applies effects to it if they are selected
- *
- * Display active effect on LCD screen after modifying playback buffer
- */
-void vModifyBuffer(void *pvparameters) {
-  uint16_t i = 0;
-  uint8_t number = 1;
-
-  while (1) {
-    switch (number) {
-      case (0):
-        for (i = 0; i < 32768; ++i) {
-          playbackBuffer[i] = 0;
-          if (0x0001 && i < SOUNDSIZE)
-            playbackBuffer[i] += (int16_t)snare[i] / 4;
-
-          if (0x0002 && i < SOUNDSIZE2)
-            playbackBuffer[i] += (int16_t)fxTom[i] / 4;
-
-          if (i < 100 && i > 0) {
-            playbackBuffer[i] = playbackBuffer[i] / (100 - i);
-          }
-        }
-        break;
-
-      case (1):
-        for (i = 0; i < 32768; ++i) {
-          playbackBuffer[i] = 0;
-          if (0x0010 && i < SOUNDSIZE)
-            playbackBuffer[i] += (int16_t)snare[i] / 4;
-
-          if (0x0020 && i < SOUNDSIZE2)
-            playbackBuffer[i] += (int16_t)fxTom[i] / 4;
-
-          if (i < 100 && i > 0) {
-            playbackBuffer[i] = playbackBuffer[i] / (100 - i);
-          }
-        }
-        break;
-
-      case (2):
-        for (i = 0; i < 32768; ++i) {
-          playbackBuffer[i] = 0;
-          if (0x0100 && i < SOUNDSIZE)
-            playbackBuffer[i] += (int16_t)snare[i] / 4;
-
-          if (0x0200 && i < SOUNDSIZE2)
-            playbackBuffer[i] += (int16_t)fxTom[i] / 4;
-
-          if (i < 100 && i > 0) {
-            playbackBuffer[i] = playbackBuffer[i] / (100 - i);
-          }
-        }
-        break;
-
-      case (3):
-        for (i = 0; i < 32768; ++i) {
-          playbackBuffer[i] = 0;
-          if (0x1000 && i < SOUNDSIZE)
-            playbackBuffer[i] += (int16_t)snare[i] / 4;
-
-          if (0x2000 && i < SOUNDSIZE2)
-            playbackBuffer[i] += (int16_t)fxTom[i] / 4;
-
-          if (i < 100 && i > 0) {
-            playbackBuffer[i] = playbackBuffer[i] / (100 - i);
-          }
-        }
-        break;
-    }  // end switch
-
-    ++number;
-    if (number > beats) {
-      number = 0;
-    }
-
-    i = 0;
-
-    vTaskSuspend(modifyTaskHandle);
-  }
-}
-
 void config_userbutton(void) {
   // Enable clock for GPIOD
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
@@ -501,4 +390,25 @@ void leds_init(void) {
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
+}
+
+uint16_t EVAL_AUDIO_GetSampleCallBack(void) { return 1; }
+
+/*
+ * Called when buffer has been played out
+ * Releases semaphore and wakes up task which modifies the buffer
+ */
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+  vTaskResume(modifyTaskHandle);
+  xSemaphoreGive(xSemaphore);
+  status = 0;
+}
+
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {}
+
+void EVAL_AUDIO_Error_CallBack(void *pData) { while (1); }
+
+uint32_t Codec_TIMEOUT_UserCallback(void) {
+  while (1);
+  return 1;
 }
