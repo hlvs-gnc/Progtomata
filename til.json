@@ -1,98 +1,54 @@
 {
-	"1111": {
-		"Type": "TRice",
-		"Strg": "Audio codec initialization failed!\\n"
-	},
-	"1234": {
+	"1028": {
 		"Type": "TRice",
 		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
 	},
-	"1539": {
-		"Type": "TRice",
-		"Strg": "error:Test playback failed\\n"
-	},
-	"1975": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
-	},
-	"2089": {
-		"Type": "TRice",
-		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
-	},
-	"2542": {
-		"Type": "TRice",
-		"Strg": "error: Semaphore creation failed\\n"
-	},
-	"3989": {
-		"Type": "TRice",
-		"Strg": "EVAL_AUDIO_TransferComplete_CallBack\\n"
-	},
-	"3996": {
-		"Type": "TRice",
-		"Strg": "LED2 OFF\\n"
-	},
-	"4444": {
-		"Type": "TRice",
-		"Strg": "error: Test playback failed\\n"
-	},
-	"4528": {
+	"1253": {
 		"Type": "TRice",
 		"Strg": "Reset blink to minimum delay\\n"
 	},
-	"4868": {
+	"2163": {
 		"Type": "TRice",
-		"Strg": "Codec_TIMEOUT_UserCallback\\n"
+		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
 	},
-	"4877": {
-		"Type": "TRice",
-		"Strg": "Reset to minimum delay\\n"
-	},
-	"5065": {
-		"Type": "TRice",
-		"Strg": "LED2 OFF\\n"
-	},
-	"5254": {
-		"Type": "TRice",
-		"Strg": "msg: Audio setup complete\\n"
-	},
-	"5676": {
+	"2498": {
 		"Type": "TRice",
 		"Strg": "Onboard button pressed\\n"
 	},
-	"5678": {
-		"Type": "TRice",
-		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
-	},
-	"6126": {
+	"3188": {
 		"Type": "TRice",
 		"Strg": "EVAL_AUDIO_Error_CallBack\\n"
 	},
-	"6226": {
+	"3401": {
 		"Type": "TRice",
-		"Strg": "att:🐁 Blink LEDs cycle\\n"
+		"Strg": "error: Semaphore creation failed\\n"
 	},
-	"6959": {
-		"Type": "TRice",
-		"Strg": "LED1 ON\\n"
-	},
-	"7167": {
+	"3487": {
 		"Type": "TRice",
 		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
 	},
-	"7317": {
+	"3658": {
+		"Type": "TRice",
+		"Strg": "EVAL_AUDIO_GetSampleCallBack\\n"
+	},
+	"3817": {
 		"Type": "TRice",
 		"Strg": "msg: Audio codec initialization failed\\n"
 	},
-	"7369": {
+	"5285": {
 		"Type": "TRice",
-		"Strg": "LED2 ON\\n"
+		"Strg": "EVAL_AUDIO_TransferComplete_CallBack\\n"
 	},
-	"7714": {
+	"6233": {
 		"Type": "TRice",
-		"Strg": "msg: Audio codec initialization failed!\\n"
+		"Strg": "Codec_TIMEOUT_UserCallback\\n"
 	},
-	"7750": {
+	"6300": {
 		"Type": "TRice",
-		"Strg": "LED1 OFF\\n"
+		"Strg": "msg: Audio setup complete\\n"
+	},
+	"7431": {
+		"Type": "TRice",
+		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
 	}
 }

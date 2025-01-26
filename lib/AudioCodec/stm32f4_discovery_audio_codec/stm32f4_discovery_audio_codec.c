@@ -376,10 +376,10 @@ uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size) {
   Codec_Play();
 
   /* Update the Media layer and enable it for play */
-  Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(Size / 4)));
+  Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(Size)));
 
   /* Update the remaining number of data to be played */
-  AudioRemSize = (Size / 2) - DMA_MAX(AudioTotalSize);
+  AudioRemSize = Size - DMA_MAX(AudioTotalSize);
 
   /* Update the current audio pointer position */
   CurrentPos = pBuffer + DMA_MAX(AudioTotalSize);
@@ -1472,7 +1472,7 @@ void Audio_MAL_Play(uint32_t Addr, uint32_t Size) {
   if (CurrAudioInterface == AUDIO_INTERFACE_I2S) {
     /* Configure the buffer address and size */
     DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)Addr;
-    DMA_InitStructure.DMA_BufferSize = (uint32_t)Size / 2;
+    DMA_InitStructure.DMA_BufferSize = (uint32_t)Size;
 
     /* Configure the DMA Stream with the new parameters */
     DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);

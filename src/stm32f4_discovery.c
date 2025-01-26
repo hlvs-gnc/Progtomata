@@ -84,7 +84,7 @@ const uint8_t BUTTON_PORT_SOURCE[BUTTONn] = {USER_BUTTON_EXTI_PORT_SOURCE};
 const uint8_t BUTTON_PIN_SOURCE[BUTTONn] = {USER_BUTTON_EXTI_PIN_SOURCE }; 
 const uint8_t BUTTON_IRQn[BUTTONn] = {USER_BUTTON_EXTI_IRQn };
 
-NVIC_InitTypeDef   NVIC_InitStructure;
+NVIC_InitTypeDef NVIC_InitStructure;
 
 /**
   * @}
