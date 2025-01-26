@@ -522,7 +522,7 @@ static void Audio_MAL_IRQHandler(void) {
     /* Manage the remaining file size and new address offset: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_TransferComplete_CallBack(pAddr, Size);
+    EVAL_AUDIO_TransferComplete_CallBack(pAddr, AudioRemSize);
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
@@ -536,7 +536,7 @@ static void Audio_MAL_IRQHandler(void) {
     /* Manage the remaining file size and new address offset: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_HalfTransfer_CallBack((uint32_t)pAddr, Size);
+    EVAL_AUDIO_HalfTransfer_CallBack((uint32_t)CurrentPos, AudioRemSize);
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_HT);
@@ -548,17 +548,17 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* FIFO Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
-    TRice(iD(7907), "Transfer Error occurred\n");
+    TRice(iD(2565), "error: Transfer Error occurred\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
-    TRice(iD(7816), "FIFO Error occurred\n");
+    TRice(iD(5877), "error: FIFO Error occurred\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
-    TRice(iD(7978), "Direct Mode Error occurred\n");
+    TRice(iD(2617), "error: Direct Mode Error occurred\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
   }
   /* If any errors occurred, invoke the callback and clear the flags */
