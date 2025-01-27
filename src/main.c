@@ -76,63 +76,6 @@
 #include <kick_22050hz.h>
 #include <openhat_22050hz.h>
 
-#define SOUNDSIZE1 (6918)  // size of kick
-#define SOUNDSIZE2 (14736)  // size of open hat
-
-#define BUFFERSIZE (16384)
-
-uint16_t playbackBuffer[BUFFERSIZE] = {0};
-
-// Declare a StaticSemaphore_t variable
-StaticSemaphore_t xSemaphoreBuffer;
-
-// Create the binary semaphore
-SemaphoreHandle_t xSemaphorePlayback;
-
-uint16_t playback_delay = 500;  // interval delay in ms
-
-/**
- * @brief Handles button press events to adjust LED blink delay.
- *
- * Monitors the state of the user button connected to GPIOA Pin 0.
- * If a button press is detected, it resets the blink delay to its
- * minimum value. Designed as a FreeRTOS task that runs continuously.
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vButtonTask(void *p);
-
-/**
- * @brief Controls LED blinking behavior with variable delay.
- *
- * Cycles through four LEDs connected to GPIOD Pins 12, 13, 14, and 15.
- * Adjusts the blinking delay dynamically within defined limits.
- * Runs as a FreeRTOS task, demonstrating time-based scheduling.
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vBlinkTask(void *p);
-
-void vPlaybackTask(void *pvparameters);
-
-/**
- * @brief Configures the user button GPIO (PA0) as an input.
- *
- * Initializes GPIO settings, enabling input mode without pull-up or
- * pull-down resistors. Prepares the pin to detect user button presses.
- */
-void config_userbutton(void);
-
-/**
- * @brief Initializes GPIO pins connected to LEDs.
- *
- * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
- * proper configuration for controlling LED states.
- */
-void leds_init(void);
-
-void SystemClock_Config(void);
-
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
  */
@@ -215,20 +158,26 @@ int main(void) {
 
   // Create button task
   buttonTaskHandle =
-      xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL,
-                        1, buttonTaskStack, &buttonTaskBuffer);
+      xTaskCreateStatic(vButtonTask, "ButtonTask",
+                        BUTTON_TASK_STACK_SIZE, NULL,
+                        1, buttonTaskStack,
+                        &buttonTaskBuffer);
 
   // Create blink task
-  /*
   blinkTaskHandle =
-      xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
-                        blinkTaskStack, &blinkTaskBuffer);
-  */
+      xTaskCreateStatic(vBlinkTask, "BlinkTask",
+                        BLINK_TASK_STACK_SIZE, NULL,
+                        1, blinkTaskStack,
+                        &blinkTaskBuffer);
 
+  // Ignore playback task for now
+/*
   playbackTaskHandle =
-      xTaskCreateStatic(vPlaybackTask, "PlayTask", PLAYBACK_TASK_STACK_SIZE,
-                        NULL, 1, playbackTaskStack, &playbackTaskBuffer);
-
+      xTaskCreateStatic(vPlaybackTask, "PlayTask",
+                        PLAYBACK_TASK_STACK_SIZE, NULL,
+                        1, playbackTaskStack,
+                        &playbackTaskBuffer);
+*/
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
@@ -341,9 +290,8 @@ void vBlinkTask(void *p) {
   vTaskDelete(NULL);
 }
 
+// NOTE: ignore for now
 /*
- * Plays sound
- */
 void vPlaybackTask(void *pvparameters) {
   for (;;) {
     // Wait for the semaphore to be given
@@ -354,6 +302,7 @@ void vPlaybackTask(void *pvparameters) {
     vTaskDelay(playback_delay / portTICK_RATE_MS);
   }
 }
+ */
 
 void config_userbutton(void) {
   // Enable clock for GPIOD
