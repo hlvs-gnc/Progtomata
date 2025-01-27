@@ -139,9 +139,9 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 
 /* Includes ------------------------------------------------------------------*/
 
-#include <trice.h>
-
 #include "stm32f4_discovery_audio_codec.h"
+
+#include <trice.h>
 
 #include "misc.h"
 #include "stm32f4xx_dac.h"
@@ -153,6 +153,8 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 /** @addtogroup Utilities
  * @{
  */
+/* Uncomment this define to disable repeat option */
+// #define PLAY_REPEAT_OFF
 
 /** @addtogroup STM32F4_DISCOVERY
  * @{
@@ -216,12 +218,12 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 DMA_InitTypeDef DMA_InitStructure;
 DMA_InitTypeDef AUDIO_MAL_DMA_InitStructure;
 
-uint32_t AudioTotalSize =
-    0xFFFF; /* This variable holds the total size of the audio file */
-uint32_t AudioRemSize =
-    0xFFFF; /* This variable holds the remaining data in audio file */
-uint16_t
-    *CurrentPos; /* This variable holds the current position of audio pointer */
+/* This variable holds the total size of the audio file */
+uint32_t AudioTotalSize = 0xFFFF;
+/* This variable holds the remaining data in audio file */
+uint32_t AudioRemSize = 0xFFFF;
+/* This variable holds the current position of audio pointer */
+uint16_t *CurrentPos;
 
 __IO uint32_t CODECTimeout = CODEC_LONG_TIMEOUT;
 __IO uint8_t OutputDev = 0;
@@ -374,6 +376,7 @@ uint32_t EVAL_AUDIO_DeInit(void) {
 uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size) {
   /* Set the total number of data to be played (count in half-word) */
   AudioTotalSize = Size;
+  CurrentPos = pBuffer;
 
   /* Call the audio Codec Play function */
   Codec_Play();
@@ -385,7 +388,7 @@ uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size) {
   AudioRemSize = Size - DMA_MAX(AudioTotalSize);
 
   /* Update the current audio pointer position */
-  CurrentPos = pBuffer + DMA_MAX(AudioTotalSize);
+  CurrentPos += DMA_MAX(AudioTotalSize);
 
   return 0;
 }
@@ -470,8 +473,6 @@ uint32_t EVAL_AUDIO_Mute(uint32_t Cmd) {
  * @retval 0 if correct communication, else wrong communication
  */
 static void Audio_MAL_IRQHandler(void) {
-  uint16_t *pAddr = (uint16_t *)CurrentPos;
-  uint32_t Size = AudioRemSize;
 
 #ifdef AUDIO_MAL_DMA_IT_TC_EN
   /* Transfer complete interrupt */
@@ -501,6 +502,7 @@ static void Audio_MAL_IRQHandler(void) {
 
       /* Update the remaining number of data to be played */
       AudioRemSize -= DMA_MAX(AudioRemSize);
+
       /* Enable the I2S DMA Stream*/
       DMA_Cmd(AUDIO_MAL_DMA_STREAM, ENABLE);
     } else {
@@ -513,14 +515,14 @@ static void Audio_MAL_IRQHandler(void) {
       /* Manage the remaining file size and new address offset: This function
       should be coded by user (its prototype is already declared in
       stm32f4_discovery_audio_codec.h) */
-      EVAL_AUDIO_TransferComplete_CallBack((uint32_t) CurrentPos, 0);       
+      EVAL_AUDIO_TransferComplete_CallBack((uint32_t)CurrentPos, 0);
     }
 
 #elif defined(AUDIO_MAL_MODE_CIRCULAR)
     /* Manage the remaining file size and new address offset: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_TransferComplete_CallBack((uint32_t) pAddr, Size);    
+    EVAL_AUDIO_TransferComplete_CallBack((uint32_t)CurrentPos, AudioRemSize);
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
@@ -534,7 +536,7 @@ static void Audio_MAL_IRQHandler(void) {
     /* Manage the remaining file size and new address offset: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_HalfTransfer_CallBack((uint32_t)pAddr, Size);    
+    EVAL_AUDIO_HalfTransfer_CallBack((uint32_t)CurrentPos, AudioRemSize);
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_HT);
@@ -546,17 +548,17 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
-    TRice(iD(4368), "error: Transfer Error\n");
+    TRice(iD(2484), "error: Transfer Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
-    TRice(iD(7885), "error: FIFO Error\n");
+    TRice(iD(3087), "error: FIFO Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
-    TRice(iD(1007), "error: Direct Mode Error\n");
+    TRice(iD(5442), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
   }
 
@@ -565,12 +567,13 @@ static void Audio_MAL_IRQHandler(void) {
     /* Manage the error generated on DMA FIFO: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_Error_CallBack((uint32_t*)&pAddr);    
+    EVAL_AUDIO_Error_CallBack((uint32_t *)CurrentPos);
 
     /* Clear the Interrupt flag */
-    DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE |
-                                            AUDIO_MAL_DMA_FLAG_FE |
-                                            AUDIO_MAL_DMA_FLAG_DME);
+    DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
+                  AUDIO_MAL_DMA_FLAG_TE |
+                  AUDIO_MAL_DMA_FLAG_FE |
+                  AUDIO_MAL_DMA_FLAG_DME);
   }
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 }
@@ -619,8 +622,8 @@ void Audio_I2S_IRQHandler(void) {
  * @param  AudioFreq: Audio frequency used to play the audio stream.
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_Init(uint16_t OutputDevice, uint8_t Volume,
-                           uint32_t AudioFreq) {
+static uint32_t Codec_Init(__attribute__((unused)) uint16_t OutputDevice,
+                           uint8_t Volume, uint32_t AudioFreq) {
   uint32_t counter = 0;
 
   /* Configure the Codec related IOs */
@@ -635,8 +638,8 @@ static uint32_t Codec_Init(uint16_t OutputDevice, uint8_t Volume,
   /* Keep Codec powered OFF */
   counter += Codec_WriteRegister(0x02, 0x01);
 
-  counter +=
-      Codec_WriteRegister(0x04, 0xAF); /* SPK always OFF & HP always ON */
+  /* SPK always OFF & HP always ON */
+  counter += Codec_WriteRegister(0x04, 0xAF);
   OutputDev = 0xAF;
 
   /* Clock configuration: Auto detection */
@@ -942,7 +945,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /*!< While the bus is busy */
   CODECTimeout = CODEC_LONG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BUSY)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /* Start the config sequence */
@@ -951,7 +954,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Test on EV5 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /* Transmit the slave address and enable writing operation */
@@ -961,7 +964,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (
       !I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /* Transmit the register address to be read */
@@ -970,7 +973,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Test on EV8 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BTF) == RESET) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /*!< Send START condition a second time */
@@ -979,7 +982,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /*!< Test on EV5 and clear it (cleared by reading SR1 then writing to DR) */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /*!< Send Codec address for read */
@@ -988,7 +991,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait on ADDR flag to be set (ADDR is still not cleared at this level */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_ADDR) == RESET) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /*!< Disable Acknowledgment */
@@ -1004,7 +1007,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait for the byte to be received */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_RXNE) == RESET) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /*!< Read the byte received from the Codec */
@@ -1013,7 +1016,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait to make sure that STOP flag has been cleared */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (CODEC_I2C->CR1 & I2C_CR1_STOP) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
   }
 
   /*!< Re-Enable Acknowledgment to be ready for another reception */
@@ -1329,8 +1332,8 @@ static void Audio_MAL_Init(void) {
 #error "AUDIO_MAL_MODE_NORMAL or AUDIO_MAL_MODE_CIRCULAR should be selected !!"
 #endif /* AUDIO_MAL_MODE_NORMAL */
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
-    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
@@ -1549,7 +1552,7 @@ static void Audio_MAL_Stop(void) {
   /* Clear all the DMA flags for the next transfer */
   DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
                 AUDIO_MAL_DMA_FLAG_TC | AUDIO_MAL_DMA_FLAG_HT |
-                    AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
+                AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
 
   /*
            The I2S DMA requests are not disabled here.

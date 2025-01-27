@@ -53,6 +53,8 @@
 // STD Library
 #include <stm32f4xx.h>
 #include <stm32f4xx_tim.h>
+#include <stm32f4xx_pwr.h>
+#include <stm32f4xx_flash.h>
 
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
@@ -71,30 +73,23 @@
 #include <trace.h>
 
 // Audio samples
-#include <fxTom.h>
-#include <hihat.h>
-#include <kick.h>
-#include <snare.h>
+#include <kick_22050hz.h>
+#include <openhat_22050hz.h>
 
-#define SOUNDSIZE1 (6044)   // size of snare
-#define SOUNDSIZE2 (12701)  // size of fxTom
-#define SOUNDSIZE3 (12690)  // size of kick
-#define SOUNDSIZE4 (14736)  // size of hihat
-// TOTAL SIZE: 92,342
-#define BUFFERSIZE (32768)
+#define SOUNDSIZE1 (6918)  // size of kick
+#define SOUNDSIZE2 (14736)  // size of open hat
 
-int16_t playbackBuffer[BUFFERSIZE] = {0};
+#define BUFFERSIZE (16384)
 
-uint64_t u64IdleTicksCnt = 0;  // Counts when the OS has no task to execute.
-uint64_t tickTime = 0;         // Counts OS ticks (default = 1000Hz).
+uint16_t playbackBuffer[BUFFERSIZE] = {0};
 
 // Declare a StaticSemaphore_t variable
 StaticSemaphore_t xSemaphoreBuffer;
 
 // Create the binary semaphore
-SemaphoreHandle_t xSemaphore;
+SemaphoreHandle_t xSemaphorePlayback;
 
-xSemaphoreHandle xSemLCD = NULL;
+uint16_t playback_delay = 500;  // interval delay in ms
 
 /**
  * @brief Handles button press events to adjust LED blink delay.
@@ -142,26 +137,46 @@ void SystemClock_Config(void);
  * @brief Configure the system clock to 168 MHz (for STM32F4)
  */
 void SystemClock_Config(void) {
-  RCC_DeInit();
-  RCC_HSEConfig(RCC_HSE_ON);
+  // Enable the power interface clock and configure voltage regulator 
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+  PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
 
-  // Wait for HSE to be ready
+  // Enable HSE
+  RCC_HSEConfig(RCC_HSE_ON);
   while (RCC_WaitForHSEStartUp() == ERROR);
 
-  // PLL config: HSE, VCO 336MHz
+  // Configure Flash wait states
+  // (5 wait states is typical for 168 MHz on STM32F4)
+  FLASH_SetLatency(FLASH_Latency_5);
+  FLASH_PrefetchBufferCmd(ENABLE);
+
+  // Configure AHB, APB1, and APB2 prescalers
+  // AHB @ 168 MHz, APB2 @ 84 MHz, APB1 @ 42 MHz
+  RCC_HCLKConfig(RCC_SYSCLK_Div1);   // AHB = SYSCLK/1 = 168 MHz
+  RCC_PCLK2Config(RCC_HCLK_Div2);    // APB2 = AHB/2 = 84 MHz
+  RCC_PCLK1Config(RCC_HCLK_Div4);    // APB1 = AHB/4 = 42 MHz
+
+  // Set up main PLL to 168 MHz system clock
+  // (HSE=8 MHz, VCO=336 MHz, /2 => 168 MHz, /7 => 48 MHz USB)
   RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
   RCC_PLLCmd(ENABLE);
-
-  // Wait for PLL to be ready
   while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
 
+  // Select the main PLL as system clock source
   RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+  while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
 
-  // Update clock speed values
+  // Configure the I2S PLL for a proper I2S clock
+  RCC_PLLI2SConfig(429, 4);
+  RCC_PLLI2SCmd(ENABLE);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
+
+  // Update the SystemCoreClock global variable
   SystemCoreClockUpdate();
 
-  // Enable clocks for peripherals
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
+  // Enable peripheral clockS
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | 
+                         RCC_AHB1Periph_GPIOC, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
@@ -182,20 +197,21 @@ int main(void) {
 
   TraceInit();
 
-  TRice(iD(7370), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(4348), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
-  xSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
-  if (xSemaphore == NULL) {
+  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
+  if (xSemaphorePlayback == NULL) {
     // Handle error: Semaphore creation failed
-    TRice(iD(5209), "error: Semaphore creation failed\n");
+    TRice(iD(1105), "error: Semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, 22050) != 0) {
-    TRice(iD(5236), "msg: Audio codec initialization failed\n");
+
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, 22050) != 0) {
+    TRice(iD(4575), "msg: Audio codec initialization failed\n");
   }
 
-  TRice(iD(3148), "msg: Audio setup complete\n");
+  TRice(iD(7739), "msg: Audio setup complete\n");
 
   // Create button task
   buttonTaskHandle =
@@ -219,18 +235,6 @@ int main(void) {
   }
 }
 
-void copyToPlaybackBuffer(const uint16_t *source, size_t size) {
-  size_t i = 0;
-
-  for (size_t i = 0; i < size; i++) {
-    playbackBuffer[i] = source[i];
-  }
-  
-  for (i = size; i < BUFFERSIZE; i++) {
-    playbackBuffer[i] = 0;
-  }
-}
-
 void vButtonTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
   uint8_t prevStatePD1 = Bit_RESET;  // Previous state for PD1
@@ -248,26 +252,45 @@ void vButtonTask(void *p) {
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
-      TRice(iD(5841), "Onboard button pressed\n");
-      TRice(iD(4793), "Reset blink to minimum delay\n");
+      TRice(iD(7649), "Onboard button pressed\n");
+      TRice(iD(4611), "Reset blink to minimum delay\n");
     }
     prevStatePA0 = currentStatePA0;
+
+    //TURN LEDs ON WHILE PRESSED, OFF WHILE NOT PRESSED ---
+    // PD1 => PD5
+    if (currentStatePD1 == Bit_RESET) { 
+      // Button is pressed
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);
+    } else {
+      // Button is not pressed
+      GPIO_ResetBits(GPIOD, GPIO_Pin_5);
+    }
+
+    // PD2 => PD6
+    if (currentStatePD2 == Bit_RESET) {
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);
+    } else {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_6);
+    }
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
-      TRice(iD(3047), "Button 1 pressed: Triggering playback for Sound 1\n");
-      copyToPlaybackBuffer(snare, SOUNDSIZE1);
-      xSemaphoreGive(xSemaphore);  // Signal playback task
+      TRice(iD(5127), "Button 1 pressed: Triggering playback for Sound 1\n");
+      EVAL_AUDIO_Play((uint16_t *)(kick_22050hz), SOUNDSIZE1);
+      // Turn on external LED on PD5 to indicate Button 1 action
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);
     }
     prevStatePD1 = currentStatePD1;
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       // Trigger playback task for Sound 2
-      TRice(iD(4023), "Button 2 pressed: Triggering playback for Sound 2\n");
-      copyToPlaybackBuffer(fxTom, SOUNDSIZE2);
-      xSemaphoreGive(xSemaphore);  // Signal playback task
+      TRice(iD(2200), "Button 2 pressed: Triggering playback for Sound 2\n");
+      EVAL_AUDIO_Play((uint16_t *)(openhat_22050hz), SOUNDSIZE2);
+      // Turn on external LED on PD6 to indicate Button 2 action
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);
     }
     prevStatePD2 = currentStatePD2;
 
@@ -311,7 +334,7 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
     }
-    TRice(iD(2757), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+    TRice(iD(4848), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
           kBlinkStep, kBlinkDelay);
   }
 
@@ -324,10 +347,11 @@ void vBlinkTask(void *p) {
 void vPlaybackTask(void *pvparameters) {
   for (;;) {
     // Wait for the semaphore to be given
-    while (xSemaphoreTake(xSemaphore, (portTickType)0xFF) == pdFALSE) {
+    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {
     };
 
-    EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE);
+    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
+    vTaskDelay(playback_delay / portTICK_RATE_MS);
   }
 }
 
@@ -380,8 +404,13 @@ void leds_init(void) {
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(4175), "EVAL_AUDIO_GetSampleCallBack\n");
+  TRice(iD(3684), "GetSampleCallBack\n");
   return 1;
+}
+
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(3636), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
 }
 
 /*
@@ -389,21 +418,15 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(2241), "EVAL_AUDIO_TransferComplete_CallBack. pBuffer: %d; Size: %d\n", pBuffer, Size);
-}
-
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  (void)pBuffer;
-  (void)Size;
-
-  TRice(iD(3190), "EVAL_AUDIO_HalfTransfer_CallBack\n");
+  TRice(iD(4871), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
-  TRice(iD(1515), "error: EVAL_AUDIO_Error_CallBack. Position: %d\n", pData);
+  TRice(iD(6521), "error: Error_CallBack. Position: %d\n", pData);
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(7076), "Codec_TIMEOUT_UserCallback\n");
+  TRice(iD(2590), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }
