@@ -1,0 +1,15 @@
+{
+  "name": "SoundBank",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": "",
+  "platforms": "ststm32",
+  "build": {
+    "flags": [
+      "-I lib/soundBank"
+    ],
+    "srcFilter": [
+      "+<*>"
+    ]
+  }
+}

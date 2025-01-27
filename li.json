@@ -1,0 +1,82 @@
+{
+	"1105": {
+		"File": "main.c",
+		"Line": 205
+	},
+	"1850": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 561
+	},
+	"2200": {
+		"File": "main.c",
+		"Line": 290
+	},
+	"2484": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 551
+	},
+	"2590": {
+		"File": "main.c",
+		"Line": 430
+	},
+	"3087": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 556
+	},
+	"3636": {
+		"File": "main.c",
+		"Line": 412
+	},
+	"3684": {
+		"File": "main.c",
+		"Line": 407
+	},
+	"4271": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 556
+	},
+	"4348": {
+		"File": "main.c",
+		"Line": 200
+	},
+	"4575": {
+		"File": "main.c",
+		"Line": 211
+	},
+	"4611": {
+		"File": "main.c",
+		"Line": 256
+	},
+	"4848": {
+		"File": "main.c",
+		"Line": 337
+	},
+	"4871": {
+		"File": "main.c",
+		"Line": 421
+	},
+	"5127": {
+		"File": "main.c",
+		"Line": 280
+	},
+	"5292": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 551
+	},
+	"5442": {
+		"File": "stm32f4_discovery_audio_codec.c",
+		"Line": 561
+	},
+	"6521": {
+		"File": "main.c",
+		"Line": 426
+	},
+	"7649": {
+		"File": "main.c",
+		"Line": 255
+	},
+	"7739": {
+		"File": "main.c",
+		"Line": 214
+	}
+}

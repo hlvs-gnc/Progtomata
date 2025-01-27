@@ -1,0 +1,82 @@
+{
+	"1105": {
+		"Type": "TRice",
+		"Strg": "error: Semaphore creation failed\\n"
+	},
+	"1850": {
+		"Type": "TRice",
+		"Strg": "error: Direct Mode Error\\n"
+	},
+	"2200": {
+		"Type": "TRice",
+		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+	},
+	"2484": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
+	},
+	"2590": {
+		"Type": "TRice",
+		"Strg": "Codec_TIMEOUT_UserCallback\\n"
+	},
+	"3087": {
+		"Type": "TRice",
+		"Strg": "error: FIFO Error\\n"
+	},
+	"3636": {
+		"Type": "TRice",
+		"Strg": "HalfTransfer_CallBack. pBuffer: %d; Size: %d\\n"
+	},
+	"3684": {
+		"Type": "TRice",
+		"Strg": "GetSampleCallBack\\n"
+	},
+	"4271": {
+		"Type": "TRice",
+		"Strg": "error: FIFO Error\\n"
+	},
+	"4348": {
+		"Type": "TRice",
+		"Strg": "info: 🐛 PROGTOMATA2000 System initialized\\n"
+	},
+	"4575": {
+		"Type": "TRice",
+		"Strg": "msg: Audio codec initialization failed\\n"
+	},
+	"4611": {
+		"Type": "TRice",
+		"Strg": "Reset blink to minimum delay\\n"
+	},
+	"4848": {
+		"Type": "TRice",
+		"Strg": "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\\n"
+	},
+	"4871": {
+		"Type": "TRice",
+		"Strg": "TransferComplete_CallBack. pBuffer: %d; Size: %d\\n"
+	},
+	"5127": {
+		"Type": "TRice",
+		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
+	},
+	"5292": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
+	},
+	"5442": {
+		"Type": "TRice",
+		"Strg": "error: Direct Mode Error\\n"
+	},
+	"6521": {
+		"Type": "TRice",
+		"Strg": "error: Error_CallBack. Position: %d\\n"
+	},
+	"7649": {
+		"Type": "TRice",
+		"Strg": "Onboard button pressed\\n"
+	},
+	"7739": {
+		"Type": "TRice",
+		"Strg": "msg: Audio setup complete\\n"
+	}
+}

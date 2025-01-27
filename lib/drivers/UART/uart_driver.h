@@ -22,8 +22,8 @@
  *
  * Hardware:
  * - Board: STM32F4-Discovery
- * - USART1 TX: PA9
- * - USART1 RX: PA10
+ * - USART2 TX: PA2
+ * - USART2 RX: PA3
  *
  * @note Ensure that the STM32F4 peripheral drivers and RCC configurations are
  *       correctly enabled before compiling the project.

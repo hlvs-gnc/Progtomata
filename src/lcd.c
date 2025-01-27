@@ -84,6 +84,7 @@ static void LCD_WriteNibble(uint8_t nibble) {
   // A short delay so LCD can latch the data
   // Use a simple for-loop or a microsecond delay if you have it
   for (volatile int i = 0; i < 500; i++);
+  
   LCD_E_LOW();
 
   for (volatile int i = 0; i < 500; i++);
@@ -128,8 +129,8 @@ void LCD_GPIO_Setup(void) {
   GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;   // No pull resistors
   GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  GPIO_ResetBits(GPIOE, GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_10 | GPIO_Pin_11 |
-                            GPIO_Pin_12 | GPIO_Pin_13);
+  GPIO_ResetBits(GPIOE, GPIO_Pin_3 | GPIO_Pin_5 |
+                 GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13);
 }
 
 void LCD_Init(void) {
@@ -138,8 +139,8 @@ void LCD_Init(void) {
   // Let the LCD power up
   for (volatile int i = 0; i < 500000; i++);  // ~some ms delay
 
-  // Step 1: We are still in 8-bit mode from power-on,
-  //         send 0x3 a few times to ensure it sees 8-bit commands
+  // State is in 8-bit mode from power-on,
+  // send 0x3 a few times to ensure it sees 8-bit commands
   LCD_RS_LOW();
   LCD_WriteNibble(0x03);
   for (volatile int i = 0; i < 30000; i++);
@@ -148,11 +149,11 @@ void LCD_Init(void) {
   LCD_WriteNibble(0x03);
   for (volatile int i = 0; i < 30000; i++);
 
-  // Step 2: Switch to 4-bit mode
+  // Switch to 4-bit mode
   LCD_WriteNibble(0x02);
   for (volatile int i = 0; i < 30000; i++);
 
-  // Now we can use the full commands
+  // Use the full commands
   LCD_Command(0x28);  // 4-bit, 2 lines, 5x8 font
   LCD_Command(0x0C);  // Display on, cursor off
   LCD_Command(0x06);  // Entry mode, auto-increment cursor
@@ -174,7 +175,6 @@ void LCD_WriteString(char *str) {
 void LCD_GotoXY(uint8_t row, uint8_t col) {
   // For a typical 16x2:
   // row 0 address = 0x00, row 1 address = 0x40
-  // If you have a 20x4 or different geometry, addresses differ
   uint8_t address = (row == 0) ? 0x00 : 0x40;
   address += col;
   LCD_Command(0x80 | address);

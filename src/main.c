@@ -43,6 +43,7 @@
 
 // System libraries
 #include <math.h>
+#include <stdbool.h>
 
 // Real-time operating system
 #include <FreeRTOS.h>
@@ -52,6 +53,8 @@
 // STD Library
 #include <stm32f4xx.h>
 #include <stm32f4xx_tim.h>
+#include <stm32f4xx_pwr.h>
+#include <stm32f4xx_flash.h>
 
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
@@ -66,104 +69,185 @@
 // System definitions
 #include <progtomata_system.h>
 
-/**
- * @brief Handles button press events to adjust LED blink delay.
- *
- * Monitors the state of the user button connected to GPIOA Pin 0.
- * If a button press is detected, it resets the blink delay to its
- * minimum value. Designed as a FreeRTOS task that runs continuously.
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vButtonTask(void *p);
+// Information logging
+#include <trace.h>
+
+// Audio samples
+#include <kick_22050hz.h>
+#include <openhat_22050hz.h>
 
 /**
- * @brief Controls LED blinking behavior with variable delay.
- *
- * Cycles through four LEDs connected to GPIOD Pins 12, 13, 14, and 15.
- * Adjusts the blinking delay dynamically within defined limits.
- * Runs as a FreeRTOS task, demonstrating time-based scheduling.
- *
- * @param[in] p Pointer to task parameters (unused).
+ * @brief Configure the system clock to 168 MHz (for STM32F4)
  */
-void vBlinkTask(void *p);
+void SystemClock_Config(void) {
+  // Enable the power interface clock and configure voltage regulator 
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+  PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
 
-/**
- * @brief Configures the user button GPIO (PA0) as an input.
- *
- * Initializes GPIO settings, enabling input mode without pull-up or
- * pull-down resistors. Prepares the pin to detect user button presses.
- */
-void config_userbutton(void);
+  // Enable HSE
+  RCC_HSEConfig(RCC_HSE_ON);
+  while (RCC_WaitForHSEStartUp() == ERROR);
 
-/**
- * @brief Initializes GPIO pins connected to LEDs.
- *
- * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
- * proper configuration for controlling LED states.
- */
-void leds_init(void);
+  // Configure Flash wait states
+  // (5 wait states is typical for 168 MHz on STM32F4)
+  FLASH_SetLatency(FLASH_Latency_5);
+  FLASH_PrefetchBufferCmd(ENABLE);
 
-#define CAROUSEL_TASK_STACK_SIZE 128
-static StaticTask_t carouselTaskBuffer;
-static StackType_t carouselTaskStack[CAROUSEL_TASK_STACK_SIZE];
+  // Configure AHB, APB1, and APB2 prescalers
+  // AHB @ 168 MHz, APB2 @ 84 MHz, APB1 @ 42 MHz
+  RCC_HCLKConfig(RCC_SYSCLK_Div1);   // AHB = SYSCLK/1 = 168 MHz
+  RCC_PCLK2Config(RCC_HCLK_Div2);    // APB2 = AHB/2 = 84 MHz
+  RCC_PCLK1Config(RCC_HCLK_Div4);    // APB1 = AHB/4 = 42 MHz
 
-void vLCDCarouselTask(void *p);
+  // Set up main PLL to 168 MHz system clock
+  // (HSE=8 MHz, VCO=336 MHz, /2 => 168 MHz, /7 => 48 MHz USB)
+  RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
+  RCC_PLLCmd(ENABLE);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
+
+  // Select the main PLL as system clock source
+  RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+  while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
+
+  // Configure the I2S PLL for a proper I2S clock
+  RCC_PLLI2SConfig(429, 4);
+  RCC_PLLI2SCmd(ENABLE);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
+
+  // Update the SystemCoreClock global variable
+  SystemCoreClockUpdate();
+
+  // Enable peripheral clockS
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | 
+                         RCC_AHB1Periph_GPIOC, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+}
 
 int main(void) {
   SystemInit();
-
-  LCD_Init();
-
-  LCD_WriteString("****************");
-  LCD_GotoXY(1, 0);
-  LCD_WriteString("*PROGTOMATA2000*");
+  SystemClock_Config();
 
   config_userbutton();
   leds_init();
   uart_init();
 
-  uart_send_string("System initialized\r\n");
-  uart_send_string("Create tasks\r\n");
+  LCD_Init();
+
+  LCD_GotoXY(0, 0);
+  LCD_WriteString("****************");
+  LCD_GotoXY(1, 0);
+  LCD_WriteString("*PROGTOMATA2000*");
+
+  TraceInit();
+
+  TRice(iD(4348), "info: 🐛 PROGTOMATA2000 System initialized\n");
+
+  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
+  if (xSemaphorePlayback == NULL) {
+    // Handle error: Semaphore creation failed
+    TRice(iD(1105), "error: Semaphore creation failed\n");
+  }
+
+  EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
+
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, 22050) != 0) {
+    TRice(iD(4575), "msg: Audio codec initialization failed\n");
+  }
+
+  TRice(iD(7739), "msg: Audio setup complete\n");
 
   // Create button task
-  xTaskCreateStatic(vButtonTask, "ButtonTask", BUTTON_TASK_STACK_SIZE, NULL, 1,
-                    buttonTaskStack, &buttonTaskBuffer);
+  buttonTaskHandle =
+      xTaskCreateStatic(vButtonTask, "ButtonTask",
+                        BUTTON_TASK_STACK_SIZE, NULL,
+                        1, buttonTaskStack,
+                        &buttonTaskBuffer);
 
   // Create blink task
-  xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL, 1,
-                    blinkTaskStack, &blinkTaskBuffer);
+  blinkTaskHandle =
+      xTaskCreateStatic(vBlinkTask, "BlinkTask",
+                        BLINK_TASK_STACK_SIZE, NULL,
+                        1, blinkTaskStack,
+                        &blinkTaskBuffer);
 
-  xTaskCreateStatic(vLCDCarouselTask, "LCDCarousel", CAROUSEL_TASK_STACK_SIZE,
-                    NULL, 1, carouselTaskStack, &carouselTaskBuffer);
+  // Ignore playback task for now
+/*
+  playbackTaskHandle =
+      xTaskCreateStatic(vPlaybackTask, "PlayTask",
+                        PLAYBACK_TASK_STACK_SIZE, NULL,
+                        1, playbackTaskStack,
+                        &playbackTaskBuffer);
+*/
+  vTaskStartScheduler();  // This shall never return
 
-  vTaskStartScheduler();
-
-  // This shall never return
   for (;;) {
   }
 }
 
 void vButtonTask(void *p) {
-  // Button task to handle user input
-  uint8_t prevState = Bit_RESET;
+  uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
+  uint8_t prevStatePD1 = Bit_RESET;  // Previous state for PD1
+  uint8_t prevStatePD2 = Bit_RESET;  // Previous state for PD2
 
   while (1) {
-    uint8_t currentState = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-    // Read state of push button and save it in "state" variable
-    // If state is high, turn on LEDs
-    if (currentState == Bit_SET && prevState == Bit_RESET) {
+    // Read current states
+    uint8_t currentStatePA0 = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+    uint8_t currentStatePD1 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_1);
+    uint8_t currentStatePD2 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2);
+
+    // Handle PA0 (onboard button)
+    if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-      // If button state changes to pressed
       kBlinkDelay = MIN_DELAY;
-      uart_print("Button pressed\r\n");
-      uart_print("Reset to minimum delay\r\n\n");
+      kBlinkStep = MIN_DELAY;
+      TRice(iD(7649), "Onboard button pressed\n");
+      TRice(iD(4611), "Reset blink to minimum delay\n");
+    }
+    prevStatePA0 = currentStatePA0;
+
+    //TURN LEDs ON WHILE PRESSED, OFF WHILE NOT PRESSED ---
+    // PD1 => PD5
+    if (currentStatePD1 == Bit_RESET) { 
+      // Button is pressed
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);
+    } else {
+      // Button is not pressed
+      GPIO_ResetBits(GPIOD, GPIO_Pin_5);
     }
 
-    prevState = currentState;
+    // PD2 => PD6
+    if (currentStatePD2 == Bit_RESET) {
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);
+    } else {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_6);
+    }
+
+    // Handle PD1 (Trigger Playback for Sound 1)
+    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
+      // Trigger playback task for Sound 1
+      TRice(iD(5127), "Button 1 pressed: Triggering playback for Sound 1\n");
+      EVAL_AUDIO_Play((uint16_t *)(kick_22050hz), SOUNDSIZE1);
+      // Turn on external LED on PD5 to indicate Button 1 action
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);
+    }
+    prevStatePD1 = currentStatePD1;
+
+    // Handle PD2 (Trigger Playback for Sound 2)
+    if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
+      // Trigger playback task for Sound 2
+      TRice(iD(2200), "Button 2 pressed: Triggering playback for Sound 2\n");
+      EVAL_AUDIO_Play((uint16_t *)(openhat_22050hz), SOUNDSIZE2);
+      // Turn on external LED on PD6 to indicate Button 2 action
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);
+    }
+    prevStatePD2 = currentStatePD2;
+
+    // Add a debounce delay
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 
+  // Delete the task if it ever exits
   vTaskDelete(NULL);
 }
 
@@ -192,58 +276,38 @@ void vBlinkTask(void *p) {
     // Adjust delay
     kBlinkDelay += kBlinkStep;
 
-    if (kBlinkDelay >= MAX_DELAY || kBlinkDelay <= MIN_DELAY) {
-      kBlinkStep = -kBlinkStep;  // Reverse step direction
-    }
+    if (kBlinkDelay >= MAX_DELAY) {
+      kBlinkStep -= MIN_DELAY;  // Reverse step direction
 
-    uart_send_string("Blink LEDs\r\n");
-    uart_print("BlinkDelay: %d, BlinkStep: %d\r\n\n", kBlinkDelay, kBlinkStep);
+    } else if (kBlinkDelay < MIN_DELAY || kBlinkStep == 0) {
+      kBlinkDelay = MIN_DELAY;
+      kBlinkStep = MIN_DELAY;
+    }
+    TRice(iD(4848), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+          kBlinkStep, kBlinkDelay);
   }
 
   vTaskDelete(NULL);
 }
 
-void vLCDCarouselTask(void *p) {
-  static char text[] = "*PROGTOMATA2000*";
-  // The display is 16 characters wide
-  const uint8_t displayWidth = 16;
+// NOTE: ignore for now
+/*
+void vPlaybackTask(void *pvparameters) {
+  for (;;) {
+    // Wait for the semaphore to be given
+    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {
+    };
 
-  // A buffer to hold the current 16-char segment
-  char buffer[17];  // +1 for null terminator
-
-  // Current "starting index" for scrolling
-  uint8_t offset = 0;
-
-  // Calculate length of the text (excluding trailing null)
-  // or just rely on the size of text[] if you prefer
-  uint8_t textLen = strlen(text);
-
-  while (1) {
-    // For each position on the LCD's 16 chars:
-    for (uint8_t i = 0; i < displayWidth; i++) {
-      // The character to show at position i is from text[(offset + i) %
-      // textLen].
-      buffer[i] = text[(offset + i) % textLen];
-    }
-    buffer[displayWidth] = '\0';  // Null-terminate
-
-    // Go to row 0, column 0
-    LCD_GotoXY(1, 0);
-    // Print the 16-char segment
-    LCD_WriteString(buffer);
-
-    // Increment offset to shift by one
-    offset = (offset + 1) % textLen;
-
-    // Delay a bit to control scroll speed (e.g., 300 ms)
-    vTaskDelay(pdMS_TO_TICKS(250));
+    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
+    vTaskDelay(playback_delay / portTICK_RATE_MS);
   }
-
-  // If the task ever ends, delete itself
-  vTaskDelete(NULL);
 }
+ */
 
 void config_userbutton(void) {
+  // Enable clock for GPIOD
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
   // Declare a variable of type struct GPIO_InitTypeDef
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -258,10 +322,16 @@ void config_userbutton(void) {
 
   // Initialize PA0 pins by passing port name and address of PushButton struct
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  // Configure PD1 and PD2 (new buttons) as input with internal pull-up
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  // Enable internal pull-up
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 void leds_init(void) {
-  // Initialize LEDs
+  // Initialize board LEDs
   STM_EVAL_LEDInit(LED3);
 
   STM_EVAL_LEDInit(LED4);
@@ -269,4 +339,43 @@ void leds_init(void) {
   STM_EVAL_LEDInit(LED5);
 
   STM_EVAL_LEDInit(LED6);
+
+  // External LEDs
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |
+                                GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+}
+
+uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
+  TRice(iD(3684), "GetSampleCallBack\n");
+  return 1;
+}
+
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(3636), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
+}
+
+/*
+ * Called when buffer has been played out
+ * Releases semaphore and wakes up task which modifies the buffer
+ */
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(4871), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
+}
+
+void EVAL_AUDIO_Error_CallBack(void *pData) {
+  TRice(iD(6521), "error: Error_CallBack. Position: %d\n", pData);
+}
+
+uint32_t Codec_TIMEOUT_UserCallback(void) {
+  TRice(iD(2590), "Codec_TIMEOUT_UserCallback\n");
+  return 1;
 }

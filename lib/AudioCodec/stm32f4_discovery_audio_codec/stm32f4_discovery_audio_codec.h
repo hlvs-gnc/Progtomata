@@ -60,17 +60,17 @@
 #define AUDIO_MAL_MODE_NORMAL
 
 // Uncomment this line to enable the audio transfer using DMA
-/* #define AUDIO_MAL_MODE_CIRCULAR */
+// #define AUDIO_MAL_MODE_CIRCULAR
 
 /* For the DMA modes select the interrupt that will be used */
 // Uncomment this line to enable DMA Transfer Complete interrupt
 #define AUDIO_MAL_DMA_IT_TC_EN
 
 // Uncomment this line to enable DMA Half Transfer Complete interrupt */
-/* #define AUDIO_MAL_DMA_IT_HT_EN */
+// #define AUDIO_MAL_DMA_IT_HT_EN
 
 // Uncomment this line to enable DMA Transfer Error interrupt
-/* #define AUDIO_MAL_DMA_IT_TE_EN */
+#define AUDIO_MAL_DMA_IT_TE_EN
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */
@@ -88,7 +88,7 @@
 /* #define USE_DEFAULT_TIMEOUT_CALLBACK */
 
 /* Enable this define to use the I2S DMA for writing into DAC register */
-//  #define DAC_USE_I2S_DMA
+// #define DAC_USE_I2S_DMA
 /*----------------------------------------------------------------------------*/
 
 /*------------------------------------
