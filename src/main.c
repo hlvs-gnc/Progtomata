@@ -54,6 +54,7 @@
 #include <stm32f4xx.h>
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_pwr.h>
+#include <stm32f4xx_spi.h>
 #include <stm32f4xx_flash.h>
 
 // STM32F4 Discovery
@@ -150,7 +151,7 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, 22050) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, I2S_AudioFreq_22k) != 0) {
     TRice(iD(4575), "msg: Audio codec initialization failed\n");
   }
 
