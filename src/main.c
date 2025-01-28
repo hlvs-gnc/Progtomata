@@ -73,9 +73,12 @@
 // Information logging
 #include <trace.h>
 
-// Audio samples
-#include <kick_22050hz.h>
-#include <openhat_22050hz.h>
+// Mono Audio samples
+#include <kick_22050_mono.h>
+#include <openhat_22050_mono.h>
+
+// Stereo Audio samples
+#include <kick_44100_stereo.h>
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -111,7 +114,7 @@ void SystemClock_Config(void) {
   while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
 
   // Configure the I2S PLL for a proper I2S clock
-  RCC_PLLI2SConfig(429, 4);
+  RCC_PLLI2SConfig(271, 2);
   RCC_PLLI2SCmd(ENABLE);
   while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
 
@@ -151,7 +154,7 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 70, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 80, I2S_AudioFreq_44k) != 0) {
     TRice(iD(4575), "msg: Audio codec initialization failed\n");
   }
 
@@ -221,8 +224,8 @@ void vButtonTask(void *p) {
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
-      TRice(iD(5127), "Button 1 pressed: Triggering playback for Sound 1\n");
-      EVAL_AUDIO_Play((uint16_t *)(kick_22050hz), SOUNDSIZE1);
+      TRice(iD(5127), "Button 1 pressed: Triggering playback for Sound 3\n");
+      EVAL_AUDIO_Play((uint16_t *)(kick_44100_stereo), SOUNDSIZE3);
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
     }
@@ -239,7 +242,7 @@ void vButtonTask(void *p) {
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       // Trigger playback task for Sound 2
       TRice(iD(2200), "Button 2 pressed: Triggering playback for Sound 2\n");
-      EVAL_AUDIO_Play((uint16_t *)(openhat_22050hz), SOUNDSIZE2);
+      EVAL_AUDIO_Play((uint16_t *)(openhat_22050_mono), SOUNDSIZE2);
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
     }
