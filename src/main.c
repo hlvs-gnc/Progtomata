@@ -151,7 +151,7 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 70, I2S_AudioFreq_22k) != 0) {
     TRice(iD(4575), "msg: Audio codec initialization failed\n");
   }
 
@@ -165,6 +165,7 @@ int main(void) {
                         &buttonTaskBuffer);
 
   // Create blink task
+/*
   blinkTaskHandle =
       xTaskCreateStatic(vBlinkTask, "BlinkTask",
                         BLINK_TASK_STACK_SIZE, NULL,
@@ -172,7 +173,7 @@ int main(void) {
                         &blinkTaskBuffer);
 
   // Ignore playback task for now
-/*
+
   playbackTaskHandle =
       xTaskCreateStatic(vPlaybackTask, "PlayTask",
                         PLAYBACK_TASK_STACK_SIZE, NULL,
@@ -217,13 +218,6 @@ void vButtonTask(void *p) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_5);
     }
 
-    // PD2 => PD6
-    if (currentStatePD2 == Bit_RESET) {
-      GPIO_SetBits(GPIOD, GPIO_Pin_6);
-    } else {
-      GPIO_ResetBits(GPIOD, GPIO_Pin_6);
-    }
-
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       // Trigger playback task for Sound 1
@@ -233,6 +227,13 @@ void vButtonTask(void *p) {
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
     }
     prevStatePD1 = currentStatePD1;
+
+    // PD2 => PD6
+    if (currentStatePD2 == Bit_RESET) {
+      GPIO_SetBits(GPIOD, GPIO_Pin_6);
+    } else {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_6);
+    }
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {

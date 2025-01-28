@@ -46,7 +46,7 @@ const uint32_t MAX_DELAY = 250;
 #define SOUNDSIZE1 (6918)
 
 /// @brief Number of samples in open hat audio file
-#define SOUNDSIZE2 (14736)
+#define SOUNDSIZE2 (9882)
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (16384)
