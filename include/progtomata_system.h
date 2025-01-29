@@ -31,7 +31,7 @@
 #define PLAYBACK_TASK_STACK_SIZE 512
 
 /// @brief Stack size for the modify task in bytes
-#define MODIFY_TASK_STACK_SIZE 512
+#define MODIFYBUFFER_TASK_STACK_SIZE 1024
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
@@ -42,26 +42,41 @@ const uint32_t MIN_DELAY = 10;
 /// @brief Maximum delay for LED blinking in milliseconds
 const uint32_t MAX_DELAY = 250;
 
-/// @brief Number of samples in kick audio file
+/// @brief Number of samples in kick mono audio file
 #define SOUNDSIZE1 (6918)
 
 /// @brief Number of samples in open hat audio file
-#define SOUNDSIZE2 (14736)
+#define SOUNDSIZE2 (9882)
+
+/// @brief Number of samples in kick stereo audio file
+#define SOUNDSIZE3 (17700)
 
 /// @brief Size of the audio playback buffer in bytes
-#define BUFFERSIZE (16384)
+#define BUFFERSIZE (32768)
 
 // NOTE: ignore for now
-// uint16_t playbackBuffer[BUFFERSIZE] = {0};
+__attribute__((section(".audio_buffer"))) uint16_t playbackBuffer[BUFFERSIZE] = {0};
 
-/// @brief Declare a StaticSemaphore_t variable
-StaticSemaphore_t xSemaphoreBuffer;
+/// @brief 
+StaticSemaphore_t xSemaphorePlaybackStatic;
 
 /// @brief Binary semaphore for playback sequence
 SemaphoreHandle_t xSemaphorePlayback;
 
+/// @brief
+StaticSemaphore_t xSemaphoreModifyBufferStatic;
+
+/// @brief Binary semaphore for playback sequence
+SemaphoreHandle_t xSemaphoreModifyBuffer;
+
 /// @brief Interval delay in milliseconds for the playback task
 uint16_t playback_delay = 500;
+
+/// @brief Counts when the OS has no task to execute
+uint64_t u64IdleTicksCnt = 0;
+
+/// @brief Counts OS ticks (default = 1000Hz)
+uint64_t tickTime = 0;
 
 /**
  * @brief Handles button press events to adjust LED blink delay.
@@ -84,6 +99,16 @@ void vButtonTask(void *p);
  * @param[in] p Pointer to task parameters (unused).
  */
 void vBlinkTask(void *p);
+
+/**
+ * @brief Loads sound into the playback buffer
+ *
+ * Loads sound into the array, applies effects to it if they are selected,
+ * and displays active effect on LCD screen after modifying playback buffer
+ *
+ * @param[in] pvparameters Pointer to task parameters (unused).
+ */
+void vModifyBufferTask(void *pvparameters);
 
 /**
  * @brief Triggers audio playback with a variable delay.
@@ -125,29 +150,44 @@ void leds_init(void);
  */
 void SystemClock_Config(void);
 
+// --- Button Task ---
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
+
 /// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t buttonTaskBuffer CCM_RAM;
 
+/// @brief Handle for the button task
 TaskHandle_t buttonTaskHandle;
 
+// --- Blink Task ---
 /// @brief Stack memory allocation for the blink task stored in CCM
 StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
+
 /// @brief Task control block (TCB) for the blink task stored in CCM
 StaticTask_t blinkTaskBuffer CCM_RAM;
+
+/// @brief Handle for the blink task
 TaskHandle_t blinkTaskHandle;
 
+// --- Playback Task ---
 /// @brief Stack memory allocation for the playback task stored in CCM
 StackType_t playbackTaskStack[PLAYBACK_TASK_STACK_SIZE] CCM_RAM;
+
 /// @brief Task control block (TCB) for the playback task stored in CCM
 StaticTask_t playbackTaskBuffer CCM_RAM;
+
+/// @brief Handle for the playback task
 TaskHandle_t playbackTaskHandle;
 
+// --- Modify Buffer Task ---
 /// @brief Stack memory allocation for the modify task stored in CCM
-StackType_t modifyTaskStack[MODIFY_TASK_STACK_SIZE] CCM_RAM;
+StackType_t modifyBufferTaskStack[MODIFYBUFFER_TASK_STACK_SIZE] CCM_RAM;
+
 /// @brief Task control block (TCB) for the modify task stored in CCM
-StaticTask_t modifyTaskBuffer CCM_RAM;
-TaskHandle_t modifyTaskHandle;
+StaticTask_t modifyBufferTaskBuffer CCM_RAM;
+
+/// @brief Handle for the modify buffer task
+TaskHandle_t modifyBufferTaskHandle;
 
 #endif  // PROGTOMATA_SYSTEM_H_

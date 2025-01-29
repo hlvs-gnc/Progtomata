@@ -82,6 +82,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* Add a section for the audio samples in FLASH */
+  .audio_samples :
+  {
+    _audio_buffer_start = .;       /* Start address of the section */
+    KEEP(*(.audio_samples))         /* Keep all .audio_samples sections */
+    _audio_buffer_end = .;         /* End address of the section */
+  } >FLASH
+
   /* Add a section for the playback buffer in FLASH */
   .audio_buffer :
   {

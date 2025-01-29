@@ -54,6 +54,7 @@
 #include <stm32f4xx.h>
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_pwr.h>
+#include <stm32f4xx_spi.h>
 #include <stm32f4xx_flash.h>
 
 // STM32F4 Discovery
@@ -72,9 +73,21 @@
 // Information logging
 #include <trace.h>
 
-// Audio samples
-#include <kick_22050hz.h>
-#include <openhat_22050hz.h>
+// FreeRTOS Hook functions
+#include <hooks.h>
+
+// Mono Audio samples
+#include <kick_22050_mono.h>
+#include <openhat_22050_mono.h>
+
+// Stereo Audio samples
+#include <kick_44100_stereo.h>
+
+// N Buttons' states - each bit indicate respective button's ON/OFF state
+uint16_t buttonState = 0;
+
+// Indicates whether a sound is playing (1) or not (0)
+uint8_t status = 0;
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -110,7 +123,7 @@ void SystemClock_Config(void) {
   while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
 
   // Configure the I2S PLL for a proper I2S clock
-  RCC_PLLI2SConfig(429, 4);
+  RCC_PLLI2SConfig(192, 2);
   RCC_PLLI2SCmd(ENABLE);
   while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
 
@@ -140,21 +153,48 @@ int main(void) {
 
   TraceInit();
 
-  TRice(iD(4348), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(1158), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
-  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
+  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
   if (xSemaphorePlayback == NULL) {
     // Handle error: Semaphore creation failed
-    TRice(iD(1105), "error: Semaphore creation failed\n");
+    TRice(iD(4558), "error: Semaphore creation failed\n");
+  }
+
+  xSemaphoreModifyBuffer = xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
+  if (xSemaphoreModifyBuffer == NULL) {
+    // Handle error: Semaphore creation failed
+    TRice(iD(5830), "error: Semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 100, 22050) != 0) {
-    TRice(iD(4575), "msg: Audio codec initialization failed\n");
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 80, I2S_AudioFreq_22k) != 0) {
+    TRice(iD(5116), "msg: Audio codec initialization failed\n");
   }
 
-  TRice(iD(7739), "msg: Audio setup complete\n");
+  TRice(iD(1060), "msg: Audio setup complete\n");
+
+/*
+  // Create blink task
+  blinkTaskHandle =
+      xTaskCreateStatic(vBlinkTask, "BlinkTask",
+                        BLINK_TASK_STACK_SIZE, NULL,
+                        1, blinkTaskStack,
+                        &blinkTaskBuffer);
+
+  playbackTaskHandle =
+      xTaskCreateStatic(vPlaybackTask, "PlaybackTask",
+                        PLAYBACK_TASK_STACK_SIZE, NULL,
+                        1, playbackTaskStack,
+                        &playbackTaskBuffer);
+
+  modifyBufferTaskHandle =
+      xTaskCreateStatic(vModifyBufferTask, "ModifyBufferTask",
+                        MODIFYBUFFER_TASK_STACK_SIZE, NULL,
+                        1, modifyBufferTaskStack,
+                        &modifyBufferTaskBuffer);
+*/
 
   // Create button task
   buttonTaskHandle =
@@ -163,26 +203,89 @@ int main(void) {
                         1, buttonTaskStack,
                         &buttonTaskBuffer);
 
-  // Create blink task
-  blinkTaskHandle =
-      xTaskCreateStatic(vBlinkTask, "BlinkTask",
-                        BLINK_TASK_STACK_SIZE, NULL,
-                        1, blinkTaskStack,
-                        &blinkTaskBuffer);
-
-  // Ignore playback task for now
-/*
-  playbackTaskHandle =
-      xTaskCreateStatic(vPlaybackTask, "PlayTask",
-                        PLAYBACK_TASK_STACK_SIZE, NULL,
-                        1, playbackTaskStack,
-                        &playbackTaskBuffer);
-*/
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
   }
 }
+
+uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
+  TRice(iD(5526), "GetSampleCallBack\n");
+  return 1;
+}
+
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(6894), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
+}
+
+/*
+ * Called when buffer has been played out
+ * Releases semaphore and wakes up task which modifies the buffer
+ */
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(1983), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n",
+        pBuffer, Size);
+  status = 0;
+}
+
+void EVAL_AUDIO_Error_CallBack(void *pData) {
+  TRice(iD(2795), "error: Error_CallBack. Position: %d\n", pData);
+}
+
+uint32_t Codec_TIMEOUT_UserCallback(void) {
+  TRice(iD(3625), "Codec_TIMEOUT_UserCallback\n");
+  return 1;
+}
+/*
+void vPlaybackTask(void *pvparameters) {
+  for (;;) {
+    // Wait for the semaphore to be given
+    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFE) == pdFALSE) {}
+
+    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
+    status = 1;
+    vTaskDelay(playback_delay / portTICK_RATE_MS);
+  }
+}
+*/
+/*
+ * Loads sound into the playback buffer
+ * First loads sound into the array
+ * Then applies effects to it if they are selected
+ *
+ * Display active effect on LCD screen after modifying playback buffer
+
+void vModifyBufferTask(void *pvparameters) {
+
+  while (1) {
+    uint16_t i = 0;
+
+    xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
+
+    for (i = 0; i < BUFFERSIZE; ++i) {
+      playbackBuffer[i] = 0;
+      if (buttonState & 0x0001 && i < SOUNDSIZE1) {
+        playbackBuffer[i] += (int16_t)(kick_44100_stereo[i] / 4);
+      }
+
+      if (buttonState & 0x0002 && i < SOUNDSIZE2) {
+        playbackBuffer[i] += (int16_t)(openhat_22050_mono[i] / 4);
+      }
+
+      if (buttonState & 0x0004 && i < SOUNDSIZE3) {
+        playbackBuffer[i] += (int16_t)(kick_22050_mono[i] / 4);
+      }
+
+      if (i < 100 && i > 0) {
+        playbackBuffer[i] = playbackBuffer[i] / (100 - i);
+      }
+    }
+
+    xSemaphoreGive(xSemaphorePlayback);  // Signal Modify Buffer Task
+  }
+}
+*/
 
 void vButtonTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
@@ -201,8 +304,8 @@ void vButtonTask(void *p) {
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
-      TRice(iD(7649), "Onboard button pressed\n");
-      TRice(iD(4611), "Reset blink to minimum delay\n");
+      TRice(iD(2345), "Onboard button pressed\n");
+      TRice(iD(4986), "Reset blink to minimum delay\n");
     }
     prevStatePA0 = currentStatePA0;
 
@@ -216,6 +319,17 @@ void vButtonTask(void *p) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_5);
     }
 
+    // Handle PD1 (Trigger Playback for Sound 1)
+    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
+      buttonState = 0x0001;
+      // Trigger playback task for Sound 1
+      TRice(iD(6754), "Button 1 pressed: Triggering playback for Sound 1\n");
+      // Turn on external LED on PD5 to indicate Button 1 action
+      GPIO_SetBits(GPIOD, GPIO_Pin_5);
+      EVAL_AUDIO_Play((uint16_t *)(kick_22050_mono), SOUNDSIZE1);
+    }
+    prevStatePD1 = currentStatePD1;
+
     // PD2 => PD6
     if (currentStatePD2 == Bit_RESET) {
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
@@ -223,23 +337,14 @@ void vButtonTask(void *p) {
       GPIO_ResetBits(GPIOD, GPIO_Pin_6);
     }
 
-    // Handle PD1 (Trigger Playback for Sound 1)
-    if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      // Trigger playback task for Sound 1
-      TRice(iD(5127), "Button 1 pressed: Triggering playback for Sound 1\n");
-      EVAL_AUDIO_Play((uint16_t *)(kick_22050hz), SOUNDSIZE1);
-      // Turn on external LED on PD5 to indicate Button 1 action
-      GPIO_SetBits(GPIOD, GPIO_Pin_5);
-    }
-    prevStatePD1 = currentStatePD1;
-
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
+      buttonState = 0x0002;
       // Trigger playback task for Sound 2
-      TRice(iD(2200), "Button 2 pressed: Triggering playback for Sound 2\n");
-      EVAL_AUDIO_Play((uint16_t *)(openhat_22050hz), SOUNDSIZE2);
+      TRice(iD(4252), "Button 2 pressed: Triggering playback for Sound 2\n");
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
+      EVAL_AUDIO_Play((uint16_t *)(openhat_22050_mono), SOUNDSIZE2);
     }
     prevStatePD2 = currentStatePD2;
 
@@ -283,26 +388,13 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_DELAY;
       kBlinkStep = MIN_DELAY;
     }
-    TRice(iD(4848), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+
+    TRice(iD(5046), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
           kBlinkStep, kBlinkDelay);
   }
 
   vTaskDelete(NULL);
 }
-
-// NOTE: ignore for now
-/*
-void vPlaybackTask(void *pvparameters) {
-  for (;;) {
-    // Wait for the semaphore to be given
-    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {
-    };
-
-    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
-    vTaskDelay(playback_delay / portTICK_RATE_MS);
-  }
-}
- */
 
 void config_userbutton(void) {
   // Enable clock for GPIOD
@@ -352,30 +444,24 @@ void leds_init(void) {
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(3684), "GetSampleCallBack\n");
-  return 1;
-}
-
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(3636), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
-        pBuffer, Size);
-}
+/*
+ * This FreeRTOS callback function gets called once per tick (default = 1000Hz)
+ */
+void vApplicationTickHook(void) { ++tickTime; }
 
 /*
- * Called when buffer has been played out
- * Releases semaphore and wakes up task which modifies the buffer
+ * Continually send "silence" to the speaker when not playing
  */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(4871), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n",
-        pBuffer, Size);
-}
+void vApplicationIdleHook(void) {
+  uint8_t i = 0;
 
-void EVAL_AUDIO_Error_CallBack(void *pData) {
-  TRice(iD(6521), "error: Error_CallBack. Position: %d\n", pData);
-}
-
-uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(2590), "Codec_TIMEOUT_UserCallback\n");
-  return 1;
+  ++u64IdleTicksCnt;
+  if (status == 0) {
+    if (SPI_I2S_GetFlagStatus(CODEC_I2S, SPI_I2S_FLAG_TXE)) {
+      SPI_I2S_SendData(CODEC_I2S, i);
+      if (i > 16) {
+        i = 0;
+      }
+    }
+  }
 }
