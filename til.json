@@ -11,21 +11,29 @@
 		"Type": "TRice",
 		"Strg": "TransferComplete_CallBack. pBuffer: %d; Size: %d\\n"
 	},
+	"2076": {
+		"Type": "TRice",
+		"Strg": "error: Direct Mode Error\\n"
+	},
 	"2345": {
 		"Type": "TRice",
 		"Strg": "Onboard button pressed\\n"
+	},
+	"2640": {
+		"Type": "TRice",
+		"Strg": "error: FIFO Error\\n"
 	},
 	"2795": {
 		"Type": "TRice",
 		"Strg": "error: Error_CallBack. Position: %d\\n"
 	},
-	"2897": {
-		"Type": "TRice",
-		"Strg": "error: Transfer Error\\n"
-	},
 	"3625": {
 		"Type": "TRice",
 		"Strg": "Codec_TIMEOUT_UserCallback\\n"
+	},
+	"3970": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
 	},
 	"4252": {
 		"Type": "TRice",
@@ -47,10 +55,6 @@
 		"Type": "TRice",
 		"Strg": "msg: Audio codec initialization failed\\n"
 	},
-	"5477": {
-		"Type": "TRice",
-		"Strg": "error: FIFO Error\\n"
-	},
 	"5526": {
 		"Type": "TRice",
 		"Strg": "GetSampleCallBack\\n"
@@ -59,16 +63,24 @@
 		"Type": "TRice",
 		"Strg": "error: Semaphore creation failed\\n"
 	},
+	"5854": {
+		"Type": "TRice",
+		"Strg": "error: Direct Mode Error\\n"
+	},
+	"6162": {
+		"Type": "TRice",
+		"Strg": "error: Transfer Error\\n"
+	},
 	"6754": {
 		"Type": "TRice",
-		"Strg": "Button 1 pressed: Triggering playback for Sound 3\\n"
+		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
 	},
 	"6894": {
 		"Type": "TRice",
 		"Strg": "HalfTransfer_CallBack. pBuffer: %d; Size: %d\\n"
 	},
-	"7751": {
+	"7324": {
 		"Type": "TRice",
-		"Strg": "error: Direct Mode Error\\n"
+		"Strg": "error: FIFO Error\\n"
 	}
 }

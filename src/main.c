@@ -83,8 +83,7 @@
 // Stereo Audio samples
 #include <kick_44100_stereo.h>
 
-// 8 Buttons' states - each bit indicate respective button's ON/OFF state
-xSemaphoreHandle xButtonInterrupts = NULL;
+// N Buttons' states - each bit indicate respective button's ON/OFF state
 uint16_t buttonState = 0;
 
 // Indicates whether a sound is playing (1) or not (0)
