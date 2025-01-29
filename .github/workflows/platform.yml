@@ -1,0 +1,56 @@
+name: CI/ CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    name: Build with PlatformIO
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Install dependencies
+        run: pio pkg install
+
+      - name: Build project
+        run: pio run
+
+  #test:
+  #  name: Run Unit Tests
+  #  runs-on: ubuntu-latest
+
+  #  steps:
+  #    - name: Checkout code
+  #      uses: actions/checkout@v3
+
+  #    - name: Set up Python
+  #      uses: actions/setup-python@v4
+  #      with:
+  #        python-version: "3.10"
+
+  #    - name: Install PlatformIO
+  #      run: |
+  #        python -m pip install --upgrade pip
+  #        pip install platformio
+
+  #    - name: Install dependencies
+  #      run: pio pkg install
+
+  #    - name: Run Unit Tests
+  #      run: pio test
