@@ -84,10 +84,10 @@
 #include <kick_44100_stereo.h>
 
 // N Buttons' states - each bit indicate respective button's ON/OFF state
-uint16_t buttonState = 0;
+static uint16_t buttonState = 0;
 
 // Indicates whether a sound is playing (1) or not (0)
-uint8_t status = 0;
+static uint8_t status = 0;
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -102,8 +102,7 @@ void SystemClock_Config(void) {
   while (RCC_WaitForHSEStartUp() == ERROR);
 
   // Configure Flash wait states
-  // (5 wait states is typical for 168 MHz on STM32F4)
-  FLASH_SetLatency(FLASH_Latency_5);
+  FLASH_SetLatency(FLASH_Latency_1);
   FLASH_PrefetchBufferCmd(ENABLE);
 
   // Configure AHB, APB1, and APB2 prescalers
@@ -123,7 +122,7 @@ void SystemClock_Config(void) {
   while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
 
   // Configure the I2S PLL for a proper I2S clock
-  RCC_PLLI2SConfig(192, 2);
+  RCC_PLLI2SConfig(271, 2);
   RCC_PLLI2SCmd(ENABLE);
   while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
 
@@ -169,8 +168,12 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 80, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, I2S_AudioFreq_44k) != 0) {
     TRice(iD(5116), "msg: Audio codec initialization failed\n");
+  }
+
+  for (int i = 0; i < BUFFERSIZE; i++) {
+    playbackBuffer[i] = 0;
   }
 
   TRice(iD(1060), "msg: Audio setup complete\n");
@@ -182,7 +185,7 @@ int main(void) {
                         BLINK_TASK_STACK_SIZE, NULL,
                         1, blinkTaskStack,
                         &blinkTaskBuffer);
-
+*/
   playbackTaskHandle =
       xTaskCreateStatic(vPlaybackTask, "PlaybackTask",
                         PLAYBACK_TASK_STACK_SIZE, NULL,
@@ -194,15 +197,19 @@ int main(void) {
                         MODIFYBUFFER_TASK_STACK_SIZE, NULL,
                         1, modifyBufferTaskStack,
                         &modifyBufferTaskBuffer);
-*/
 
-  // Create button task
   buttonTaskHandle =
       xTaskCreateStatic(vButtonTask, "ButtonTask",
                         BUTTON_TASK_STACK_SIZE, NULL,
                         1, buttonTaskStack,
                         &buttonTaskBuffer);
 
+  sequencerTaskHandle =
+      xTaskCreateStatic(vSequencerTask, "SequencerTask",
+                        SEQUENCER_TASK_STACK_SIZE, NULL,
+                        1, sequencerTaskStack,
+                        &sequencerTaskBuffer);
+                        
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
@@ -237,55 +244,46 @@ uint32_t Codec_TIMEOUT_UserCallback(void) {
   TRice(iD(3625), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }
-/*
+
 void vPlaybackTask(void *pvparameters) {
   for (;;) {
     // Wait for the semaphore to be given
-    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFE) == pdFALSE) {}
-
-    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
+    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {}
+    
     status = 1;
+    EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
     vTaskDelay(playback_delay / portTICK_RATE_MS);
   }
 }
-*/
-/*
- * Loads sound into the playback buffer
- * First loads sound into the array
- * Then applies effects to it if they are selected
- *
- * Display active effect on LCD screen after modifying playback buffer
+
+void vSequencerTask(void *pvparameters) {
+  while (1) {
+    if (buttonState & 0x0002) {
+      xSemaphoreGive(xSemaphoreModifyBuffer);
+    }
+
+    if (buttonState & 0x0003) {
+      xSemaphoreGive(xSemaphoreModifyBuffer);
+    }
+    vTaskDelay(playback_delay / portTICK_RATE_MS);
+  }
+}
 
 void vModifyBufferTask(void *pvparameters) {
 
   while (1) {
-    uint16_t i = 0;
-
     xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
+    memset(playbackBuffer, 0, BUFFERSIZE * sizeof(uint16_t));
 
-    for (i = 0; i < BUFFERSIZE; ++i) {
-      playbackBuffer[i] = 0;
-      if (buttonState & 0x0001 && i < SOUNDSIZE1) {
-        playbackBuffer[i] += (int16_t)(kick_44100_stereo[i] / 4);
-      }
-
-      if (buttonState & 0x0002 && i < SOUNDSIZE2) {
-        playbackBuffer[i] += (int16_t)(openhat_22050_mono[i] / 4);
-      }
-
-      if (buttonState & 0x0004 && i < SOUNDSIZE3) {
-        playbackBuffer[i] += (int16_t)(kick_22050_mono[i] / 4);
-      }
-
-      if (i < 100 && i > 0) {
-        playbackBuffer[i] = playbackBuffer[i] / (100 - i);
-      }
+    if (buttonState & 0x0002) {
+      memcpy(playbackBuffer, kick_44100_stereo, SOUNDSIZE2 * sizeof(uint16_t));
+    } else if (buttonState & 0x0003) {
+      memcpy(playbackBuffer, openhat_22050_mono, SOUNDSIZE3 * sizeof(uint16_t));
     }
 
     xSemaphoreGive(xSemaphorePlayback);  // Signal Modify Buffer Task
   }
 }
-*/
 
 void vButtonTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
@@ -300,12 +298,17 @@ void vButtonTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
+      buttonState = 0x0001;
+      TRice(iD(2345), "Onboard button pressed: triggering playback for sound 1\n");
+      
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-      kBlinkDelay = MIN_DELAY;
-      kBlinkStep = MIN_DELAY;
-      TRice(iD(2345), "Onboard button pressed\n");
+
+      kBlinkDelay = MIN_BLINK_DELAY;
+      kBlinkStep = MIN_BLINK_DELAY;
       TRice(iD(4986), "Reset blink to minimum delay\n");
+
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePA0 = currentStatePA0;
 
@@ -321,12 +324,13 @@ void vButtonTask(void *p) {
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      buttonState = 0x0001;
+      buttonState ^= 0x0002; // Toggle step 1
       // Trigger playback task for Sound 1
-      TRice(iD(6754), "Button 1 pressed: Triggering playback for Sound 1\n");
+      TRice(iD(6754), "Button 2 pressed: triggering playback for sound 2\n");
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
-      EVAL_AUDIO_Play((uint16_t *)(kick_22050_mono), SOUNDSIZE1);
+
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePD1 = currentStatePD1;
 
@@ -339,17 +343,18 @@ void vButtonTask(void *p) {
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
-      buttonState = 0x0002;
+      buttonState ^= 0x0003; // Toggle step 2
       // Trigger playback task for Sound 2
-      TRice(iD(4252), "Button 2 pressed: Triggering playback for Sound 2\n");
+      TRice(iD(4252), "Button 3 pressed: triggering playback for sound 3\n");
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
-      EVAL_AUDIO_Play((uint16_t *)(openhat_22050_mono), SOUNDSIZE2);
+
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePD2 = currentStatePD2;
 
     // Add a debounce delay
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 
   // Delete the task if it ever exits
@@ -381,12 +386,12 @@ void vBlinkTask(void *p) {
     // Adjust delay
     kBlinkDelay += kBlinkStep;
 
-    if (kBlinkDelay >= MAX_DELAY) {
-      kBlinkStep -= MIN_DELAY;  // Reverse step direction
+    if (kBlinkDelay >= MAX_BLINK_DELAY) {
+      kBlinkStep -= MIN_BLINK_DELAY;  // Reverse step direction
 
-    } else if (kBlinkDelay < MIN_DELAY || kBlinkStep == 0) {
-      kBlinkDelay = MIN_DELAY;
-      kBlinkStep = MIN_DELAY;
+    } else if (kBlinkDelay < MIN_BLINK_DELAY || kBlinkStep == 0) {
+      kBlinkDelay = MIN_BLINK_DELAY;
+      kBlinkStep = MIN_BLINK_DELAY;
     }
 
     TRice(iD(5046), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
@@ -456,6 +461,7 @@ void vApplicationIdleHook(void) {
   uint8_t i = 0;
 
   ++u64IdleTicksCnt;
+
   if (status == 0) {
     if (SPI_I2S_GetFlagStatus(CODEC_I2S, SPI_I2S_FLAG_TXE)) {
       SPI_I2S_SendData(CODEC_I2S, i);
