@@ -17,11 +17,7 @@
 	},
 	"2345": {
 		"Type": "TRice",
-		"Strg": "Onboard button pressed\\n"
-	},
-	"2640": {
-		"Type": "TRice",
-		"Strg": "error: FIFO Error\\n"
+		"Strg": "Onboard button pressed: triggering playback for sound 1\\n"
 	},
 	"2795": {
 		"Type": "TRice",
@@ -37,7 +33,7 @@
 	},
 	"4252": {
 		"Type": "TRice",
-		"Strg": "Button 2 pressed: Triggering playback for Sound 2\\n"
+		"Strg": "Button 3 pressed: triggering playback for sound 3\\n"
 	},
 	"4558": {
 		"Type": "TRice",
@@ -63,17 +59,9 @@
 		"Type": "TRice",
 		"Strg": "error: Semaphore creation failed\\n"
 	},
-	"5854": {
-		"Type": "TRice",
-		"Strg": "error: Direct Mode Error\\n"
-	},
-	"6162": {
-		"Type": "TRice",
-		"Strg": "error: Transfer Error\\n"
-	},
 	"6754": {
 		"Type": "TRice",
-		"Strg": "Button 1 pressed: Triggering playback for Sound 1\\n"
+		"Strg": "Button 2 pressed: triggering playback for sound 2\\n"
 	},
 	"6894": {
 		"Type": "TRice",

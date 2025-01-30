@@ -53,11 +53,8 @@ const uint32_t MAX_BLINK_DELAY = 250;
 /// @brief Number of samples in kick stereo audio file
 #define SOUNDSIZE2 (17700)
 
-/// @brief Number of samples in open hat audio file
-#define SOUNDSIZE2 (9882)
-
-/// @brief Number of samples in kick stereo audio file
-#define SOUNDSIZE3 (17700)
+/// @brief Number of samples in open hat mono audio file
+#define SOUNDSIZE3 (9882)
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (32768)

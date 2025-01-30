@@ -168,12 +168,8 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, I2S_AudioFreq_44k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_44k) != 0) {
     TRice(iD(5116), "msg: Audio codec initialization failed\n");
-  }
-
-  for (int i = 0; i < BUFFERSIZE; i++) {
-    playbackBuffer[i] = 0;
   }
 
   TRice(iD(1060), "msg: Audio setup complete\n");
@@ -277,6 +273,7 @@ void vModifyBufferTask(void *pvparameters) {
 
     if (buttonState & 0x0002) {
       memcpy(playbackBuffer, kick_44100_stereo, SOUNDSIZE2 * sizeof(uint16_t));
+
     } else if (buttonState & 0x0003) {
       memcpy(playbackBuffer, openhat_22050_mono, SOUNDSIZE3 * sizeof(uint16_t));
     }
