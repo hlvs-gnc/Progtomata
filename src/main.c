@@ -152,7 +152,6 @@ int main(void) {
 
   TraceInit();
 
-
   TRice(iD(1158), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
@@ -270,13 +269,6 @@ void vSequencerTask(void *pvparameters) {
   }
 }
 
-/*
- * Loads sound into the playback buffer
- * First loads sound into the array
- * Then applies effects to it if they are selected
- *
- * Display active effect on LCD screen after modifying playback buffer
-*/
 void vModifyBufferTask(void *pvparameters) {
 
   while (1) {
@@ -311,6 +303,7 @@ void vButtonTask(void *p) {
       
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
       TRice(iD(4986), "Reset blink to minimum delay\n");
@@ -337,7 +330,7 @@ void vButtonTask(void *p) {
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
 
-      //xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePD1 = currentStatePD1;
 
@@ -356,7 +349,7 @@ void vButtonTask(void *p) {
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
 
-      //xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePD2 = currentStatePD2;
 

@@ -36,7 +36,6 @@
 /// @brief Stack size for the sequencer task in bytes
 #define SEQUENCER_TASK_STACK_SIZE 512
 
-
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
 static uint32_t kBlinkStep = 10, kBlinkDelay = 50;
@@ -55,7 +54,10 @@ const uint32_t MAX_BLINK_DELAY = 250;
 #define SOUNDSIZE2 (17700)
 
 /// @brief Number of samples in open hat audio file
-#define SOUNDSIZE3 (9882)
+#define SOUNDSIZE2 (9882)
+
+/// @brief Number of samples in kick stereo audio file
+#define SOUNDSIZE3 (17700)
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (32768)
