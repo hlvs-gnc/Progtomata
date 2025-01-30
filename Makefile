@@ -6,7 +6,7 @@ LI_JSON := li.json
 SRC_DIR := src/
 LIB_DIRS := $(filter-out lib/trice/, $(wildcard lib/*/))  # Get all directories inside lib/ except lib/trice
 
-.PHONY: clean update
+.PHONY: trice_clean trice_update
 
 # Clean target: empties til.json and li.json while keeping the files
 trice_clean:
