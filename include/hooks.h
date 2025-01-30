@@ -53,6 +53,9 @@
 // Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
+#define vAppTickHook 0
+#define vAppIdleHook 0
+
 // Hook function prototypes
 void vApplicationTickHook(void);
 void vApplicationMallocFailedHook(void);
