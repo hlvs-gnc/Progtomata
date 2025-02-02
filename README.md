@@ -25,7 +25,7 @@
                 ||       |___,,--")_\
                 ||         |_|   ccc/
                 ||        ccc/ BDDDD
-                        BDDDD
+                  BDDDD
 </pre>
 
 </div>
