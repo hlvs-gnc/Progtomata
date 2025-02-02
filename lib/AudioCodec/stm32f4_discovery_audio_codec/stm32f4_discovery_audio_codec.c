@@ -526,7 +526,7 @@ static void Audio_MAL_IRQHandler(void) {
 
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
-#endif /* AUDIO_MAL_MODE_NORMAL */
+#endif /* AUDIO_MAL_MODE */
   }
 #endif /* AUDIO_MAL_DMA_IT_TC_EN */
 

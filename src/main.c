@@ -168,7 +168,7 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_44k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, I2S_AudioFreq_44k) != 0) {
     TRice(iD(5116), "msg: Audio codec initialization failed\n");
   }
 
@@ -220,6 +220,19 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   TRice(iD(6894), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
         pBuffer, Size);
+
+  if (pBuffer == 0) {
+    // check 
+    TRice(iD(6895), "error: pBuffer is not 0\n");
+  } else {
+    if (Size != 0) {
+      // continue playing
+      Codec_Play();
+    } else {
+      // TransferComplete_CallBack
+      EVAL_AUDIO_TransferComplete_CallBack(pBuffer, Size);
+    }
+  }
 }
 
 /*
@@ -254,11 +267,11 @@ void vPlaybackTask(void *pvparameters) {
 
 void vSequencerTask(void *pvparameters) {
   while (1) {
-    if (buttonState & 0x0002) {
+    if (buttonState == 0x0002) {
       xSemaphoreGive(xSemaphoreModifyBuffer);
     }
 
-    if (buttonState & 0x0003) {
+    if (buttonState == 0x0003) {
       xSemaphoreGive(xSemaphoreModifyBuffer);
     }
     vTaskDelay(playback_delay / portTICK_RATE_MS);
@@ -271,10 +284,10 @@ void vModifyBufferTask(void *pvparameters) {
     xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
     memset(playbackBuffer, 0, BUFFERSIZE * sizeof(uint16_t));
 
-    if (buttonState & 0x0002) {
+    if (buttonState == 0x0002) {
       memcpy(playbackBuffer, kick_44100_stereo, SOUNDSIZE2 * sizeof(uint16_t));
 
-    } else if (buttonState & 0x0003) {
+    } else if (buttonState == 0x0003) {
       memcpy(playbackBuffer, openhat_22050_mono, SOUNDSIZE3 * sizeof(uint16_t));
     }
 
@@ -321,7 +334,7 @@ void vButtonTask(void *p) {
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      buttonState ^= 0x0002; // Toggle step 1
+      buttonState = 0x0002; // Toggle step 1
       // Trigger playback task for Sound 1
       TRice(iD(6754), "Button 2 pressed: triggering playback for sound 2\n");
       // Turn on external LED on PD5 to indicate Button 1 action
@@ -340,7 +353,7 @@ void vButtonTask(void *p) {
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
-      buttonState ^= 0x0003; // Toggle step 2
+      buttonState = 0x0003; // Toggle step 2
       // Trigger playback task for Sound 2
       TRice(iD(4252), "Button 3 pressed: triggering playback for sound 3\n");
       // Turn on external LED on PD6 to indicate Button 2 action
@@ -351,7 +364,7 @@ void vButtonTask(void *p) {
     prevStatePD2 = currentStatePD2;
 
     // Add a debounce delay
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(25));
   }
 
   // Delete the task if it ever exits
