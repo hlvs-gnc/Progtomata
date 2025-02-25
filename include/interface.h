@@ -14,8 +14,8 @@
  * @{
  */
 #define Encoder1_Port GPIOA /*!< GPIO port for encoder 1 */
-#define Encoder1_Q0 GPIO_Pin_13 /*!< Pin number for encoder 1 Q0 */
-#define Encoder1_Q1 GPIO_Pin_14 /*!< Pin number for encoder 1 Q1 */
+#define Encoder1_Q0 GPIO_Pin_8 /*!< Pin number for encoder 1 Q0 */
+#define Encoder1_Q1 GPIO_Pin_9 /*!< Pin number for encoder 1 Q1 */
 #define Encoder1_Q2 GPIO_Pin_15 /*!< Pin number for encoder 1 Q2 */
 // #define Encoder1_EN GPIO_Pin_8 /*!< Pin number for encoder 1 enable */
 
