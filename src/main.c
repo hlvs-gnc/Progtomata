@@ -52,14 +52,17 @@
 
 // STD Library
 #include <stm32f4xx.h>
-#include <stm32f4xx_tim.h>
+#include <stm32f4xx_flash.h>
 #include <stm32f4xx_pwr.h>
 #include <stm32f4xx_spi.h>
-#include <stm32f4xx_flash.h>
+#include <stm32f4xx_tim.h>
 
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
+
+// Interface
+#include <interface.h>
 
 // Peripherals
 #include <lcd.h>
@@ -84,7 +87,9 @@
 #include <kick_44100_stereo.h>
 
 // N Buttons' states - each bit indicate respective button's ON/OFF state
-static uint16_t buttonState = 0;
+static uint16_t sampleButtonState = 0;
+
+static uint16_t stepButtonState = 0;
 
 // Indicates whether a sound is playing (1) or not (0)
 static uint8_t status = 0;
@@ -93,7 +98,7 @@ static uint8_t status = 0;
  * @brief Configure the system clock to 168 MHz (for STM32F4)
  */
 void SystemClock_Config(void) {
-  // Enable the power interface clock and configure voltage regulator 
+  // Enable the power interface clock and configure voltage regulator
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
 
@@ -107,9 +112,9 @@ void SystemClock_Config(void) {
 
   // Configure AHB, APB1, and APB2 prescalers
   // AHB @ 168 MHz, APB2 @ 84 MHz, APB1 @ 42 MHz
-  RCC_HCLKConfig(RCC_SYSCLK_Div1);   // AHB = SYSCLK/1 = 168 MHz
-  RCC_PCLK2Config(RCC_HCLK_Div2);    // APB2 = AHB/2 = 84 MHz
-  RCC_PCLK1Config(RCC_HCLK_Div4);    // APB1 = AHB/4 = 42 MHz
+  RCC_HCLKConfig(RCC_SYSCLK_Div1);  // AHB = SYSCLK/1 = 168 MHz
+  RCC_PCLK2Config(RCC_HCLK_Div2);   // APB2 = AHB/2 = 84 MHz
+  RCC_PCLK1Config(RCC_HCLK_Div4);   // APB1 = AHB/4 = 42 MHz
 
   // Set up main PLL to 168 MHz system clock
   // (HSE=8 MHz, VCO=336 MHz, /2 => 168 MHz, /7 => 48 MHz USB)
@@ -129,9 +134,9 @@ void SystemClock_Config(void) {
   // Update the SystemCoreClock global variable
   SystemCoreClockUpdate();
 
-  // Enable peripheral clockS
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | 
-                         RCC_AHB1Periph_GPIOC, ENABLE);
+  // Enable peripheral clocks
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
+
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
@@ -150,38 +155,40 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
+  Interface_Init();
+
   TraceInit();
 
-  TRice(iD(1158), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(3190), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
   if (xSemaphorePlayback == NULL) {
     // Handle error: Semaphore creation failed
-    TRice(iD(4558), "error: Semaphore creation failed\n");
+    TRice(iD(1711), "error: Semaphore creation failed\n");
   }
 
-  xSemaphoreModifyBuffer = xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
+  xSemaphoreModifyBuffer =
+      xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
   if (xSemaphoreModifyBuffer == NULL) {
     // Handle error: Semaphore creation failed
-    TRice(iD(5830), "error: Semaphore creation failed\n");
+    TRice(iD(1883), "error: Semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, I2S_AudioFreq_44k) != 0) {
-    TRice(iD(5116), "msg: Audio codec initialization failed\n");
+    TRice(iD(4135), "msg: Audio codec initialization failed\n");
   }
 
-  TRice(iD(1060), "msg: Audio setup complete\n");
+  TRice(iD(7431), "msg: Audio setup complete\n");
 
-/*
   // Create blink task
-  blinkTaskHandle =
+  /* blinkTaskHandle =
       xTaskCreateStatic(vBlinkTask, "BlinkTask",
                         BLINK_TASK_STACK_SIZE, NULL,
                         1, blinkTaskStack,
-                        &blinkTaskBuffer);
-*/
+                        &blinkTaskBuffer); */
+
   playbackTaskHandle =
       xTaskCreateStatic(vPlaybackTask, "PlaybackTask",
                         PLAYBACK_TASK_STACK_SIZE, NULL,
@@ -194,18 +201,20 @@ int main(void) {
                         1, modifyBufferTaskStack,
                         &modifyBufferTaskBuffer);
 
-  buttonTaskHandle =
-      xTaskCreateStatic(vButtonTask, "ButtonTask",
-                        BUTTON_TASK_STACK_SIZE, NULL,
-                        1, buttonTaskStack,
-                        &buttonTaskBuffer);
+  sampleButtonTaskHandle =
+      xTaskCreateStatic(vButtonSampleTask, "SampleButtonTask",
+                        SAMPLE_BUTTON_TASK_STACK_SIZE, NULL,
+                        1, sampleButtonTaskStack,
+                        &sampleButtonTaskBuffer);
 
-  sequencerTaskHandle =
-      xTaskCreateStatic(vSequencerTask, "SequencerTask",
-                        SEQUENCER_TASK_STACK_SIZE, NULL,
-                        1, sequencerTaskStack,
-                        &sequencerTaskBuffer);
-                        
+  stepButtonTaskHandle = xTaskCreateStatic(
+      vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL, 1,
+      stepButtonTaskStack, &stepButtonTaskBuffer);
+
+  sequencerTaskHandle = xTaskCreateStatic(
+      vSequencerTask, "SequencerTask", SEQUENCER_TASK_STACK_SIZE, NULL, 1,
+      sequencerTaskStack, &sequencerTaskBuffer);
+
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
@@ -213,21 +222,20 @@ int main(void) {
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(5526), "GetSampleCallBack\n");
+  TRice(iD(3071), "GetSampleCallBack\n");
   return 1;
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(6894), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n",
-        pBuffer, Size);
+  TRice(iD(5644), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
+        Size);
 
   if (pBuffer == 0) {
-    // check 
-    TRice(iD(6895), "error: pBuffer is not 0\n");
+    // check
+    TRice(iD(3726), "error: pBuffer invalid\n");
   } else {
     if (Size != 0) {
       // continue playing
-      Codec_Play();
     } else {
       // TransferComplete_CallBack
       EVAL_AUDIO_TransferComplete_CallBack(pBuffer, Size);
@@ -240,25 +248,26 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(1983), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n",
-        pBuffer, Size);
+  TRice(iD(1006), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
+        Size);
   status = 0;
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
-  TRice(iD(2795), "error: Error_CallBack. Position: %d\n", pData);
+  TRice(iD(4285), "error: Error_CallBack. Position: %d\n", pData);
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(3625), "Codec_TIMEOUT_UserCallback\n");
+  TRice(iD(2136), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }
 
 void vPlaybackTask(void *pvparameters) {
   for (;;) {
     // Wait for the semaphore to be given
-    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {}
-    
+    while (xSemaphoreTake(xSemaphorePlayback, (portTickType)0xFF) == pdFALSE) {
+    }
+
     status = 1;
     EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
     vTaskDelay(playback_delay / portTICK_RATE_MS);
@@ -267,11 +276,11 @@ void vPlaybackTask(void *pvparameters) {
 
 void vSequencerTask(void *pvparameters) {
   while (1) {
-    if (buttonState == 0x0002) {
+    if (sampleButtonState == 0x0002) {
       xSemaphoreGive(xSemaphoreModifyBuffer);
     }
 
-    if (buttonState == 0x0003) {
+    if (sampleButtonState == 0x0003) {
       xSemaphoreGive(xSemaphoreModifyBuffer);
     }
     vTaskDelay(playback_delay / portTICK_RATE_MS);
@@ -279,23 +288,22 @@ void vSequencerTask(void *pvparameters) {
 }
 
 void vModifyBufferTask(void *pvparameters) {
-
   while (1) {
     xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
     memset(playbackBuffer, 0, BUFFERSIZE * sizeof(uint16_t));
 
-    if (buttonState == 0x0002) {
+    if (sampleButtonState == 0x0002) {
       memcpy(playbackBuffer, kick_44100_stereo, SOUNDSIZE2 * sizeof(uint16_t));
 
-    } else if (buttonState == 0x0003) {
+    } else if (sampleButtonState == 0x0003) {
       memcpy(playbackBuffer, openhat_22050_mono, SOUNDSIZE3 * sizeof(uint16_t));
     }
 
-    xSemaphoreGive(xSemaphorePlayback);  // Signal Modify Buffer Task
+    xSemaphoreGive(xSemaphorePlayback);  // Signal playback task
   }
 }
 
-void vButtonTask(void *p) {
+void vButtonSampleTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
   uint8_t prevStatePD1 = Bit_RESET;  // Previous state for PD1
   uint8_t prevStatePD2 = Bit_RESET;  // Previous state for PD2
@@ -308,23 +316,23 @@ void vButtonTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      buttonState = 0x0001;
-      TRice(iD(2345), "Onboard button pressed: triggering playback for sound 1\n");
-      
+      sampleButtonState = 0x0001;
+      TRice(iD(1107), "Onboard button pressed: triggering playback for sound 1\n");
+
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
-      TRice(iD(4986), "Reset blink to minimum delay\n");
+      TRice(iD(4842), "Reset blink to minimum delay\n");
 
       xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
     }
     prevStatePA0 = currentStatePA0;
 
-    //TURN LEDs ON WHILE PRESSED, OFF WHILE NOT PRESSED ---
-    // PD1 => PD5
-    if (currentStatePD1 == Bit_RESET) { 
+    // TURN LEDs ON WHILE PRESSED, OFF WHILE NOT PRESSED ---
+    //  PD1 => PD5
+    if (currentStatePD1 == Bit_RESET) {
       // Button is pressed
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
     } else {
@@ -334,13 +342,13 @@ void vButtonTask(void *p) {
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      buttonState = 0x0002; // Toggle step 1
+      sampleButtonState = 0x0002;  // Toggle step 1
       // Trigger playback task for Sound 1
-      TRice(iD(6754), "Button 2 pressed: triggering playback for sound 2\n");
+      TRice(iD(7925), "Button 2 pressed: triggering playback for sound 2\n");
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
 
-      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal modify buffer task
     }
     prevStatePD1 = currentStatePD1;
 
@@ -353,13 +361,13 @@ void vButtonTask(void *p) {
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
-      buttonState = 0x0003; // Toggle step 2
+      sampleButtonState = 0x0003;  // Toggle step 2
       // Trigger playback task for Sound 2
-      TRice(iD(4252), "Button 3 pressed: triggering playback for sound 3\n");
+      TRice(iD(7737), "Button 3 pressed: triggering playback for sound 3\n");
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
 
-      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal Modify Buffer Task
+      xSemaphoreGive(xSemaphoreModifyBuffer);  // Signal modify buffer task
     }
     prevStatePD2 = currentStatePD2;
 
@@ -369,6 +377,53 @@ void vButtonTask(void *p) {
 
   // Delete the task if it ever exits
   vTaskDelete(NULL);
+}
+
+// Global binary semaphore for button events (using static allocation)
+StaticSemaphore_t xButtonSemaphore;
+SemaphoreHandle_t xButtonSemaphoreHandle;
+
+void vButtonStepTask(void *pvParameters) {
+  uint8_t buttonValue = 0;
+  // wasPressed: 0 = released, 1 = pressed
+  static uint8_t wasPressed = 0;
+
+  // Create the semaphore before any button processing
+  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphore);
+
+  // Initially, give the semaphore so our task doesn't block immediately
+  xSemaphoreGive(xButtonSemaphoreHandle);
+
+  for (;;) {
+    // Wait a short time for our "event" semaphore (simulating an event trigger)
+    if (xSemaphoreTake(xButtonSemaphoreHandle, pdMS_TO_TICKS(30)) == pdTRUE) {
+      // Poll the button value
+      buttonValue = Interface_ReadButtonStep();
+
+      // Only process a press when transitioning from idle (STEPIDLE_VALUE) to a
+      // valid press (0-3)
+      if ((buttonValue != STEPIDLE_VALUE) && (wasPressed == 0)) {
+        // Process the button press event: toggle the bit corresponding to
+        // buttonValue
+        stepButtonState ^= (1 << buttonValue);
+        TRice(iD(5764), "info: buttonValue: %d\n", buttonValue);
+        TRice(iD(6857), "info: stepButtonState: %d\n", stepButtonState);
+        wasPressed = 1;  // Mark that this press has been processed
+      }
+
+      // When the button returns to idle, clear the flag so a new press can be
+      // registered
+      if (buttonValue == STEPIDLE_VALUE) {
+        wasPressed = 0;
+      }
+    }
+
+    // Delay for debouncing and to free CPU time for other tasks
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // Re-give the semaphore to trigger the next poll cycle
+    xSemaphoreGive(xButtonSemaphoreHandle);
+  }
 }
 
 void vBlinkTask(void *p) {
@@ -404,7 +459,7 @@ void vBlinkTask(void *p) {
       kBlinkStep = MIN_BLINK_DELAY;
     }
 
-    TRice(iD(5046), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+    TRice(iD(2365), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
           kBlinkStep, kBlinkDelay);
   }
 
