@@ -23,14 +23,11 @@
  * \brief Stack size and priority for the Trice task.
  * \note  Adjust as needed for your system.
  */
-#define TRICE_TASK_STACK_SIZE 512
-#define TRICE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define TRACE_TASK_STACK_SIZE 256
+#define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
-
-/// @brief Stack size for the button task in bytes
-#define TRACE_TASK_STACK_SIZE 256
 
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
@@ -66,9 +63,6 @@ static void vTriceTask(void* pvParameters) {
     // Wait for the given interval
     vTaskDelay(TRICE_TASK_INTERVAL);
 
-    // uart_print("TriceStamp16: %d\r\n", TriceStamp16);
-    // uart_print("TriceStamp32: %d\r\n", TriceStamp32);
-
     // Every loop, call TriceTransfer() to handle deferred output
     TriceTransfer();
   }
@@ -87,7 +81,7 @@ void TraceInit(void) {
 
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
-    xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL,
+    xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
                       configTIMER_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;

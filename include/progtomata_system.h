@@ -87,7 +87,7 @@ static const uint16_t MAX_PB_DELAY = 1000;
 static const uint16_t MIN_PB_DELAY = 500;
 
 /// @brief Interval delay in milliseconds for the playback task
-uint16_t playback_delay = 400;
+uint16_t playback_delay = 2500;
 
 /// @brief Counts when the OS has no task to execute
 uint64_t u64IdleTicksCnt = 0;

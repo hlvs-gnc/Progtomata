@@ -57,10 +57,10 @@
 
 /* Audio Transfer mode (DMA, Interrupt or Polling) */
 // Uncomment this line to enable the audio transfer using DMA
-#define AUDIO_MAL_MODE_NORMAL
+// #define AUDIO_MAL_MODE_NORMAL
 
 // Uncomment this line to enable the audio transfer using DMA
-// #define AUDIO_MAL_MODE_CIRCULAR
+#define AUDIO_MAL_MODE_CIRCULAR
 
 /* For the DMA modes select the interrupt that will be used */
 // Uncomment this line to enable DMA Transfer Complete interrupt
@@ -74,7 +74,7 @@
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */
-/* Select the preemption priority level(0 is the highest) */
+/* Select the preemption priority level (0 is the highest) */
 #define EVAL_AUDIO_IRQ_PREPRIO 0
 
 /* Select the sub-priority level (0 is the highest) */
