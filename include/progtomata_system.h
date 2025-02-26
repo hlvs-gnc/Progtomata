@@ -78,6 +78,12 @@ StaticSemaphore_t xSemaphoreModifyBufferStatic;
 /// @brief Binary semaphore handle used to signal buffer modification
 SemaphoreHandle_t xSemaphoreModifyBuffer;
 
+/// @brief Binary semaphore for button events
+StaticSemaphore_t xButtonSemaphore;
+
+/// @brief Binary semaphore handle for button events
+SemaphoreHandle_t xButtonSemaphoreHandle;
+
 
 // Tempo variables
 /// @brief Maximum playback task delay (<2^32)
@@ -86,8 +92,8 @@ static const uint16_t MAX_PB_DELAY = 1000;
 /// @brief Minimum playback task delay (>=1)
 static const uint16_t MIN_PB_DELAY = 500;
 
-/// @brief Interval delay in milliseconds for the playback task
-uint16_t playback_delay = 2500;
+/// @brief Interval delay for the playback task
+uint16_t playback_delay = 5000;
 
 /// @brief Counts when the OS has no task to execute
 uint64_t u64IdleTicksCnt = 0;
