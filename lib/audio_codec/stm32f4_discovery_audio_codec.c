@@ -545,17 +545,17 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
-    TRice(iD(3376), "error: Transfer Error\n");
+    TRice(iD(5452), "error: Transfer Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
-    TRice(iD(4740), "error: FIFO Error\n");
+    TRice(iD(6278), "error: FIFO Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
-    TRice(iD(7073), "error: Direct Mode Error\n");
+    TRice(iD(2060), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
   }
 
@@ -1331,7 +1331,7 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_MODE_NORMAL */
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
     DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
-    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
