@@ -143,7 +143,7 @@ def create_and_crop_ascii_image(ascii_frame, image_size=(600, 700), font=font):
 ascii_images = [create_and_crop_ascii_image(frame) for frame in ascii_frames]
 
 # Save as GIF
-output_gif_path = "wizardry/wizard_spell.gif"
+output_gif_path = "wizard_spell.gif"
 ascii_images[0].save(
     output_gif_path,
     save_all=True,
