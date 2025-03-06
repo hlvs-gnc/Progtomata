@@ -67,14 +67,14 @@
 #define AUDIO_MAL_DMA_IT_TC_EN
 
 // Uncomment this line to enable DMA Half Transfer Complete interrupt */
-// #define AUDIO_MAL_DMA_IT_HT_EN
+#define AUDIO_MAL_DMA_IT_HT_EN
 
 // Uncomment this line to enable DMA Transfer Error interrupt
 #define AUDIO_MAL_DMA_IT_TE_EN
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */
-/* Select the preemption priority level(0 is the highest) */
+/* Select the preemption priority level (0 is the highest) */
 #define EVAL_AUDIO_IRQ_PREPRIO 0
 
 /* Select the sub-priority level (0 is the highest) */

@@ -251,7 +251,7 @@ static void Audio_MAL_IRQHandler(void);
 static uint32_t Codec_Init(uint16_t OutputDevice, uint8_t Volume,
                            uint32_t AudioFreq);
 static uint32_t Codec_DeInit(void);
-static uint32_t Codec_Play(void);
+// static uint32_t Codec_Play(void);
 static uint32_t Codec_PauseResume(uint32_t Cmd);
 static uint32_t Codec_Stop(uint32_t Cmd);
 static uint32_t Codec_VolumeCtrl(uint8_t Volume);
@@ -377,9 +377,6 @@ uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size) {
   /* Set the total number of data to be played (count in half-word) */
   AudioTotalSize = Size;
   CurrentPos = pBuffer;
-
-  /* Call the audio Codec Play function */
-  Codec_Play();
 
   /* Update the Media layer and enable it for play */
   Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(Size)));
@@ -548,17 +545,17 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
-    TRice(iD(3970), "error: Transfer Error\n");
+    TRice(iD(5452), "error: Transfer Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
-    TRice(iD(7324), "error: FIFO Error\n");
+    TRice(iD(6278), "error: FIFO Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
-    TRice(iD(2076), "error: Direct Mode Error\n");
+    TRice(iD(2060), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
   }
 
@@ -729,16 +726,17 @@ static uint32_t Codec_DeInit(void) {
  * @note   For this codec no Play options are required.
  * @param  None
  * @retval 0 if correct communication, else wrong communication
- */
+ */  /*
 static uint32_t Codec_Play(void) {
-  /*
-     No actions required on Codec level for play command
-     */
 
-  /* Return communication control value */
+     No actions required on Codec level for play command
+     
+
+  // Return communication control value
   return 0;
 }
 
+*/
 /**
  * @brief  Pauses and resumes playing on the audio codec.
  * @param  Cmd: AUDIO_PAUSE (or 0) to pause, AUDIO_RESUME (or any value
@@ -1319,7 +1317,7 @@ static void Audio_MAL_Init(void) {
         (uint32_t)0; /* This field will be configured in play function */
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
     DMA_InitStructure.DMA_BufferSize =
-        (uint32_t)0xFFFE; /* This field will be configured in play function */
+        (uint32_t)0xFFFF; /* This field will be configured in play function */
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = AUDIO_MAL_DMA_PERIPH_DATA_SIZE;
@@ -1333,7 +1331,7 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_MODE_NORMAL */
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
     DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
-    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
@@ -1378,7 +1376,7 @@ static void Audio_MAL_Init(void) {
         (uint32_t)0; /* This field will be configured in play function */
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
     DMA_InitStructure.DMA_BufferSize =
-        (uint32_t)0xFFFE; /* This field will be configured in play function */
+        (uint32_t)0xFFFF; /* This field will be configured in play function */
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = AUDIO_MAL_DMA_PERIPH_DATA_SIZE;

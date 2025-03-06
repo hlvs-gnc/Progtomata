@@ -21,20 +21,23 @@
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
-/// @brief Stack size for the button task in bytes
-#define BUTTON_TASK_STACK_SIZE 256
+/// @brief Stack size for the sample button task in bytes
+#define SAMPLE_BUTTON_TASK_STACK_SIZE 128
+
+/// @brief Stack size for the step button task in bytes
+#define STEP_BUTTON_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the blink task in bytes
-#define BLINK_TASK_STACK_SIZE 256
+#define BLINK_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the playback task in bytes
-#define PLAYBACK_TASK_STACK_SIZE 512
+#define PLAYBACK_TASK_STACK_SIZE 256
 
 /// @brief Stack size for the modify task in bytes
 #define MODIFYBUFFER_TASK_STACK_SIZE 512
 
 /// @brief Stack size for the sequencer task in bytes
-#define SEQUENCER_TASK_STACK_SIZE 512
+#define SEQUENCER_TASK_STACK_SIZE 256
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
@@ -75,6 +78,12 @@ StaticSemaphore_t xSemaphoreModifyBufferStatic;
 /// @brief Binary semaphore handle used to signal buffer modification
 SemaphoreHandle_t xSemaphoreModifyBuffer;
 
+/// @brief Binary semaphore for button events
+StaticSemaphore_t xButtonSemaphore;
+
+/// @brief Binary semaphore handle for button events
+SemaphoreHandle_t xButtonSemaphoreHandle;
+
 
 // Tempo variables
 /// @brief Maximum playback task delay (<2^32)
@@ -83,8 +92,8 @@ static const uint16_t MAX_PB_DELAY = 1000;
 /// @brief Minimum playback task delay (>=1)
 static const uint16_t MIN_PB_DELAY = 500;
 
-/// @brief Interval delay in milliseconds for the playback task
-uint16_t playback_delay = 500;
+/// @brief Interval delay for the playback task
+uint16_t playback_delay = 1250;
 
 /// @brief Counts when the OS has no task to execute
 uint64_t u64IdleTicksCnt = 0;
@@ -93,15 +102,25 @@ uint64_t u64IdleTicksCnt = 0;
 uint64_t tickTime = 0;
 
 
-// --- Button Task ---
-/// @brief Stack memory allocation for the button task stored in CCM
-StackType_t buttonTaskStack[BUTTON_TASK_STACK_SIZE] CCM_RAM;
+// --- Sample buttons Task ---
+/// @brief Stack memory allocation for the sample button task stored in CCM
+StackType_t sampleButtonTaskStack[SAMPLE_BUTTON_TASK_STACK_SIZE] CCM_RAM;
 
-/// @brief Task control block (TCB) for the button task stored in CCM
-StaticTask_t buttonTaskBuffer CCM_RAM;
+/// @brief Task control block (TCB) for the sample button task stored in CCM
+StaticTask_t sampleButtonTaskBuffer CCM_RAM;
 
-/// @brief Handle for the button task
-TaskHandle_t buttonTaskHandle;
+/// @brief Handle for the sample button task
+TaskHandle_t sampleButtonTaskHandle;
+
+// --- Step buttons Task ---
+/// @brief Stack memory allocation for the stepbutton task stored in CCM
+StackType_t stepButtonTaskStack[STEP_BUTTON_TASK_STACK_SIZE] CCM_RAM;
+
+/// @brief Task control block (TCB) for the step button task stored in CCM
+StaticTask_t stepButtonTaskBuffer CCM_RAM;
+
+/// @brief Handle for the step button task
+TaskHandle_t stepButtonTaskHandle;
 
 
 // --- Blink Task ---
@@ -149,7 +168,7 @@ TaskHandle_t sequencerTaskHandle;
 
 
 /**
- * @brief Handles button press events to adjust LED blink delay.
+ * @brief
  *
  * Monitors the state of the user button connected to GPIOA Pin 0.
  * If a button press is detected, it resets the blink delay to its
@@ -157,7 +176,14 @@ TaskHandle_t sequencerTaskHandle;
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-void vButtonTask(void *p);
+void vButtonSampleTask(void *p);
+
+/**
+ * @brief
+ *
+ * @param[in] p Pointer to task parameters (unused).
+ */
+void vButtonStepTask(void *p);
 
 /**
  * @brief Controls LED blinking behavior with variable delay.
