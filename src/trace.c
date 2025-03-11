@@ -82,7 +82,7 @@ void TraceInit(void) {
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
-                      configTIMER_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
+      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }

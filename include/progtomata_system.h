@@ -21,6 +21,7 @@
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
+// Task stack sizes
 /// @brief Stack size for the sample button task in bytes
 #define SAMPLE_BUTTON_TASK_STACK_SIZE 128
 
@@ -38,6 +39,26 @@
 
 /// @brief Stack size for the sequencer task in bytes
 #define SEQUENCER_TASK_STACK_SIZE 256
+
+// Task priority levels
+/// @brief Priority level for the sample button task (2 = medium)
+#define SAMPLE_BUTTON_TASK_PRIORITY 2
+
+/// @brief Priority level for the step button task (2 = medium)
+#define STEP_BUTTON_TASK_PRIORITY 2
+
+/// @brief Priority level for the blink task (1 = low)
+#define BLINK_TASK_PRIORITY 1
+
+/// @brief Priority level for the playback task (3 = high)
+#define PLAYBACK_TASK_PRIORITY 3
+
+/// @brief Priority level for the modify task (4 = very high)
+#define MODIFYBUFFER_TASK_PRIORITY 4
+
+/// @brief Priority level for the sequencer task (4 = very high)
+#define SEQUENCER_TASK_PRIORITY 4
+
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds

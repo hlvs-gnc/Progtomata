@@ -195,36 +195,33 @@ int main(void) {
 
   TRice(iD(2233), "msg: Audio setup complete\n");
 
-  sequencerTaskHandle =
-    xTaskCreateStatic(vSequencerTask, "SequencerTask",
-                      SEQUENCER_TASK_STACK_SIZE, NULL, 1,
-                      sequencerTaskStack, &sequencerTaskBuffer);
+  sequencerTaskHandle = xTaskCreateStatic(
+      vSequencerTask, "SequencerTask", SEQUENCER_TASK_STACK_SIZE, NULL,
+      SEQUENCER_TASK_PRIORITY, sequencerTaskStack, &sequencerTaskBuffer);
 
-  playbackTaskHandle =
-    xTaskCreateStatic(vPlaybackTask, "PlaybackTask",
-                      PLAYBACK_TASK_STACK_SIZE, NULL, 1,
-                      playbackTaskStack, &playbackTaskBuffer);
+  playbackTaskHandle = xTaskCreateStatic(
+      vPlaybackTask, "PlaybackTask", PLAYBACK_TASK_STACK_SIZE, NULL,
+      PLAYBACK_TASK_PRIORITY, playbackTaskStack, &playbackTaskBuffer);
 
-  modifyBufferTaskHandle =
-    xTaskCreateStatic(vModifyBufferTask, "ModifyBufferTask",
-                      MODIFYBUFFER_TASK_STACK_SIZE, NULL, 1,
-                      modifyBufferTaskStack, &modifyBufferTaskBuffer);
+  modifyBufferTaskHandle = xTaskCreateStatic(
+      vModifyBufferTask, "ModifyBufferTask", MODIFYBUFFER_TASK_STACK_SIZE, NULL,
+      MODIFYBUFFER_TASK_PRIORITY, modifyBufferTaskStack,
+      &modifyBufferTaskBuffer);
 
-  sampleButtonTaskHandle =
-    xTaskCreateStatic(vButtonSampleTask, "SampleButtonTask",
-                      SAMPLE_BUTTON_TASK_STACK_SIZE, NULL, 1,
-                      sampleButtonTaskStack, &sampleButtonTaskBuffer);
+  sampleButtonTaskHandle = xTaskCreateStatic(
+      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE,
+      NULL, SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
+      &sampleButtonTaskBuffer);
 
-  stepButtonTaskHandle =
-    xTaskCreateStatic(vButtonStepTask, "StepButtonTask",
-                      STEP_BUTTON_TASK_STACK_SIZE, NULL, 1,
-                      stepButtonTaskStack, &stepButtonTaskBuffer);
+  stepButtonTaskHandle = xTaskCreateStatic(
+      vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL,
+      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
   // Create blink task
-  /*blinkTaskHandle =
-      xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-                        1, blinkTaskStack, &blinkTaskBuffer);
-  */
+  blinkTaskHandle = xTaskCreateStatic(
+      vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
+      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+
   vTaskStartScheduler();  // This shall never return
 
   for (;;) {
@@ -237,7 +234,7 @@ void vSequencerTask(void *pvparameters) {
     // Wait for a trigger to start the sequencer
     for (uint8_t step = 0; step < NUM_STEPS; step++) {
       currentStep = step;
-      TRice(iD(3035), "Processing step %d\n", step);
+      // TRice(iD(3035), "Processing step %d\n", step);
 
       if (stepGrid[0][step] || stepGrid[1][step]) {
         xSemaphoreGive(xSemaphoreModifyBuffer);
@@ -291,7 +288,7 @@ void vButtonSampleTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      TRice(iD(3068), "Reset blink to minimum delay\n");
+      // TRice(iD(3068), "Reset blink to minimum delay\n");
 
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
@@ -421,8 +418,8 @@ void vBlinkTask(void *p) {
       kBlinkStep = MIN_BLINK_DELAY;
     }
 
-    TRice(iD(7937), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
-          kBlinkStep, kBlinkDelay);
+    // TRice(iD(7937), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+    //      kBlinkStep, kBlinkDelay);
   }
 
   vTaskDelete(NULL);
@@ -514,16 +511,12 @@ void vApplicationTickHook(void) { ++tickTime; }
  * Continually send "silence" to the speaker when not playing
  */
 void vApplicationIdleHook(void) {
-  uint8_t i = 0;
 
   ++u64IdleTicksCnt;
 
   if (status == 0) {
     if (SPI_I2S_GetFlagStatus(CODEC_I2S, SPI_I2S_FLAG_TXE)) {
-      SPI_I2S_SendData(CODEC_I2S, i);
-      if (i > 16) {
-        i = 0;
-      }
+      SPI_I2S_SendData(CODEC_I2S, 0);
     }
   }
 }

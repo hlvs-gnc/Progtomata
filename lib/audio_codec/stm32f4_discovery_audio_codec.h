@@ -67,7 +67,7 @@
 #define AUDIO_MAL_DMA_IT_TC_EN
 
 // Uncomment this line to enable DMA Half Transfer Complete interrupt */
-#define AUDIO_MAL_DMA_IT_HT_EN
+// #define AUDIO_MAL_DMA_IT_HT_EN
 
 // Uncomment this line to enable DMA Transfer Error interrupt
 #define AUDIO_MAL_DMA_IT_TE_EN
