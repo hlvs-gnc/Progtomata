@@ -1,6 +1,6 @@
 file(GLOB UART_DRIVER_SRC
-    *.c
-    *.h
+  *.c
+  *.h
 )
 
 add_library(uart_driver STATIC ${UART_DRIVER_SRC})

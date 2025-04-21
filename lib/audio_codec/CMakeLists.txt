@@ -1,6 +1,6 @@
 file(GLOB AUDIO_CODEC_SRC
-    *.c
-    *.h
+  *.c
+  *.h
 )
 
 add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
