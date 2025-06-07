@@ -18,6 +18,9 @@
 #ifndef PROGTOMATA_SYSTEM_H_
 #define PROGTOMATA_SYSTEM_H_
 
+#include <stdint.h>
+#include <semphr.h>
+
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
