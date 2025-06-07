@@ -1313,11 +1313,11 @@ static void Audio_MAL_Init(void) {
     /* Set the parameters to be configured */
     DMA_InitStructure.DMA_Channel = AUDIO_MAL_DMA_CHANNEL;
     DMA_InitStructure.DMA_PeripheralBaseAddr = AUDIO_MAL_DMA_DREG;
-    DMA_InitStructure.DMA_Memory0BaseAddr =
-        (uint32_t)0; /* This field will be configured in play function */
+    /* This field will be configured in play function */
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)0;
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-    DMA_InitStructure.DMA_BufferSize =
-        (uint32_t)0xFFFF; /* This field will be configured in play function */
+    /* This field will be configured in play function */
+    DMA_InitStructure.DMA_BufferSize = (uint32_t)0xFFFF;
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = AUDIO_MAL_DMA_PERIPH_DATA_SIZE;
@@ -1372,11 +1372,11 @@ static void Audio_MAL_Init(void) {
     /* Set the parameters to be configured */
     DMA_InitStructure.DMA_Channel = AUDIO_MAL_DMA_CHANNEL;
     DMA_InitStructure.DMA_PeripheralBaseAddr = AUDIO_MAL_DMA_DREG;
-    DMA_InitStructure.DMA_Memory0BaseAddr =
-        (uint32_t)0; /* This field will be configured in play function */
+    /* This field will be configured in play function */
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)0;
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-    DMA_InitStructure.DMA_BufferSize =
-        (uint32_t)0xFFFF; /* This field will be configured in play function */
+    /* This field will be configured in play function */
+    DMA_InitStructure.DMA_BufferSize = (uint32_t)0xFFFF;
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = AUDIO_MAL_DMA_PERIPH_DATA_SIZE;

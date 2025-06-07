@@ -62,7 +62,8 @@
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
-static uint32_t kBlinkStep = 10, kBlinkDelay = 50;
+static uint32_t kBlinkStep = 10;
+static uint32_t kBlinkDelay = 50;
 
 
 /// @brief Minimum delay for LED blinking in milliseconds
