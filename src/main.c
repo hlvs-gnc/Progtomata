@@ -66,6 +66,7 @@
 
 // Peripherals
 #include <lcd.h>
+#include <oled.h>
 
 // Drivers
 #include <uart_driver.h>
