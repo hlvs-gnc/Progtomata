@@ -1,9 +1,9 @@
 /*!
- * \file trace.c
- * \brief This file contains the definitions of user-provided functions and
+ * @file trace.c
+ * @brief This file contains the definitions of user-provided functions and
  * function pointers for use with the Trice library in deferred mode.
  *
- * \details
+ * @details
  *   - A FreeRTOS task is created to periodically invoke \c TriceTransfer()
  *     (here, every 10,000 clock ticks).
  *   - \c TraceInit() calls \c TriceInit(), creates the task, and ensures it
@@ -14,14 +14,14 @@
 
 #include <trace.h>
 
-/*!
- * \brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
+/**
+ * @brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
  */
 #define TRICE_TASK_INTERVAL (100)
 
-/*!
- * \brief Stack size and priority for the Trice task.
- * \note  Adjust as needed for your system.
+/**
+ * @brief Stack size and priority for the Trice task.
+ * @note  Adjust as needed for your system.
  */
 #define TRACE_TASK_STACK_SIZE 256
 #define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
@@ -35,8 +35,8 @@ StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
 /// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t traceTaskBuffer CCM_RAM;
 
-/*!
- * \brief Flag to ensure TraceInit() is only called once.
+/**
+ * @brief Flag to ensure TraceInit() is only called once.
  */
 static bool g_isTraceInitialized = false;
 
@@ -51,10 +51,10 @@ void DWT_Init(void) {
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-/*!
- * \brief The FreeRTOS task that periodically invokes TriceTransfer().
+/**
+ * @brief The FreeRTOS task that periodically invokes TriceTransfer().
  *
- * \param pvParameters Not used in this example.
+ * @param pvParameters Not used.
  */
 static void vTriceTask(void* pvParameters) {
   (void) pvParameters;  // Unused parameter
@@ -68,14 +68,6 @@ static void vTriceTask(void* pvParameters) {
   }
 }
 
-/*!
- * \brief TraceInit
- *
- * \details
- *   - Initializes the Trice library via TriceInit().
- *   - Creates a FreeRTOS task that periodically calls TriceTransfer().
- *   - Ensures it only happens once.
- */
 void TraceInit(void) {
   DWT_Init();
 

@@ -7,6 +7,11 @@
  *   in deferred mode and creating the associated FreeRTOS task.
  * 
  * @copyright Radar2000
+ * This work is licensed under Creative Commons 
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ *
+ * @author Radar2000
+ * 
  */
 
 #ifndef TRACE_H_
@@ -26,10 +31,10 @@ extern "C" {
 
 #include <trice.h>
 
-/*!
- * \brief Initialize the trace system.
+/**
+ * @brief Initialize the trace system.
  *
- * \details
+ * @details
  *   - Calls \c TriceInit() to initialize the Trice library.
  *   - Creates a FreeRTOS task that periodically calls \c TriceTransfer().
  *   - Ensures it is only initialized once.

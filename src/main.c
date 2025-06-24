@@ -61,6 +61,9 @@
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
 
+// Audio manager
+#include <audio_manager.h>
+
 // Interface
 #include <interface.h>
 
@@ -170,6 +173,9 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
+    // Initialize audio manager
+  AudioManager_Init();
+  
   TRice(iD(5882), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   xSemaphorePlayback =
@@ -484,14 +490,14 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(6478), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
-        Size);
+  TRice(iD(6478), "TransferComplete. pBuffer: %d; Size: %d\n", pBuffer, Size);
+  AudioManager_TransferCompleteCallback();
   status = 0;
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(2248), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
-  Size);
+  TRice(iD(2248), "HalfTransfer. pBuffer: %d; Size: %d\n", pBuffer, Size);
+  AudioManager_HalfTransferCallback();
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {

@@ -18,6 +18,9 @@
 #ifndef PROGTOMATA_SYSTEM_H_
 #define PROGTOMATA_SYSTEM_H_
 
+#include <stdint.h>
+#include <semphr.h>
+
 /// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
@@ -62,7 +65,8 @@
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
-static uint32_t kBlinkStep = 10, kBlinkDelay = 50;
+static uint32_t kBlinkStep = 10;
+static uint32_t kBlinkDelay = 50;
 
 
 /// @brief Minimum delay for LED blinking in milliseconds
