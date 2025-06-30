@@ -43,6 +43,12 @@
 /// @brief Stack size for the sequencer task in bytes
 #define SEQUENCER_TASK_STACK_SIZE 256
 
+/// @brief Stack size for the display task in bytes
+#define DISPLAY_TASK_STACK_SIZE 256
+
+/// @brief Stack size for the animation task in bytes
+#define ANIMATION_TASK_STACK_SIZE 256
+
 // Task priority levels
 /// @brief Priority level for the sample button task (2 = medium)
 #define SAMPLE_BUTTON_TASK_PRIORITY 2
@@ -62,6 +68,11 @@
 /// @brief Priority level for the sequencer task (4 = very high)
 #define SEQUENCER_TASK_PRIORITY 4
 
+/// @brief Priority level for the display task (4 = very high)
+#define DISPLAY_TASK_PRIORITY 1
+
+/// @brief Priority level for the animation task (4 = very high)
+#define ANIMATION_TASK_PRIORITY 1
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
@@ -103,11 +114,18 @@ StaticSemaphore_t xSemaphoreModifyBufferStatic;
 /// @brief Binary semaphore handle used to signal buffer modification
 SemaphoreHandle_t xSemaphoreModifyBuffer;
 
+/// @brief Static semaphore for OLED events
+StaticSemaphore_t xSemaphoreOledStatic;
+
+/// @brief Binary semaphore buffer for buffer modification
+SemaphoreHandle_t xSemaphoreOled;
+
 /// @brief Binary semaphore for button events
 StaticSemaphore_t xButtonSemaphore;
 
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
+
 
 
 // Tempo variables
@@ -190,7 +208,6 @@ StaticTask_t sequencerTaskBuffer CCM_RAM;
 
 /// @brief Handle for the modify buffer task
 TaskHandle_t sequencerTaskHandle;
-
 
 /**
  * @brief

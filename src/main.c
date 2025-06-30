@@ -61,15 +61,12 @@
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
 
-// Audio manager
-#include <audio_manager.h>
-
-// Interface
+// Displays
 #include <interface.h>
+#include <oled.h>
 
 // Peripherals
 #include <lcd.h>
-#include <oled.h>
 
 // Drivers
 #include <uart_driver.h>
@@ -158,6 +155,21 @@ int main(void) {
   SystemInit();
   SystemClock_Config();
 
+  // Initialize OLED display
+  OLED_Init();
+
+  // Clear the display buffer
+  OLED_Clear();
+
+  // Text width: 16 characters * 6 pixels = 96 pixels
+  // Starting X position: (132 - 96) / 2 = 18
+  OLED_DrawString(18, 16, "*PROGTOMATA2000*");
+
+  OLED_DrawCircle(64, 40, 8, true);
+
+  // Update the display to show the content
+  OLED_UpdateScreen();
+
   Interface_Init();
 
   TraceInit();
@@ -173,9 +185,6 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
-    // Initialize audio manager
-  AudioManager_Init();
-  
   TRice(iD(5882), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   xSemaphorePlayback =
@@ -385,7 +394,7 @@ void vButtonStepTask(void *pvParameters) {
     }
 
     // Delay for debouncing and to free CPU time for other tasks
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(75));
 
     // Re-give the semaphore to trigger the next poll cycle
     xSemaphoreGive(xButtonSemaphoreHandle);
@@ -490,14 +499,14 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
  * Releases semaphore and wakes up task which modifies the buffer
  */
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(6478), "TransferComplete. pBuffer: %d; Size: %d\n", pBuffer, Size);
-  AudioManager_TransferCompleteCallback();
+  TRice(iD(6478), "TransferComplete_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
+        Size);
   status = 0;
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(2248), "HalfTransfer. pBuffer: %d; Size: %d\n", pBuffer, Size);
-  AudioManager_HalfTransferCallback();
+  TRice(iD(2248), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
+  Size);
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {

@@ -27,7 +27,7 @@
 #include "stm32f4xx_rcc.h"
 
 /* OLED Display Configuration */
-#define OLED_WIDTH 128
+#define OLED_WIDTH 132
 #define OLED_HEIGHT 64
 #define OLED_PAGES 8
 #define OLED_I2C_ADDR 0x78  // 0x3C << 1
@@ -178,13 +178,6 @@ static const uint8_t Font5x7[][5] = {
 };
 
 /* Function Prototypes */
-/**
- * @brief Initializes the OLED display.
- *
- * This function initializes the OLED display and sets it up for use. It must
- * be called before any other function in this module.
- */
-void OLED_Init(void);
 
 /**
  * @brief Initializes the OLED display.
