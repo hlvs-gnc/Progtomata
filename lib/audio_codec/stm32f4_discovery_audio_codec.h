@@ -74,7 +74,7 @@
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */
-/* Select the preemption priority level(0 is the highest) */
+/* Select the preemption priority level (0 is the highest) */
 #define EVAL_AUDIO_IRQ_PREPRIO 0
 
 /* Select the sub-priority level (0 is the highest) */

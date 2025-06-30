@@ -3,9 +3,9 @@
  *
  * @brief FreeRTOS Hook Function Declarations for STM32F4 Application.
  *
- * This header file declares hook functions and memory allocations required 
- * by FreeRTOS for system-level operations, such as idle tasks, timer tasks, 
- * and error handling. It supports static memory allocation using Core Coupled 
+ * This header file declares hook functions and memory allocations required
+ * by FreeRTOS for system-level operations, such as idle tasks, timer tasks,
+ * and error handling. It supports static memory allocation using Core Coupled
  * Memory (CCM) for optimized performance on STM32F4 devices.
  *
  * @details
@@ -18,7 +18,8 @@
  * - Ensures compatibility with FreeRTOS static memory management configuration.
  *
  * Features:
- * - Static memory management with Core Coupled Memory (CCM) for deterministic behavior.
+ * - Static memory management with Core Coupled Memory (CCM) for deterministic
+ * behavior.
  * - Hook function declarations for robust error handling and debugging.
  * - Optimized for STM32F4-based embedded systems.
  *
@@ -38,7 +39,7 @@
  *   - configUSE_TIMERS = 1
  *
  * @copyright Radar2000
- * This work is licensed under Creative Commons 
+ * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
  * @author Radar2000
@@ -53,13 +54,54 @@
 // Macro to use CCM (Core Coupled Memory) in STM32F4
 #define CCM_RAM __attribute__((section(".ccmram")))
 
+#define vAppTickHook 0
+#define vAppIdleHook 0
+
 // Hook function prototypes
+/**
+ * @brief Hook function called on each system tick.
+ */
 void vApplicationTickHook(void);
+
+/**
+ * @brief Hook function called on memory allocation failure.
+ */
 void vApplicationMallocFailedHook(void);
+
+/**
+ * @brief Hook function called when the system is idle.
+ */
 void vApplicationIdleHook(void);
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName);
-void vApplicationGetIdleTaskMemory(StaticTask_t** ppxIdleTaskTCBBuffer, StackType_t** ppxIdleTaskStackBuffer, uint32_t* pulIdleTaskStackSize);
-void vApplicationGetTimerTaskMemory(StaticTask_t** ppxTimerTaskTCBBuffer, StackType_t** ppxTimerTaskStackBuffer, uint32_t* pulTimerTaskStackSize);
+
+/**
+ * @brief Hook function called on stack overflow.
+ *
+ * @param xTask Task handle of the task that overflowed.
+ * @param pcTaskName Name of the task that overflowed.
+ */
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName);
+
+/**
+ * @brief Provides static memory for the FreeRTOS idle task.
+ *
+ * @param ppxIdleTaskTCBBuffer Pointer to the idle task control block buffer.
+ * @param ppxIdleTaskStackBuffer Pointer to the idle task stack buffer.
+ * @param pulIdleTaskStackSize Pointer to the size of the idle task stack.
+ */
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
+                                   StackType_t **ppxIdleTaskStackBuffer,
+                                   uint32_t *pulIdleTaskStackSize);
+
+/**
+ * @brief Provides static memory for the FreeRTOS timer task.
+ *
+ * @param ppxTimerTaskTCBBuffer Pointer to the timer task control block buffer.
+ * @param ppxTimerTaskStackBuffer Pointer to the timer task stack buffer.
+ * @param pulTimerTaskStackSize Pointer to the size of the timer task stack.
+ */
+void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
+                                    StackType_t **ppxTimerTaskStackBuffer,
+                                    uint32_t *pulTimerTaskStackSize);
 
 // Memory allocation for Idle Task
 extern StaticTask_t xIdleTaskTCB CCM_RAM;
@@ -69,4 +111,4 @@ extern StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE] CCM_RAM;
 extern StaticTask_t xTimerTaskTCB CCM_RAM;
 extern StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH] CCM_RAM;
 
-#endif  // HOOKS_H_
+#endif // HOOKS_H_

@@ -41,16 +41,20 @@
 
 #include "hooks.h"
 
+#if (vAppTickHook == 1)
 void vApplicationTickHook(void) {
 }
+#endif
 
 void vApplicationMallocFailedHook(void) {
   taskDISABLE_INTERRUPTS();
   for (;;);
 }
 
+#if (vAppIdleHook == 1)
 void vApplicationIdleHook(void) {
 }
+#endif
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName) {
   (void)xTask;

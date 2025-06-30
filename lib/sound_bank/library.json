@@ -6,7 +6,7 @@
   "platforms": "ststm32",
   "build": {
     "flags": [
-      "-I lib/soundBank"
+      "-I lib/sound_bank"
     ],
     "srcFilter": [
       "+<*>"
