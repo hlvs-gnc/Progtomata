@@ -165,8 +165,6 @@ int main(void) {
   // Starting X position: (132 - 96) / 2 = 18
   OLED_DrawString(18, 16, "*PROGTOMATA2000*");
 
-  OLED_DrawCircle(64, 40, 8, true);
-
   // Update the display to show the content
   OLED_UpdateScreen();
 
@@ -177,7 +175,7 @@ int main(void) {
   config_userbutton();
   leds_init();
   uart_init();
-  
+
   LCD_Init();
 
   LCD_GotoXY(0, 0);
@@ -185,10 +183,7 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
-  TRice(iD(5882), "info: 🐛 PROGTOMATA2000 System initialized\n");
-
-  xSemaphorePlayback =
-    xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
+  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
   if (xSemaphorePlayback == NULL) {
     // Handle error: Semaphore creation failed
     TRice(iD(3325), "error: Semaphore creation failed\n");
@@ -207,7 +202,7 @@ int main(void) {
     TRice(iD(5761), "msg: Audio codec initialization failed\n");
   }
 
-  memset(playbackBuffer, 0, BUFFERSIZE*sizeof(int16_t));
+  memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
   TRice(iD(2233), "msg: Audio setup complete\n");
 
@@ -233,10 +228,15 @@ int main(void) {
       vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL,
       STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
-  // Create blink task
   blinkTaskHandle = xTaskCreateStatic(
-      vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+    vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
+    BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+
+  animationTaskHandle = xTaskCreateStatic(
+      vOledAnimationTask, "OledAnimationTask", ANIMATION_TASK_STACK_SIZE, NULL,
+      ANIMATION_TASK_PRIORITY, animationTaskStack, &animationTaskBuffer);
+
+  TRice(iD(5882), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   vTaskStartScheduler();  // This shall never return
 
@@ -250,12 +250,13 @@ void vSequencerTask(void *pvparameters) {
     // Wait for a trigger to start the sequencer
     for (uint8_t step = 0; step < NUM_STEPS; step++) {
       currentStep = step;
-      // TRice(iD(3035), "Processing step %d\n", step);
-
+#ifdef DEBUG
+      TRice(iD(3035), "Processing step %d\n", step);
+#endif
       if (stepGrid[0][step] || stepGrid[1][step]) {
         xSemaphoreGive(xSemaphoreModifyBuffer);
       }
-      vTaskDelay((playback_delay/NUM_STEPS) / portTICK_RATE_MS);
+      vTaskDelay((playback_delay / NUM_STEPS) / portTICK_RATE_MS);
     }
   }
 }
@@ -280,7 +281,7 @@ void vModifyBufferTask(void *pvparameters) {
 
     for (int i = 0; i < BUFFERSIZE; i++) {
       playbackBuffer[i] = 0;
-      if ((stepGrid[0][currentStep]) && (i < SOUNDSIZE2*2)) {
+      if ((stepGrid[0][currentStep]) && (i < SOUNDSIZE2 * 2)) {
         playbackBuffer[i] += (int16_t)kick_44100_stereo[i] / 2;
       }
       if ((stepGrid[1][currentStep]) && (i < SOUNDSIZE3)) {
@@ -381,9 +382,10 @@ void vButtonStepTask(void *pvParameters) {
         TRice(iD(1844), "info: stepButtonState: %d\n", stepButtonState);
 
         if (stepButtonState <= NUM_STEPS && sampleButtonState < NUM_SAMPLES) {
-          stepGrid[sampleButtonState][stepButtonState-1] =
-            1 - stepGrid[sampleButtonState][stepButtonState-1];
-          TRice(iD(3956), "info: Select step %d for sample %d\n", stepButtonState, sampleButtonState);
+          stepGrid[sampleButtonState][stepButtonState - 1] =
+              1 - stepGrid[sampleButtonState][stepButtonState - 1];
+          TRice(iD(3956), "info: Select step %d for sample %d\n",
+                stepButtonState, sampleButtonState);
         }
         wasPressed = 1;  // Mark that this press has been processed
       }
@@ -433,12 +435,56 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
     }
-
-    // TRice(iD(7937), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
-    //      kBlinkStep, kBlinkDelay);
+#ifdef DEBUG
+    TRice(iD(7937), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+          kBlinkStep, kBlinkDelay);
+#endif
   }
 
   vTaskDelete(NULL);
+}
+
+void vOledAnimationTask(void *pvParameters) {
+  int16_t x = 64;
+  int16_t y = 32;
+  int16_t radius = 10;
+
+  int16_t vx = 3;  // initial velocity X
+  int16_t vy = 3;  // initial velocity Y
+
+  while (1) {
+    // Clear previous frame
+    OLED_Clear();
+
+    // Draw circle at new position
+    OLED_DrawCircle(x, y, radius, true);
+
+    // Update screen
+    OLED_UpdateScreen();
+
+    // Move the circle
+    x += vx;
+    y += vy;
+
+    // Check for collisions with frame borders
+    if ((x - radius <= 0) || (x + radius >= 128)) {
+      vx = -vx;
+
+      // Small random variation for more dynamic rebound
+      vx += (rand() % 3) - 1;
+      if (vx == 0) vx = (rand() % 2) ? 1 : -1;
+    }
+
+    if ((y - radius <= 0) || (y + radius >= 64)) {
+      vy = -vy;
+
+      vy += (rand() % 3) - 1;
+      if (vy == 0) vy = (rand() % 2) ? 1 : -1;
+    }
+
+    // Small delay for animation speed
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
 }
 
 void config_userbutton(void) {
@@ -506,7 +552,7 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   TRice(iD(2248), "HalfTransfer_CallBack. pBuffer: %d; Size: %d\n", pBuffer,
-  Size);
+        Size);
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
@@ -527,7 +573,6 @@ void vApplicationTickHook(void) { ++tickTime; }
  * Continually send "silence" to the speaker when not playing
  */
 void vApplicationIdleHook(void) {
-
   ++u64IdleTicksCnt;
 
   if (status == 0) {

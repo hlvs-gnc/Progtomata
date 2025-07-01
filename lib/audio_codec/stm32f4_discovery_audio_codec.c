@@ -545,17 +545,17 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)) {
-    TRice(iD(2607), "error: Transfer Error\n");
+    TRice(iD(2617), "error: Transfer Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)) {
-    TRice(iD(3450), "error: FIFO Error\n");
+    TRice(iD(4558), "error: FIFO Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;  // Track the error flag
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)) {
-    TRice(iD(4716), "error: Direct Mode Error\n");
+    TRice(iD(1293), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;  // Track the error flag
   }
 

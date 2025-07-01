@@ -43,9 +43,6 @@
 /// @brief Stack size for the sequencer task in bytes
 #define SEQUENCER_TASK_STACK_SIZE 256
 
-/// @brief Stack size for the display task in bytes
-#define DISPLAY_TASK_STACK_SIZE 256
-
 /// @brief Stack size for the animation task in bytes
 #define ANIMATION_TASK_STACK_SIZE 256
 
@@ -67,9 +64,6 @@
 
 /// @brief Priority level for the sequencer task (4 = very high)
 #define SEQUENCER_TASK_PRIORITY 4
-
-/// @brief Priority level for the display task (4 = very high)
-#define DISPLAY_TASK_PRIORITY 1
 
 /// @brief Priority level for the animation task (4 = very high)
 #define ANIMATION_TASK_PRIORITY 1
@@ -126,8 +120,6 @@ StaticSemaphore_t xButtonSemaphore;
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
 
-
-
 // Tempo variables
 /// @brief Maximum playback task delay (<2^32)
 static const uint16_t MAX_PB_DELAY = 1000;
@@ -176,6 +168,15 @@ StaticTask_t blinkTaskBuffer CCM_RAM;
 /// @brief Handle for the blink task
 TaskHandle_t blinkTaskHandle;
 
+// --- Animation Task ---
+/// @brief Stack memory allocation for the playback task stored in CCM
+StackType_t animationTaskStack[ANIMATION_TASK_STACK_SIZE] CCM_RAM;
+
+/// @brief Task control block (TCB) for the playback task stored in CCM
+StaticTask_t animationTaskBuffer CCM_RAM;
+
+/// @brief Handle for the playback task
+TaskHandle_t animationTaskHandle;
 
 // --- Playback Task ---
 /// @brief Stack memory allocation for the playback task stored in CCM
@@ -237,6 +238,17 @@ void vButtonStepTask(void *p);
  * @param[in] p Pointer to task parameters (unused).
  */
 void vBlinkTask(void *p);
+
+/**
+ * @brief Task to animate the OLED display.
+ *
+ * This task runs continuously and redraws the OLED display with an
+ * animation. The animation is a bouncing ball that moves within the
+ * display boundaries.
+ *
+ * @param[in] pvParameters Pointer to task parameters (unused).
+ */
+void vOledAnimationTask(void *pvParameters);
 
 /**
  * @brief Loads sound into the playback buffer

@@ -12,7 +12,6 @@ They connect to the encoders (buttons) and shift registers (LEDs)
 */
 void Interface_Init() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-  // RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
   GPIO_InitTypeDef GPIO_InitStruct;
