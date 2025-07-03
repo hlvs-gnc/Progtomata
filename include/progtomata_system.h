@@ -93,7 +93,7 @@ const uint32_t MAX_BLINK_DELAY = 250;
 #define BUFFERSIZE (32768)
 
 /// @brief Buffer for storing audio data for playback
-int16_t playbackBuffer[BUFFERSIZE] = {0};
+// int16_t playbackBuffer[BUFFERSIZE] = {0};
 
 
 /// @brief Static semaphore buffer for playback control
