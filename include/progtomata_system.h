@@ -93,32 +93,7 @@ const uint32_t MAX_BLINK_DELAY = 250;
 #define BUFFERSIZE (32768)
 
 /// @brief Buffer for storing audio data for playback
-// int16_t playbackBuffer[BUFFERSIZE] = {0};
-
-
-/// @brief Static semaphore buffer for playback control
-StaticSemaphore_t xSemaphorePlaybackStatic;
-
-/// @brief Binary semaphore handle used to signal playback
-SemaphoreHandle_t xSemaphorePlayback;
-
-/// @brief Static semaphore buffer for buffer modification
-StaticSemaphore_t xSemaphoreModifyBufferStatic;
-
-/// @brief Binary semaphore handle used to signal buffer modification
-SemaphoreHandle_t xSemaphoreModifyBuffer;
-
-/// @brief Static semaphore for OLED events
-StaticSemaphore_t xSemaphoreOledStatic;
-
-/// @brief Binary semaphore buffer for buffer modification
-SemaphoreHandle_t xSemaphoreOled;
-
-/// @brief Binary semaphore for button events
-StaticSemaphore_t xButtonSemaphore;
-
-/// @brief Binary semaphore handle for button events
-SemaphoreHandle_t xButtonSemaphoreHandle;
+int16_t playbackBuffer[BUFFERSIZE] = {0};
 
 // Tempo variables
 /// @brief Maximum playback task delay (<2^32)
