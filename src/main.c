@@ -8,13 +8,6 @@
  * presses, demonstrating task scheduling and semaphore usage.
  *
  * @details
- * - **Button Task**: Detects button presses and resets the LED blink delay to
- *   the minimum value.
- * - **Blink Task**: Cycles through LEDs with variable delay, adjusting the
- *   delay dynamically.
- * - Uses FreeRTOS static task creation and Core Coupled Memory (CCM) for
- *   optimized performance.
- * - Implements basic input handling and GPIO initialization for STM32F4.
  *
  * Features:
  * - LED sequencing with dynamic delay adjustment.
@@ -23,14 +16,9 @@
  * - Real-time operation using FreeRTOS.
  *
  * Dependencies:
- * - STM32F4xx Standard Peripheral Library
- * - STM32F4-Discovery Board Support Package (BSP)
  * - FreeRTOS Kernel
- *
- * Hardware:
- * - Board: STM32F4-Discovery
- * - LEDs: Connected to GPIOD (Pins 12, 13, 14, 15)
- * - User Button: Connected to GPIOA (Pin 0)
+ * - STM32F4-Discovery Board Support Package (BSP)
+ * - STM32F4xx Standard Peripheral Library
  *
  * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly
  *       configured before compiling the project.
@@ -56,20 +44,18 @@
 #include <stm32f4xx_pwr.h>
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_tim.h>
+#include <stm32f4xx_dma.h>
 
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
 
-// Audio manager
-#include <audio_manager.h>
-
-// Interface
+// Displays
 #include <interface.h>
+#include <oled.h>
 
 // Peripherals
 #include <lcd.h>
-#include <oled.h>
 
 // Drivers
 #include <uart_driver.h>
@@ -84,7 +70,7 @@
 #include <hooks.h>
 
 // Mono Audio samples
-#include <kick_22050_mono.h>
+// #include <kick_22050_mono.h>
 #include <openhat_22050_mono.h>
 
 // Stereo Audio samples
@@ -105,8 +91,39 @@ static uint16_t sampleButtonState = 0;
 
 static uint16_t stepButtonState = 0;
 
-// Indicates whether a sound is playing (1) or not (0)
-static uint8_t status = 0;
+// Audio playback state management
+typedef enum {
+  AUDIO_STATE_IDLE,
+  AUDIO_STATE_PLAYING,
+  AUDIO_STATE_PENDING
+} AudioState_t;
+
+static volatile AudioState_t audioState = AUDIO_STATE_IDLE;
+static volatile uint8_t pendingPlayback = 0;
+
+/// @brief Static semaphore buffer for playback control
+StaticSemaphore_t xSemaphorePlaybackStatic;
+
+/// @brief Binary semaphore handle used to signal playback
+SemaphoreHandle_t xSemaphorePlayback;
+
+/// @brief Static semaphore buffer for buffer modification
+StaticSemaphore_t xSemaphoreModifyBufferStatic;
+
+/// @brief Binary semaphore handle used to signal buffer modification
+SemaphoreHandle_t xSemaphoreModifyBuffer;
+
+/// @brief Static semaphore for OLED events
+StaticSemaphore_t xSemaphoreOledStatic;
+
+/// @brief Binary semaphore buffer for buffer modification
+SemaphoreHandle_t xSemaphoreOled;
+
+/// @brief Binary semaphore for button events
+StaticSemaphore_t xButtonSemaphore;
+
+/// @brief Binary semaphore handle for button events
+SemaphoreHandle_t xButtonSemaphoreHandle;
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -118,7 +135,8 @@ void SystemClock_Config(void) {
 
   // Enable HSE
   RCC_HSEConfig(RCC_HSE_ON);
-  while (RCC_WaitForHSEStartUp() == ERROR);
+  while (RCC_WaitForHSEStartUp() == ERROR)
+    ;
 
   // Configure Flash wait states
   FLASH_SetLatency(FLASH_Latency_1);
@@ -126,24 +144,27 @@ void SystemClock_Config(void) {
 
   // Configure AHB, APB1, and APB2 prescalers
   // AHB @ 168 MHz, APB2 @ 84 MHz, APB1 @ 42 MHz
-  RCC_HCLKConfig(RCC_SYSCLK_Div1);  // AHB = SYSCLK/1 = 168 MHz
-  RCC_PCLK2Config(RCC_HCLK_Div2);   // APB2 = AHB/2 = 84 MHz
-  RCC_PCLK1Config(RCC_HCLK_Div4);   // APB1 = AHB/4 = 42 MHz
+  RCC_HCLKConfig(RCC_SYSCLK_Div1); // AHB = SYSCLK/1 = 168 MHz
+  RCC_PCLK2Config(RCC_HCLK_Div2);  // APB2 = AHB/2 = 84 MHz
+  RCC_PCLK1Config(RCC_HCLK_Div4);  // APB1 = AHB/4 = 42 MHz
 
   // Set up main PLL to 168 MHz system clock
   // (HSE=8 MHz, VCO=336 MHz, /2 => 168 MHz, /7 => 48 MHz USB)
   RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
   RCC_PLLCmd(ENABLE);
-  while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
+    ;
 
   // Select the main PLL as system clock source
   RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-  while (RCC_GetSYSCLKSource() != 0x08);  // 0x08 = PLL used as sysclk
+  while (RCC_GetSYSCLKSource() != 0x08)
+    ; // 0x08 = PLL used as sysclk
 
   // Configure the I2S PLL for a proper I2S clock
   RCC_PLLI2SConfig(271, 2);
   RCC_PLLI2SCmd(ENABLE);
-  while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLI2SRDY) == RESET)
+    ;
 
   // Update the SystemCoreClock global variable
   SystemCoreClockUpdate();
@@ -158,6 +179,19 @@ int main(void) {
   SystemInit();
   SystemClock_Config();
 
+  // Initialize OLED display
+  OLED_Init();
+
+  // Clear the display buffer
+  OLED_Clear();
+
+  // Text width: 16 characters * 6 pixels = 96 pixels
+  // Starting X position: (132 - 96) / 2 = 18
+  OLED_DrawString(18, 16, "*PROGTOMATA2000*");
+
+  // Update the display to show the content
+  OLED_UpdateScreen();
+
   Interface_Init();
 
   TraceInit();
@@ -165,7 +199,7 @@ int main(void) {
   config_userbutton();
   leds_init();
   uart_init();
-  
+
   LCD_Init();
 
   LCD_GotoXY(0, 0);
@@ -173,42 +207,46 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
-    // Initialize audio manager
-  AudioManager_Init();
-  
-  TRice(iD(5882), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
 
-  xSemaphorePlayback =
-    xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
   if (xSemaphorePlayback == NULL) {
-    // Handle error: Semaphore creation failed
-    TRice(iD(3325), "error: Semaphore creation failed\n");
+    TRice(iD(4376), "error: Playback semaphore creation failed\n");
   }
 
   xSemaphoreModifyBuffer =
       xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
   if (xSemaphoreModifyBuffer == NULL) {
-    // Handle error: Semaphore creation failed
-    TRice(iD(5995), "error: Semaphore creation failed\n");
+    TRice(iD(1175), "error: Memory mutex creation failed\n");
+  }
+
+  
+  // Create the semaphore before any button processing
+  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphore);
+  if (xButtonSemaphoreHandle == NULL) {
+    TRice(iD(3926), "error: Button semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_44k) != 0) {
-    TRice(iD(5761), "msg: Audio codec initialization failed\n");
+    TRice(iD(4708), "msg: Audio codec initialization failed\n");
   }
 
-  memset(playbackBuffer, 0, BUFFERSIZE*sizeof(int16_t));
+  memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
-  TRice(iD(2233), "msg: Audio setup complete\n");
+  EVAL_AUDIO_Play((uint16_t*)playbackBuffer, BUFFERSIZE * sizeof(int16_t));
+
+  TRice(iD(3720), "msg: Audio setup complete\n");
 
   sequencerTaskHandle = xTaskCreateStatic(
       vSequencerTask, "SequencerTask", SEQUENCER_TASK_STACK_SIZE, NULL,
-      SEQUENCER_TASK_PRIORITY, sequencerTaskStack, &sequencerTaskBuffer);
+      SEQUENCER_TASK_PRIORITY, sequencerTaskStack,
+      &sequencerTaskBuffer);
 
   playbackTaskHandle = xTaskCreateStatic(
       vPlaybackTask, "PlaybackTask", PLAYBACK_TASK_STACK_SIZE, NULL,
-      PLAYBACK_TASK_PRIORITY, playbackTaskStack, &playbackTaskBuffer);
+      PLAYBACK_TASK_PRIORITY, playbackTaskStack,
+      &playbackTaskBuffer);
 
   modifyBufferTaskHandle = xTaskCreateStatic(
       vModifyBufferTask, "ModifyBufferTask", MODIFYBUFFER_TASK_STACK_SIZE, NULL,
@@ -216,37 +254,48 @@ int main(void) {
       &modifyBufferTaskBuffer);
 
   sampleButtonTaskHandle = xTaskCreateStatic(
-      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE,
-      NULL, SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
+      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE, NULL,
+      SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
       &sampleButtonTaskBuffer);
 
   stepButtonTaskHandle = xTaskCreateStatic(
       vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL,
-      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
+      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack,
+      &stepButtonTaskBuffer);
 
-  // Create blink task
   blinkTaskHandle = xTaskCreateStatic(
       vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+      BLINK_TASK_PRIORITY, blinkTaskStack,
+      &blinkTaskBuffer);
 
-  vTaskStartScheduler();  // This shall never return
+  animationTaskHandle = xTaskCreateStatic(
+      vOledAnimationTask, "OledAnimationTask", ANIMATION_TASK_STACK_SIZE, NULL,
+      ANIMATION_TASK_PRIORITY, animationTaskStack,
+      &animationTaskBuffer);
+
+  TRice(iD(1106), "info: 🐛 PROGTOMATA2000 System initialized\n");
+
+  vTaskStartScheduler(); // This shall never return
 
   for (;;) {
   }
 }
 
 void vSequencerTask(void *pvparameters) {
-  TRice(iD(3448), "Sequencer started\n");
+  TRice(iD(6498), "Sequencer started\n");
+
   while (1) {
     // Wait for a trigger to start the sequencer
     for (uint8_t step = 0; step < NUM_STEPS; step++) {
       currentStep = step;
-      // TRice(iD(3035), "Processing step %d\n", step);
-
+#ifdef DEBUG
+      TRice(iD(5370), "Processing step %d\n", step);
+#endif
       if (stepGrid[0][step] || stepGrid[1][step]) {
         xSemaphoreGive(xSemaphoreModifyBuffer);
       }
-      vTaskDelay((playback_delay/NUM_STEPS) / portTICK_RATE_MS);
+
+      vTaskDelay((playback_delay / NUM_STEPS) / portTICK_RATE_MS);
     }
   }
 }
@@ -254,38 +303,78 @@ void vSequencerTask(void *pvparameters) {
 void vPlaybackTask(void *pvparameters) {
   while (1) {
     // Wait for the semaphore to be given
-    xSemaphoreTake(xSemaphorePlayback, portMAX_DELAY);
+    if (xSemaphoreTake(xSemaphorePlayback, portMAX_DELAY) == pdTRUE) {
+      // Check if DMA is still busy (defensive programming)
+      if (DMA_GetCmdStatus(AUDIO_I2S_DMA_STREAM) != DISABLE) {
+        TRice(iD(2487), "warning: DMA still busy, skipping playback\n");
+        continue;
+      }
 
-    if (playbackBuffer != NULL && BUFFERSIZE > 0) {
-      EVAL_AUDIO_Play((uint16_t *)(playbackBuffer), BUFFERSIZE);
-      status = 1;
-    } else {
-      TRice(iD(2182), "warning: Playback buffer is empty or invalid\n");
+      // Start playback
+      audioState = AUDIO_STATE_PLAYING;
+
+      if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
+        TRice(iD(3023), "error: Failed to start audio playback\n");
+        audioState = AUDIO_STATE_IDLE;
+      }
+
+      pendingPlayback = 0;
     }
   }
 }
 
+/*
 void vModifyBufferTask(void *pvparameters) {
   while (1) {
     xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
 
     for (int i = 0; i < BUFFERSIZE; i++) {
       playbackBuffer[i] = 0;
-      if ((stepGrid[0][currentStep]) && (i < SOUNDSIZE2*2)) {
+      if ((stepGrid[0][currentStep]) && (i < SOUNDSIZE2 * 2)) {
         playbackBuffer[i] += (int16_t)kick_44100_stereo[i] / 2;
       }
       if ((stepGrid[1][currentStep]) && (i < SOUNDSIZE3)) {
         playbackBuffer[i] += (int16_t)openhat_22050_mono[i] / 2;
       }
     }
-    xSemaphoreGive(xSemaphorePlayback);  // Signal playback task
+    xSemaphoreGive(xSemaphorePlayback); // Signal playback task
+  }
+}
+*/
+
+void vModifyBufferTask(void *pvparameters) {
+  while (1) {
+    if (xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY) == pdTRUE) {
+
+      // Clear the preparation buffer
+      memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
+
+      // Mix samples with clipping prevention
+      for (int i = 0; i < BUFFERSIZE; i++) {
+
+        if (stepGrid[0][currentStep] && (i < SOUNDSIZE2 * 2)) {
+          playbackBuffer[i] += (int32_t)kick_44100_stereo[i] / 2;
+        }
+
+        if (stepGrid[1][currentStep] && (i < SOUNDSIZE3)) {
+          playbackBuffer[i] += (int32_t)openhat_22050_mono[i] / 2;
+        }
+      }
+
+      // Only trigger playback if not already playing
+      if (audioState == AUDIO_STATE_IDLE) {
+        xSemaphoreGive(xSemaphorePlayback);
+      } else {
+        pendingPlayback = 1;
+      }
+    }
   }
 }
 
 void vButtonSampleTask(void *p) {
-  uint8_t prevStatePA0 = Bit_RESET;  // Previous state for PA0
-  uint8_t prevStatePD1 = Bit_RESET;  // Previous state for PD1
-  uint8_t prevStatePD2 = Bit_RESET;  // Previous state for PD2
+  uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
+  uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
+  uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
 
   while (1) {
     // Read current states
@@ -295,7 +384,7 @@ void vButtonSampleTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      // TRice(iD(3068), "Reset blink to minimum delay\n");
+      // TRice(iD(2144), "Reset blink to minimum delay\n");
 
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
@@ -317,9 +406,9 @@ void vButtonSampleTask(void *p) {
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      sampleButtonState = 0x0000;  // Toggle step 1
+      sampleButtonState = 0x0000; // Toggle step 1
       // Trigger playback task for Sound 1
-      TRice(iD(7889), "Button 2 pressed: triggering playback for sound 2\n");
+      TRice(iD(1008), "Button 2 pressed: triggering playback for sound 2\n");
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
     }
@@ -334,9 +423,9 @@ void vButtonSampleTask(void *p) {
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
-      sampleButtonState = 0x0001;  // Toggle step 2
+      sampleButtonState = 0x0001; // Toggle step 2
       // Trigger playback task for Sound 2
-      TRice(iD(2545), "Button 3 pressed: triggering playback for sound 3\n");
+      TRice(iD(7338), "Button 3 pressed: triggering playback for sound 3\n");
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
     }
@@ -355,9 +444,6 @@ void vButtonStepTask(void *pvParameters) {
   // wasPressed: 0 = released, 1 = pressed
   static uint8_t wasPressed = 0;
 
-  // Create the semaphore before any button processing
-  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphore);
-
   // Initially, give the semaphore so our task doesn't block immediately
   xSemaphoreGive(xButtonSemaphoreHandle);
 
@@ -369,14 +455,15 @@ void vButtonStepTask(void *pvParameters) {
 
       // Process an event transitioning from idle to a valid state (0-3)
       if ((stepButtonState != STEPIDLE_VALUE) && (wasPressed == 0)) {
-        TRice(iD(1844), "info: stepButtonState: %d\n", stepButtonState);
+        TRice(iD(3561), "info: stepButtonState: %d\n", stepButtonState);
 
         if (stepButtonState <= NUM_STEPS && sampleButtonState < NUM_SAMPLES) {
-          stepGrid[sampleButtonState][stepButtonState-1] =
-            1 - stepGrid[sampleButtonState][stepButtonState-1];
-          TRice(iD(3956), "info: Select step %d for sample %d\n", stepButtonState, sampleButtonState);
+          stepGrid[sampleButtonState][stepButtonState - 1] =
+              1 - stepGrid[sampleButtonState][stepButtonState - 1];
+          TRice(iD(1743), "info: Select step %d for sample %d\n",
+                stepButtonState, sampleButtonState);
         }
-        wasPressed = 1;  // Mark that this press has been processed
+        wasPressed = 1; // Mark that this press has been processed
       }
       // When the button returns to idle, clear the flag
       if (stepButtonState == STEPIDLE_VALUE) {
@@ -418,18 +505,68 @@ void vBlinkTask(void *p) {
     kBlinkDelay += kBlinkStep;
 
     if (kBlinkDelay >= MAX_BLINK_DELAY) {
-      kBlinkStep -= MIN_BLINK_DELAY;  // Reverse step direction
+      kBlinkStep -= MIN_BLINK_DELAY; // Reverse step direction
 
     } else if (kBlinkDelay < MIN_BLINK_DELAY || kBlinkStep == 0) {
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
     }
-
-    // TRice(iD(7937), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
-    //      kBlinkStep, kBlinkDelay);
+#ifdef DEBUG
+    TRice(iD(3348), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+          kBlinkStep, kBlinkDelay);
+#endif
   }
 
   vTaskDelete(NULL);
+}
+
+void vOledAnimationTask(void *pvParameters) {
+  int16_t x = 64;
+  int16_t y = 32;
+  int16_t radius = 10;
+
+  int16_t vx = 3; // initial velocity X
+  int16_t vy = 3; // initial velocity Y
+
+  while (1) {
+    // Clear previous frame
+    OLED_Clear();
+
+    // Draw circle at new position
+    OLED_DrawCircle(x, y, radius, true);
+
+    // Update screen
+    OLED_UpdateScreen();
+
+    // Move the circle
+    x += vx;
+    y += vy;
+
+    // Check for collisions with frame borders
+    if ((x - radius <= 0) || (x + radius >= 128)) {
+      vx = -vx;
+      // Clamp position inside the frame to avoid getting stuck
+      if (x - radius <= 0) {
+        x = radius + 1;
+      }
+      
+      if (x + radius >= 128) {
+        x = 128 - radius - 1;
+      }
+    }
+
+    if ((y - radius <= 0) || (y + radius >= 64)) {
+      vy = -vy;
+      if (y - radius <= 0) {
+        y = radius + 1;
+      }
+      if (y + radius >= 64) {
+        y = 64 - radius - 1;
+      }
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
 }
 
 void config_userbutton(void) {
@@ -454,7 +591,7 @@ void config_userbutton(void) {
   // Configure PD1 and PD2 (new buttons) as input with internal pull-up
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;  // Enable internal pull-up
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; // Enable internal pull-up
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
@@ -477,53 +614,88 @@ void leds_init(void) {
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(3770), "GetSampleCallBack\n");
+  TRice(iD(5273), "GetSampleCallBack\n");
   return 1;
 }
-
 /*
- * Called when buffer has been played out
- * Releases semaphore and wakes up task which modifies the buffer
- */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(6478), "TransferComplete. pBuffer: %d; Size: %d\n", pBuffer, Size);
-  AudioManager_TransferCompleteCallback();
-  status = 0;
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+  TRice(iD(3965), "HalfTransfer_CallBack. pBuffer: %x; Size: %d\n", pBuffer,
+        Size);
 }
 
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(2248), "HalfTransfer. pBuffer: %d; Size: %d\n", pBuffer, Size);
-  AudioManager_HalfTransferCallback();
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  TRice(iD(2701), "TransferComplete_CallBack. pBuffer: %x; Size: %d; audioState: %d\n", pBuffer,
+        Size, audioState);
+
+  if (pendingPlayback) {
+    xSemaphoreGiveFromISR(xSemaphorePlayback, &xHigherPriorityTaskWoken);
+    pendingPlayback = 0;
+  }
+  audioState = AUDIO_STATE_IDLE;
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+*/
+
+static void mixCurrentStep(int16_t *dst, uint16_t samples)
+{
+  memset(dst, 0, samples * sizeof(int16_t));
+
+  for (uint32_t i = 0; i < samples; ++i) {
+    if (stepGrid[0][currentStep] && i < SOUNDSIZE2)
+      dst[i] += kick_44100_stereo[i] >> 1;
+
+    if (stepGrid[1][currentStep] && i < SOUNDSIZE3)
+      dst[i] += openhat_22050_mono[i] >> 1;
+  }
+}
+
+/* called when 1st half of the buffer has just been sent */
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
+{
+  mixCurrentStep(playbackBuffer, BUFFERSIZE/2);
+
+  TRice(iD(3188), "HalfTransfer_CallBack. pBuffer: %x; Size: %d\n", pBuffer,
+        Size);
+}
+
+/* called when 2nd half has been sent */
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
+{
+  mixCurrentStep(playbackBuffer + BUFFERSIZE/2, BUFFERSIZE/2);
+
+  /* advance sequencer */
+  currentStep = (currentStep + 1) % NUM_STEPS;
+
+  if (pendingPlayback) {
+    pendingPlayback = 0;
+  }
+  audioState = AUDIO_STATE_IDLE;
+
+  TRice(iD(4542), "TransferComplete_CallBack. pBuffer: %x; Size: %d; audioState: %d\n", pBuffer,
+        Size, audioState);
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
-  TRice(iD(6277), "error: Error_CallBack. Position: %d\n", pData);
+  TRice(iD(1408), "error: Error_CallBack. Position: %x\n", pData);
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(3396), "Codec_TIMEOUT_UserCallback\n");
+  TRice(iD(7902), "Codec_TIMEOUT_UserCallback\n");
   return 1;
 }
 
-/*
- * This FreeRTOS callback function gets called once per tick (default = 1000Hz)
- */
-void vApplicationTickHook(void) { ++tickTime; }
+void vApplicationTickHook(void) {
+  ++tickTime;
+}
 
-/*
- * Continually send "silence" to the speaker when not playing
- */
 void vApplicationIdleHook(void) {
-
   ++u64IdleTicksCnt;
-
-  if (status == 0) {
-    if (SPI_I2S_GetFlagStatus(CODEC_I2S, SPI_I2S_FLAG_TXE)) {
-      SPI_I2S_SendData(CODEC_I2S, 0);
-    }
-  }
 }

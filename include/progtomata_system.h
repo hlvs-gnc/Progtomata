@@ -43,6 +43,9 @@
 /// @brief Stack size for the sequencer task in bytes
 #define SEQUENCER_TASK_STACK_SIZE 256
 
+/// @brief Stack size for the animation task in bytes
+#define ANIMATION_TASK_STACK_SIZE 256
+
 // Task priority levels
 /// @brief Priority level for the sample button task (2 = medium)
 #define SAMPLE_BUTTON_TASK_PRIORITY 2
@@ -62,6 +65,8 @@
 /// @brief Priority level for the sequencer task (4 = very high)
 #define SEQUENCER_TASK_PRIORITY 4
 
+/// @brief Priority level for the animation task (4 = very high)
+#define ANIMATION_TASK_PRIORITY 1
 
 /// @brief Initial step size for delay increment and initial delay
 /// value in milliseconds
@@ -89,26 +94,6 @@ const uint32_t MAX_BLINK_DELAY = 250;
 
 /// @brief Buffer for storing audio data for playback
 int16_t playbackBuffer[BUFFERSIZE] = {0};
-
-
-/// @brief Static semaphore buffer for playback control
-StaticSemaphore_t xSemaphorePlaybackStatic;
-
-/// @brief Binary semaphore handle used to signal playback
-SemaphoreHandle_t xSemaphorePlayback;
-
-/// @brief Static semaphore buffer for buffer modification
-StaticSemaphore_t xSemaphoreModifyBufferStatic;
-
-/// @brief Binary semaphore handle used to signal buffer modification
-SemaphoreHandle_t xSemaphoreModifyBuffer;
-
-/// @brief Binary semaphore for button events
-StaticSemaphore_t xButtonSemaphore;
-
-/// @brief Binary semaphore handle for button events
-SemaphoreHandle_t xButtonSemaphoreHandle;
-
 
 // Tempo variables
 /// @brief Maximum playback task delay (<2^32)
@@ -158,6 +143,15 @@ StaticTask_t blinkTaskBuffer CCM_RAM;
 /// @brief Handle for the blink task
 TaskHandle_t blinkTaskHandle;
 
+// --- Animation Task ---
+/// @brief Stack memory allocation for the playback task stored in CCM
+StackType_t animationTaskStack[ANIMATION_TASK_STACK_SIZE] CCM_RAM;
+
+/// @brief Task control block (TCB) for the playback task stored in CCM
+StaticTask_t animationTaskBuffer CCM_RAM;
+
+/// @brief Handle for the playback task
+TaskHandle_t animationTaskHandle;
 
 // --- Playback Task ---
 /// @brief Stack memory allocation for the playback task stored in CCM
@@ -191,7 +185,6 @@ StaticTask_t sequencerTaskBuffer CCM_RAM;
 /// @brief Handle for the modify buffer task
 TaskHandle_t sequencerTaskHandle;
 
-
 /**
  * @brief
  *
@@ -220,6 +213,17 @@ void vButtonStepTask(void *p);
  * @param[in] p Pointer to task parameters (unused).
  */
 void vBlinkTask(void *p);
+
+/**
+ * @brief Task to animate the OLED display.
+ *
+ * This task runs continuously and redraws the OLED display with an
+ * animation. The animation is a bouncing ball that moves within the
+ * display boundaries.
+ *
+ * @param[in] pvParameters Pointer to task parameters (unused).
+ */
+void vOledAnimationTask(void *pvParameters);
 
 /**
  * @brief Loads sound into the playback buffer
