@@ -34,9 +34,6 @@
 /// @brief Stack size for the blink task in bytes
 #define BLINK_TASK_STACK_SIZE 128
 
-/// @brief Stack size for the playback task in bytes
-#define PLAYBACK_TASK_STACK_SIZE 256
-
 /// @brief Stack size for the modify task in bytes
 #define MODIFYBUFFER_TASK_STACK_SIZE 512
 
@@ -83,11 +80,13 @@ const uint32_t MAX_BLINK_DELAY = 250;
 /// @brief Number of samples in kick mono audio file
 #define SOUNDSIZE1 (6918)
 
-/// @brief Number of samples in kick stereo audio file
-#define SOUNDSIZE2 (17700)
-
 /// @brief Number of samples in open hat mono audio file
-#define SOUNDSIZE3 (9882)
+#define SOUNDSIZE2 (9882)
+
+typedef enum {
+  SAMPLE1 = 0,
+  SAMPLE2
+} audioSampleId;
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (32768)
@@ -96,14 +95,14 @@ const uint32_t MAX_BLINK_DELAY = 250;
 int16_t playbackBuffer[BUFFERSIZE] = {0};
 
 // Tempo variables
-/// @brief Maximum playback task delay (<2^32)
-static const uint16_t MAX_PB_DELAY = 1000;
+/// @brief Maximum playback task delay
+static const uint16_t MAX_PB_DELAY = 2500;
 
-/// @brief Minimum playback task delay (>=1)
-static const uint16_t MIN_PB_DELAY = 500;
+/// @brief Minimum playback task delay
+static const uint16_t MIN_PB_DELAY = 100;
 
 /// @brief Interval delay for the playback task
-uint16_t playback_delay = 1250;
+uint16_t playback_delay = 400;
 
 /// @brief Counts when the OS has no task to execute
 uint64_t u64IdleTicksCnt = 0;
@@ -143,6 +142,7 @@ StaticTask_t blinkTaskBuffer CCM_RAM;
 /// @brief Handle for the blink task
 TaskHandle_t blinkTaskHandle;
 
+
 // --- Animation Task ---
 /// @brief Stack memory allocation for the playback task stored in CCM
 StackType_t animationTaskStack[ANIMATION_TASK_STACK_SIZE] CCM_RAM;
@@ -152,16 +152,6 @@ StaticTask_t animationTaskBuffer CCM_RAM;
 
 /// @brief Handle for the playback task
 TaskHandle_t animationTaskHandle;
-
-// --- Playback Task ---
-/// @brief Stack memory allocation for the playback task stored in CCM
-StackType_t playbackTaskStack[PLAYBACK_TASK_STACK_SIZE] CCM_RAM;
-
-/// @brief Task control block (TCB) for the playback task stored in CCM
-StaticTask_t playbackTaskBuffer CCM_RAM;
-
-/// @brief Handle for the playback task
-TaskHandle_t playbackTaskHandle;
 
 
 // --- Modify Buffer Task ---

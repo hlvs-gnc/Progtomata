@@ -9,15 +9,8 @@
  *
  * @details
  *
- * Features:
- * - LED sequencing with dynamic delay adjustment.
- * - Button press detection to modify LED behavior.
- * - Static task allocation with CCM for optimized memory usage.
- * - Real-time operation using FreeRTOS.
- *
  * Dependencies:
  * - FreeRTOS Kernel
- * - STM32F4-Discovery Board Support Package (BSP)
  * - STM32F4xx Standard Peripheral Library
  *
  * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly
@@ -70,17 +63,13 @@
 #include <hooks.h>
 
 // Mono Audio samples
-// #include <kick_22050_mono.h>
+#include <kick_22050_mono.h>
 #include <openhat_22050_mono.h>
-
-// Stereo Audio samples
-#include <kick_44100_stereo.h>
 
 #define NUM_SAMPLES 2
 #define NUM_STEPS 4
 
 // Step grid to hold sample triggers for each step
-// stepGrid[step][sample] = 1 if sample should play at this step
 uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
 
 // Current step index
@@ -91,36 +80,20 @@ static uint16_t sampleButtonState = 0;
 
 static uint16_t stepButtonState = 0;
 
-// Audio playback state management
-typedef enum {
-  AUDIO_STATE_IDLE,
-  AUDIO_STATE_PLAYING,
-  AUDIO_STATE_PENDING
-} AudioState_t;
-
-static volatile AudioState_t audioState = AUDIO_STATE_IDLE;
-static volatile uint8_t pendingPlayback = 0;
-
-/// @brief Static semaphore buffer for playback control
-StaticSemaphore_t xSemaphorePlaybackStatic;
-
-/// @brief Binary semaphore handle used to signal playback
-SemaphoreHandle_t xSemaphorePlayback;
-
 /// @brief Static semaphore buffer for buffer modification
 StaticSemaphore_t xSemaphoreModifyBufferStatic;
 
 /// @brief Binary semaphore handle used to signal buffer modification
-SemaphoreHandle_t xSemaphoreModifyBuffer;
+SemaphoreHandle_t xSemaphoreModifyBufferHandle;
 
 /// @brief Static semaphore for OLED events
 StaticSemaphore_t xSemaphoreOledStatic;
 
 /// @brief Binary semaphore buffer for buffer modification
-SemaphoreHandle_t xSemaphoreOled;
+SemaphoreHandle_t xSemaphoreOledHandle;
 
 /// @brief Binary semaphore for button events
-StaticSemaphore_t xButtonSemaphore;
+StaticSemaphore_t xButtonSemaphoreStatic;
 
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
@@ -207,46 +180,37 @@ int main(void) {
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
 
-  xSemaphorePlayback = xSemaphoreCreateBinaryStatic(&xSemaphorePlaybackStatic);
-
-  if (xSemaphorePlayback == NULL) {
-    TRice(iD(4376), "error: Playback semaphore creation failed\n");
-  }
-
-  xSemaphoreModifyBuffer =
+  xSemaphoreModifyBufferHandle =
       xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
-  if (xSemaphoreModifyBuffer == NULL) {
-    TRice(iD(1175), "error: Memory mutex creation failed\n");
+  if (xSemaphoreModifyBufferHandle == NULL) {
+    TRice(iD(7399), "error: Memory mutex creation failed\n");
   }
 
   
   // Create the semaphore before any button processing
-  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphore);
+  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
   if (xButtonSemaphoreHandle == NULL) {
-    TRice(iD(3926), "error: Button semaphore creation failed\n");
+    TRice(iD(7573), "error: Button semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_44k) != 0) {
-    TRice(iD(4708), "msg: Audio codec initialization failed\n");
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 60, I2S_AudioFreq_22k) != 0) {
+    TRice(iD(2873), "msg: Audio codec initialization failed\n");
   }
 
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
-  EVAL_AUDIO_Play((uint16_t*)playbackBuffer, BUFFERSIZE * sizeof(int16_t));
-
-  TRice(iD(3720), "msg: Audio setup complete\n");
+  if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
+    TRice(iD(3630), "error: Failed to start audio playback\n");
+  }
+  
+  TRice(iD(1375), "msg: Audio setup complete\n");
 
   sequencerTaskHandle = xTaskCreateStatic(
       vSequencerTask, "SequencerTask", SEQUENCER_TASK_STACK_SIZE, NULL,
       SEQUENCER_TASK_PRIORITY, sequencerTaskStack,
       &sequencerTaskBuffer);
-
-  playbackTaskHandle = xTaskCreateStatic(
-      vPlaybackTask, "PlaybackTask", PLAYBACK_TASK_STACK_SIZE, NULL,
-      PLAYBACK_TASK_PRIORITY, playbackTaskStack,
-      &playbackTaskBuffer);
 
   modifyBufferTaskHandle = xTaskCreateStatic(
       vModifyBufferTask, "ModifyBufferTask", MODIFYBUFFER_TASK_STACK_SIZE, NULL,
@@ -273,7 +237,7 @@ int main(void) {
       ANIMATION_TASK_PRIORITY, animationTaskStack,
       &animationTaskBuffer);
 
-  TRice(iD(1106), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(7392), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   vTaskStartScheduler(); // This shall never return
 
@@ -282,17 +246,18 @@ int main(void) {
 }
 
 void vSequencerTask(void *pvparameters) {
-  TRice(iD(6498), "Sequencer started\n");
+  TRice(iD(1451), "Sequencer started\n");
 
   while (1) {
     // Wait for a trigger to start the sequencer
     for (uint8_t step = 0; step < NUM_STEPS; step++) {
-      currentStep = step;
 #ifdef DEBUG
-      TRice(iD(5370), "Processing step %d\n", step);
+      TRice(iD(5014), "Processing step %d\n", step);
 #endif
-      if (stepGrid[0][step] || stepGrid[1][step]) {
-        xSemaphoreGive(xSemaphoreModifyBuffer);
+      currentStep = step;
+
+      if (stepGrid[SAMPLE1][step] || stepGrid[SAMPLE2][step]) {
+        xSemaphoreGive(xSemaphoreModifyBufferHandle);
       }
 
       vTaskDelay((playback_delay / NUM_STEPS) / portTICK_RATE_MS);
@@ -300,72 +265,20 @@ void vSequencerTask(void *pvparameters) {
   }
 }
 
-void vPlaybackTask(void *pvparameters) {
-  while (1) {
-    // Wait for the semaphore to be given
-    if (xSemaphoreTake(xSemaphorePlayback, portMAX_DELAY) == pdTRUE) {
-      // Check if DMA is still busy (defensive programming)
-      if (DMA_GetCmdStatus(AUDIO_I2S_DMA_STREAM) != DISABLE) {
-        TRice(iD(2487), "warning: DMA still busy, skipping playback\n");
-        continue;
-      }
-
-      // Start playback
-      audioState = AUDIO_STATE_PLAYING;
-
-      if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
-        TRice(iD(3023), "error: Failed to start audio playback\n");
-        audioState = AUDIO_STATE_IDLE;
-      }
-
-      pendingPlayback = 0;
-    }
-  }
-}
-
-/*
 void vModifyBufferTask(void *pvparameters) {
   while (1) {
-    xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY);
-
-    for (int i = 0; i < BUFFERSIZE; i++) {
-      playbackBuffer[i] = 0;
-      if ((stepGrid[0][currentStep]) && (i < SOUNDSIZE2 * 2)) {
-        playbackBuffer[i] += (int16_t)kick_44100_stereo[i] / 2;
-      }
-      if ((stepGrid[1][currentStep]) && (i < SOUNDSIZE3)) {
-        playbackBuffer[i] += (int16_t)openhat_22050_mono[i] / 2;
-      }
-    }
-    xSemaphoreGive(xSemaphorePlayback); // Signal playback task
-  }
-}
-*/
-
-void vModifyBufferTask(void *pvparameters) {
-  while (1) {
-    if (xSemaphoreTake(xSemaphoreModifyBuffer, portMAX_DELAY) == pdTRUE) {
-
-      // Clear the preparation buffer
-      memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
-
+    if (xSemaphoreTake(xSemaphoreModifyBufferHandle, portMAX_DELAY) == pdTRUE) {
       // Mix samples with clipping prevention
       for (int i = 0; i < BUFFERSIZE; i++) {
+        playbackBuffer[i] = 0;
 
-        if (stepGrid[0][currentStep] && (i < SOUNDSIZE2 * 2)) {
-          playbackBuffer[i] += (int32_t)kick_44100_stereo[i] / 2;
+        if (stepGrid[SAMPLE1][currentStep] && (i < SOUNDSIZE1)) {
+          playbackBuffer[i] += (int32_t)kick_22050_mono[i] / 2;
         }
 
-        if (stepGrid[1][currentStep] && (i < SOUNDSIZE3)) {
+        if (stepGrid[SAMPLE2][currentStep] && (i < SOUNDSIZE2)) {
           playbackBuffer[i] += (int32_t)openhat_22050_mono[i] / 2;
         }
-      }
-
-      // Only trigger playback if not already playing
-      if (audioState == AUDIO_STATE_IDLE) {
-        xSemaphoreGive(xSemaphorePlayback);
-      } else {
-        pendingPlayback = 1;
       }
     }
   }
@@ -384,8 +297,6 @@ void vButtonSampleTask(void *p) {
 
     // Handle PA0 (onboard button)
     if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      // TRice(iD(2144), "Reset blink to minimum delay\n");
-
       GPIO_SetBits(GPIOD,
                    GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
 
@@ -394,7 +305,6 @@ void vButtonSampleTask(void *p) {
     }
     prevStatePA0 = currentStatePA0;
 
-    // TURN LEDs ON WHILE PRESSED, OFF WHILE NOT PRESSED ---
     //  PD1 => PD5
     if (currentStatePD1 == Bit_RESET) {
       // Button is pressed
@@ -407,8 +317,7 @@ void vButtonSampleTask(void *p) {
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       sampleButtonState = 0x0000; // Toggle step 1
-      // Trigger playback task for Sound 1
-      TRice(iD(1008), "Button 2 pressed: triggering playback for sound 2\n");
+      TRice(iD(7916), "Button 2 pressed: set playback for sound 2\n");
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
     }
@@ -424,8 +333,7 @@ void vButtonSampleTask(void *p) {
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       sampleButtonState = 0x0001; // Toggle step 2
-      // Trigger playback task for Sound 2
-      TRice(iD(7338), "Button 3 pressed: triggering playback for sound 3\n");
+      TRice(iD(7521), "Button 3 pressed: set playback for sound 3\n");
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
     }
@@ -444,23 +352,23 @@ void vButtonStepTask(void *pvParameters) {
   // wasPressed: 0 = released, 1 = pressed
   static uint8_t wasPressed = 0;
 
-  // Initially, give the semaphore so our task doesn't block immediately
+  // Initially, give the semaphore so the task doesn't block immediately
   xSemaphoreGive(xButtonSemaphoreHandle);
 
   for (;;) {
-    // Wait a short time for our "event" semaphore (simulating an event trigger)
+    // Wait a short time for the event semaphore
     if (xSemaphoreTake(xButtonSemaphoreHandle, pdMS_TO_TICKS(30)) == pdTRUE) {
       // Poll the button value
       stepButtonState = Interface_ReadButtonStep();
 
       // Process an event transitioning from idle to a valid state (0-3)
       if ((stepButtonState != STEPIDLE_VALUE) && (wasPressed == 0)) {
-        TRice(iD(3561), "info: stepButtonState: %d\n", stepButtonState);
+        TRice(iD(7943), "info: stepButtonState: %d\n", stepButtonState);
 
         if (stepButtonState <= NUM_STEPS && sampleButtonState < NUM_SAMPLES) {
           stepGrid[sampleButtonState][stepButtonState - 1] =
               1 - stepGrid[sampleButtonState][stepButtonState - 1];
-          TRice(iD(1743), "info: Select step %d for sample %d\n",
+          TRice(iD(5589), "info: Select step %d for sample %d\n",
                 stepButtonState, sampleButtonState);
         }
         wasPressed = 1; // Mark that this press has been processed
@@ -511,8 +419,8 @@ void vBlinkTask(void *p) {
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
     }
-#ifdef DEBUG
-    TRice(iD(3348), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
+#ifdef BLINK
+    TRice(iD(3768), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
           kBlinkStep, kBlinkDelay);
 #endif
   }
@@ -619,76 +527,28 @@ void leds_init(void) {
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
-  TRice(iD(5273), "GetSampleCallBack\n");
+  TRice(iD(6204), "GetSample\n");
   return 1;
 }
-/*
+
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  TRice(iD(3965), "HalfTransfer_CallBack. pBuffer: %x; Size: %d\n", pBuffer,
-        Size);
+#ifdef DEBUG
+  TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
+#endif
 }
 
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-  TRice(iD(2701), "TransferComplete_CallBack. pBuffer: %x; Size: %d; audioState: %d\n", pBuffer,
-        Size, audioState);
-
-  if (pendingPlayback) {
-    xSemaphoreGiveFromISR(xSemaphorePlayback, &xHigherPriorityTaskWoken);
-    pendingPlayback = 0;
-  }
-  audioState = AUDIO_STATE_IDLE;
-
-  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
-*/
-
-static void mixCurrentStep(int16_t *dst, uint16_t samples)
-{
-  memset(dst, 0, samples * sizeof(int16_t));
-
-  for (uint32_t i = 0; i < samples; ++i) {
-    if (stepGrid[0][currentStep] && i < SOUNDSIZE2)
-      dst[i] += kick_44100_stereo[i] >> 1;
-
-    if (stepGrid[1][currentStep] && i < SOUNDSIZE3)
-      dst[i] += openhat_22050_mono[i] >> 1;
-  }
-}
-
-/* called when 1st half of the buffer has just been sent */
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
-{
-  mixCurrentStep(playbackBuffer, BUFFERSIZE/2);
-
-  TRice(iD(3188), "HalfTransfer_CallBack. pBuffer: %x; Size: %d\n", pBuffer,
-        Size);
-}
-
-/* called when 2nd half has been sent */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
-{
-  mixCurrentStep(playbackBuffer + BUFFERSIZE/2, BUFFERSIZE/2);
-
-  /* advance sequencer */
-  currentStep = (currentStep + 1) % NUM_STEPS;
-
-  if (pendingPlayback) {
-    pendingPlayback = 0;
-  }
-  audioState = AUDIO_STATE_IDLE;
-
-  TRice(iD(4542), "TransferComplete_CallBack. pBuffer: %x; Size: %d; audioState: %d\n", pBuffer,
-        Size, audioState);
+#ifdef DEBUG
+  TRice(iD(7634), "TransferComplete. pBuffer: %x; Size: %d\n", pBuffer, Size);
+#endif
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
-  TRice(iD(1408), "error: Error_CallBack. Position: %x\n", pData);
+  TRice(iD(4389), "error: Error. Position: %x\n", pData);
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
-  TRice(iD(7902), "Codec_TIMEOUT_UserCallback\n");
+  TRice(iD(1479), "Codec_TIMEOUT_User\n");
   return 1;
 }
 
