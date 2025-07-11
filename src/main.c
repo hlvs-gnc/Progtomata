@@ -68,12 +68,14 @@
 
 #define NUM_SAMPLES 2
 #define NUM_STEPS 4
+#define STEP_DURATION  (BUFFERSIZE / NUM_STEPS)
+#define CLIP16(x)      ( (x) > 32767 ? 32767 : ( (x) < -32768 ? -32768 : (x) ) )
 
 // Step grid to hold sample triggers for each step
 uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
 
 // Current step index
-static uint8_t currentStep = 0;
+static uint8_t playHeadStep = 0;
 
 // N Buttons' states - each bit indicate respective button's ON/OFF state
 static uint16_t sampleButtonState = 0;
@@ -97,6 +99,68 @@ StaticSemaphore_t xButtonSemaphoreStatic;
 
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
+
+static const int16_t * const sampleData[NUM_SAMPLES] = {
+  kick_22050_mono,         /* SAMPLE 0 */
+  openhat_22050_mono       /* SAMPLE 1 */
+};
+
+static const uint32_t sampleLen[NUM_SAMPLES] = {
+  SOUNDSIZE1,
+  SOUNDSIZE2
+};
+
+void Sequencer_SetBpm(uint16_t bpm) {
+  if (bpm < MIN_BPM) bpm = MIN_BPM;
+  if (bpm > MAX_BPM) bpm = MAX_BPM;
+
+  taskENTER_CRITICAL(); // protect against DMA callbacks
+  currBpm = bpm;
+  nbrSamplesStep = (SAMPLE_RATE * 60U) / bpm;
+  taskEXIT_CRITICAL();
+}
+
+/* ----------  new globals  ---------- */
+static uint32_t stepPos   = 0;        /* samples already rendered in curr-step */
+static uint8_t  stepIndex = 0;        /* grid column currently playing        */
+
+/* mix <cnt> samples of the current step, starting at src offset <ofs> */
+static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
+  for (uint8_t s = 0; s < NUM_SAMPLES; ++s) {
+    if (!stepGrid[s][stepIndex]) continue;
+
+    const int16_t *src = sampleData[s] + ofs;
+    uint32_t       len = sampleLen[s] - ofs;
+    if (len > cnt) len = cnt;
+
+    for (uint32_t i = 0; i < len; ++i) {
+      int32_t v = playbackBuffer[dst + i] + (src[i] >> 1);
+      playbackBuffer[dst + i] = CLIP16(v);
+    }
+  }
+}
+
+/* Render two consecutive steps starting at 'firstStep' into half 'base' */
+static void renderHalf(uint32_t base) {
+  const uint32_t halfSamples = BUFFERSIZE / 2;
+  uint32_t todo = halfSamples;               /* samples still to generate     */
+
+  while (todo) {
+    uint32_t stepSamples  = nbrSamplesStep;      /* atomic copy                   */
+    uint32_t leftInStep   = stepSamples - stepPos;
+    uint32_t chunk        = (leftInStep < todo) ? leftInStep : todo;
+
+    mixSegment(base + (halfSamples - todo), chunk, stepPos);
+
+    stepPos  += chunk;
+    todo     -= chunk;
+
+    if (stepPos == stepSamples) {          /* reached next step border ?    */
+      stepPos = 0;
+      stepIndex = (stepIndex + 1) % NUM_STEPS;
+    }
+  }
+}
 
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
@@ -179,13 +243,6 @@ int main(void) {
   LCD_WriteString("****************");
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
-
-  xSemaphoreModifyBufferHandle =
-      xSemaphoreCreateBinaryStatic(&xSemaphoreModifyBufferStatic);
-  if (xSemaphoreModifyBufferHandle == NULL) {
-    TRice(iD(7399), "error: Memory mutex creation failed\n");
-  }
-
   
   // Create the semaphore before any button processing
   xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
@@ -195,27 +252,20 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 60, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 65, I2S_AudioFreq_22k) != 0) {
     TRice(iD(2873), "msg: Audio codec initialization failed\n");
   }
 
+  Sequencer_SetBpm(120);
+  
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
+  // Start audio playback
   if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
     TRice(iD(3630), "error: Failed to start audio playback\n");
   }
-  
+
   TRice(iD(1375), "msg: Audio setup complete\n");
-
-  sequencerTaskHandle = xTaskCreateStatic(
-      vSequencerTask, "SequencerTask", SEQUENCER_TASK_STACK_SIZE, NULL,
-      SEQUENCER_TASK_PRIORITY, sequencerTaskStack,
-      &sequencerTaskBuffer);
-
-  modifyBufferTaskHandle = xTaskCreateStatic(
-      vModifyBufferTask, "ModifyBufferTask", MODIFYBUFFER_TASK_STACK_SIZE, NULL,
-      MODIFYBUFFER_TASK_PRIORITY, modifyBufferTaskStack,
-      &modifyBufferTaskBuffer);
 
   sampleButtonTaskHandle = xTaskCreateStatic(
       vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE, NULL,
@@ -242,45 +292,6 @@ int main(void) {
   vTaskStartScheduler(); // This shall never return
 
   for (;;) {
-  }
-}
-
-void vSequencerTask(void *pvparameters) {
-  TRice(iD(1451), "Sequencer started\n");
-
-  while (1) {
-    // Wait for a trigger to start the sequencer
-    for (uint8_t step = 0; step < NUM_STEPS; step++) {
-#ifdef DEBUG
-      TRice(iD(5014), "Processing step %d\n", step);
-#endif
-      currentStep = step;
-
-      if (stepGrid[SAMPLE1][step] || stepGrid[SAMPLE2][step]) {
-        xSemaphoreGive(xSemaphoreModifyBufferHandle);
-      }
-
-      vTaskDelay((playback_delay / NUM_STEPS) / portTICK_RATE_MS);
-    }
-  }
-}
-
-void vModifyBufferTask(void *pvparameters) {
-  while (1) {
-    if (xSemaphoreTake(xSemaphoreModifyBufferHandle, portMAX_DELAY) == pdTRUE) {
-      // Mix samples with clipping prevention
-      for (int i = 0; i < BUFFERSIZE; i++) {
-        playbackBuffer[i] = 0;
-
-        if (stepGrid[SAMPLE1][currentStep] && (i < SOUNDSIZE1)) {
-          playbackBuffer[i] += (int32_t)kick_22050_mono[i] / 2;
-        }
-
-        if (stepGrid[SAMPLE2][currentStep] && (i < SOUNDSIZE2)) {
-          playbackBuffer[i] += (int32_t)openhat_22050_mono[i] / 2;
-        }
-      }
-    }
   }
 }
 
@@ -532,12 +543,20 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
+  memset(&playbackBuffer[0], 0, (BUFFERSIZE/2)*sizeof(int16_t));
+  renderHalf(0);                 /* renders first half-buffer            */
+  playHeadStep = stepIndex;      /* UI can flash LEDs exactly on beat    */
+
 #ifdef DEBUG
   TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif
 }
 
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
+  memset(&playbackBuffer[BUFFERSIZE/2], 0, (BUFFERSIZE/2)*sizeof(int16_t));
+  renderHalf(BUFFERSIZE / 2);    /* renders second half-buffer           */
+  playHeadStep = stepIndex;
+
 #ifdef DEBUG
   TRice(iD(7634), "TransferComplete. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif

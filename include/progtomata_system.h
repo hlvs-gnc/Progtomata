@@ -94,15 +94,13 @@ typedef enum {
 /// @brief Buffer for storing audio data for playback
 int16_t playbackBuffer[BUFFERSIZE] = {0};
 
-// Tempo variables
-/// @brief Maximum playback task delay
-static const uint16_t MAX_PB_DELAY = 2500;
+// Tempo
+#define SAMPLE_RATE        22050U          // I²S sample-rate
+#define MIN_BPM            40U
+#define MAX_BPM            200U
 
-/// @brief Minimum playback task delay
-static const uint16_t MIN_PB_DELAY = 100;
-
-/// @brief Interval delay for the playback task
-uint16_t playback_delay = 400;
+static volatile uint16_t currBpm;             // current tempo
+static volatile uint32_t nbrSamplesStep;     // samples per sequencer step
 
 /// @brief Counts when the OS has no task to execute
 uint64_t u64IdleTicksCnt = 0;
@@ -152,28 +150,6 @@ StaticTask_t animationTaskBuffer CCM_RAM;
 
 /// @brief Handle for the playback task
 TaskHandle_t animationTaskHandle;
-
-
-// --- Modify Buffer Task ---
-/// @brief Stack memory allocation for the modify task stored in CCM
-StackType_t modifyBufferTaskStack[MODIFYBUFFER_TASK_STACK_SIZE] CCM_RAM;
-
-/// @brief Task control block (TCB) for the modify task stored in CCM
-StaticTask_t modifyBufferTaskBuffer CCM_RAM;
-
-/// @brief Handle for the modify buffer task
-TaskHandle_t modifyBufferTaskHandle;
-
-
-// --- Sequencer Task ---
-/// @brief Stack memory allocation for the modify task stored in CCM
-StackType_t sequencerTaskStack[SEQUENCER_TASK_STACK_SIZE] CCM_RAM;
-
-/// @brief Task control block (TCB) for the modify task stored in CCM
-StaticTask_t sequencerTaskBuffer CCM_RAM;
-
-/// @brief Handle for the modify buffer task
-TaskHandle_t sequencerTaskHandle;
 
 /**
  * @brief
