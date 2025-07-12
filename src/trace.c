@@ -13,6 +13,7 @@
  */
 
 #include <trace.h>
+#include <hooks.h>
 
 /**
  * @brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
@@ -26,9 +27,6 @@
 #define TRACE_TASK_STACK_SIZE 256
 #define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
-/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
-#define CCM_RAM __attribute__((section(".ccmram")))
-
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
 
@@ -40,7 +38,7 @@ StaticTask_t traceTaskBuffer CCM_RAM;
  */
 static bool g_isTraceInitialized = false;
 
-void DWT_Init(void) {
+static void DWT_Init(void) {
   // Enable trace and debug block
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 

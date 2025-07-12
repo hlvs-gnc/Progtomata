@@ -60,29 +60,6 @@ typedef enum {
 void uart_init(void);
 
 /**
- * @brief Transmits a single character over USART1.
- *
- * @param c Character to send.
- */
-void uart_send_char(char c);
-
-/**
- * @brief Transmits a string over USART1.
- *
- * @param str Pointer to the null-terminated string to send.
- */
-void uart_send_string(const char *str);
-
-/**
- * @brief Convert an integer (signed or unsigned) to a string and send it over UART.
- *        Handles signed decimal, unsigned decimal, and hexadecimal.
- *
- * @param value  The integer value to print (pass as long for convenience).
- * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC, PRINT_HEX).
- */
-void uart_print_type(double value, PrintFormat_t format);
-
-/**
  * @brief Transmits a formatted string over USART2.
  *
  * This function formats a string using the provided format specifier and arguments,

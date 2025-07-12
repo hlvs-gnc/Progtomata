@@ -92,7 +92,13 @@ static void LCD_Data(uint8_t data) {
   for (volatile int i = 0; i < 2000; i++);
 }
 
-void LCD_GPIO_Setup(void) {
+/**
+ * @brief Configures GPIO pins connected to the LCD.
+ *
+ * Prepares pins for output mode and sets them low. This is
+ * necessary before calling @ref LCD_Init().
+ */
+static void LCD_GPIO_Setup(void) {
   GPIO_InitTypeDef GPIO_InitStruct;
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
@@ -142,7 +148,7 @@ void LCD_Clear(void) {
   for (volatile int i = 0; i < 30000; i++);
 }
 
-void LCD_WriteString(char *str) {
+void LCD_WriteString(const char *str) {
   while (*str) {
     LCD_Data((uint8_t)*str++);
   }

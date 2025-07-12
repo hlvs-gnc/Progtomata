@@ -74,14 +74,24 @@ void uart_init(void) {
   USART_Cmd(USART2, ENABLE);
 }
 
-void uart_send_char(char c) {
+/**
+ * @brief Transmits a single character over USART1.
+ *
+ * @param c Character to send.
+ */
+static void uart_send_char(char c) {
   // Wait until transmit buffer is empty
   while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
   }
   USART_SendData(USART2, c);
 }
 
-void uart_send_string(const char *str) {
+/**
+ * @brief Transmits a string over USART1.
+ *
+ * @param str Pointer to the null-terminated string to send.
+ */
+static void uart_send_string(const char *str) {
   while (*str) {
     uart_send_char(*str++);
   }
@@ -243,7 +253,14 @@ static void print_float(double value) {
   }
 }
 
-void uart_print_type(double value, PrintFormat_t format) {
+/**
+ * @brief Convert an integer (signed or unsigned) to a string and send it over UART.
+ *        Handles signed decimal, unsigned decimal, and hexadecimal.
+ *
+ * @param value  The integer value to print (pass as long for convenience).
+ * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC, PRINT_HEX).
+ */
+static void uart_print_type(double value, PrintFormat_t format) {
   switch (format) {
     case PRINT_SIGNED_DEC:
       print_signed_long((long)value);
@@ -299,7 +316,7 @@ void uart_print(const char *format, ...) {
           break;
         }
         case 's': {
-          char *s = va_arg(args, char *);
+          const char *s = va_arg(args, char *);
           if (s) {
             uart_send_string(s);
           } else {

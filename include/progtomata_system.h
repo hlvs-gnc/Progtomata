@@ -20,9 +20,70 @@
 
 #include <stdint.h>
 #include <semphr.h>
+#include <hooks.h>
 
-/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
-#define CCM_RAM __attribute__((section(".ccmram")))
+// Mono Audio samples
+#include <kick_22050_mono.h>
+#include <openhat_22050_mono.h>
+
+#define NUM_SAMPLES 2
+#define NUM_STEPS 4
+#define STEP_DURATION  (BUFFERSIZE / NUM_STEPS)
+#define CLIP16(x)      ( (x) > 32767 ? 32767 : ( (x) < -32768 ? -32768 : (x) ) )
+
+/// @brief Step grid to hold sample triggers for each step
+uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
+
+/// @brief Number of samples in kick mono audio file
+#define SOUNDSIZE1 (6918)
+
+/// @brief Number of samples in open hat mono audio file
+#define SOUNDSIZE2 (9882)
+
+typedef enum {
+  SAMPLE1 = 0,
+  SAMPLE2
+} audioSampleId;
+
+/// @brief Current step index
+static uint8_t playHeadStep = 0;
+/// @brief Samples already rendered in current beat-step
+static uint32_t stepPos   = 0;
+/// @brief Grid column currently playing        
+static uint8_t  stepIndex = 0;
+
+/// @brief Sample button state - for N samples
+static uint16_t sampleButtonState = 0;
+/// @brief Step button's state - for N steps
+static uint16_t stepButtonState = 0;
+
+/// @brief Static semaphore buffer for buffer modification
+StaticSemaphore_t xSemaphoreModifyBufferStatic;
+
+/// @brief Binary semaphore handle used to signal buffer modification
+SemaphoreHandle_t xSemaphoreModifyBufferHandle;
+
+/// @brief Static semaphore for OLED events
+StaticSemaphore_t xSemaphoreOledStatic;
+
+/// @brief Binary semaphore buffer for buffer modification
+SemaphoreHandle_t xSemaphoreOledHandle;
+
+/// @brief Binary semaphore for button events
+StaticSemaphore_t xButtonSemaphoreStatic;
+
+/// @brief Binary semaphore handle for button events
+SemaphoreHandle_t xButtonSemaphoreHandle;
+
+static const int16_t * const sampleData[NUM_SAMPLES] = {
+  kick_22050_mono,         /* SAMPLE 0 */
+  openhat_22050_mono       /* SAMPLE 1 */
+};
+
+static const uint32_t sampleLen[NUM_SAMPLES] = {
+  SOUNDSIZE1,
+  SOUNDSIZE2
+};
 
 // Task stack sizes
 /// @brief Stack size for the sample button task in bytes
@@ -75,18 +136,6 @@ static uint32_t kBlinkDelay = 50;
 const uint32_t MIN_BLINK_DELAY = 10;
 /// @brief Maximum delay for LED blinking in milliseconds
 const uint32_t MAX_BLINK_DELAY = 250;
-
-
-/// @brief Number of samples in kick mono audio file
-#define SOUNDSIZE1 (6918)
-
-/// @brief Number of samples in open hat mono audio file
-#define SOUNDSIZE2 (9882)
-
-typedef enum {
-  SAMPLE1 = 0,
-  SAMPLE2
-} audioSampleId;
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (32768)
@@ -160,14 +209,14 @@ TaskHandle_t animationTaskHandle;
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-void vButtonSampleTask(void *p);
+static void vButtonSampleTask(void *p);
 
 /**
  * @brief
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-void vButtonStepTask(void *p);
+static void vButtonStepTask(void *pvParameters);
 
 /**
  * @brief Controls LED blinking behavior with variable delay.
@@ -178,7 +227,7 @@ void vButtonStepTask(void *p);
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-void vBlinkTask(void *p);
+static void vBlinkTask(void *p);
 
 /**
  * @brief Task to animate the OLED display.
@@ -189,60 +238,7 @@ void vBlinkTask(void *p);
  *
  * @param[in] pvParameters Pointer to task parameters (unused).
  */
-void vOledAnimationTask(void *pvParameters);
-
-/**
- * @brief Loads sound into the playback buffer
- *
- * Loads sound into the array, applies effects to it if they are selected,
- * and displays active effect on LCD screen after modifying playback buffer
- *
- * @param[in] pvparameters Pointer to task parameters (unused).
- */
-void vModifyBufferTask(void *pvparameters);
-
-/**
- * @brief Triggers audio playback with a variable delay.
- *
- * Runs as a FreeRTOS task that waits for a binary semaphore to be given.
- * When the semaphore is given, it plays a 16-bit signed audio sample with
- * a defined sample rate and waits for a variable delay before playing the
- * sample again. This task is designed to be triggered by the button task
- * when a button press is detected.
- *
- * @param[in] pvparameters Pointer to task parameters (unused).
- */
-void vPlaybackTask(void *pvparameters);
-
-/**
- * @brief Triggers playback of sound samples in a sequence.
- *
- * This task is responsible for triggering the playback of sound samples
- * in a predefined sequence. It waits for a binary semaphore to be given,
- * a triggering the playback task to play the next sound sample
- * in the sequence. The sequence is defined by the button state,
- * which is monitored by the button task. If the button state
- * changes, the sequence is updated accordingly.
- *
- * @param[in] pvparameters Pointer to task parameters (unused).
- */
-void vSequencerTask(void *pvparameters);
-
-/**
- * @brief Configures the user button GPIO (PA0) as an input.
- *
- * Initializes GPIO settings, enabling input mode without pull-up or
- * pull-down resistors. Prepares the pin to detect user button presses.
- */
-void config_userbutton(void);
-
-/**
- * @brief Initializes GPIO pins connected to LEDs.
- *
- * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
- * proper configuration for controlling LED states.
- */
-void leds_init(void);
+static void vOledAnimationTask(void *pvParameters);
 
 /**
  * @brief Configures the system clock to 168 MHz for STM32F4.
@@ -253,6 +249,6 @@ void leds_init(void);
  * configures the main PLL to achieve a 168 MHz system clock frequency.
  * It also configures the Flash memory latency and enables the prefetch buffer.
  */
-void SystemClock_Config(void);
+static void SystemClock_Config(void);
 
 #endif  // PROGTOMATA_SYSTEM_H_

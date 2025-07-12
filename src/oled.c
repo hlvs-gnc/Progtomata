@@ -165,6 +165,11 @@ static OLED_Status OLED_I2C_WriteMulti(uint8_t addr, uint8_t reg, uint8_t *data,
   return status;
 }
 
+/* Write command to OLED */
+static void OLED_WriteCommand(uint8_t cmd) {
+  OLED_I2C_Write(OLED_I2C_ADDR, OLED_CONTROL_BYTE_CMD_SINGLE, cmd);
+}
+
 /* Initialize OLED Display */
 void OLED_Init(void) {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -216,7 +221,7 @@ void OLED_Init(void) {
   OLED_WriteCommand(0x3F);
   OLED_WriteCommand(OLED_CMD_SET_DISPLAY_OFFSET);
   OLED_WriteCommand(0x00);
-  OLED_WriteCommand(OLED_CMD_SET_START_LINE | 0x00);
+  OLED_WriteCommand(OLED_CMD_SET_START_LINE);
   OLED_WriteCommand(OLED_CMD_CHARGE_PUMP);
   OLED_WriteCommand(0x14);
   OLED_WriteCommand(OLED_CMD_MEMORY_MODE);
@@ -240,18 +245,13 @@ void OLED_Init(void) {
   OLED_UpdateScreen();
 }
 
-/* Write command to OLED */
-void OLED_WriteCommand(uint8_t cmd) {
-  OLED_I2C_Write(OLED_I2C_ADDR, OLED_CONTROL_BYTE_CMD_SINGLE, cmd);
-}
-
 /* Write data to OLED */
 void OLED_WriteData(uint8_t data) {
   OLED_I2C_Write(OLED_I2C_ADDR, OLED_CONTROL_BYTE_DATA_STREAM, data);
 }
 
 /* Write multiple data to OLED */
-void OLED_WriteMultipleData(uint8_t *data, uint16_t size) {
+static void OLED_WriteMultipleData(uint8_t *data, uint16_t size) {
   OLED_I2C_WriteMulti(OLED_I2C_ADDR, OLED_CONTROL_BYTE_DATA_STREAM, data, size);
 }
 
@@ -289,8 +289,14 @@ void OLED_InvertDisplay(bool invert) {
   }
 }
 
-/* Draw pixel in buffer */
-void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
+/**
+ * @brief Draws a single pixel on the OLED display.
+ *
+ * @param x the x-coordinate of the pixel
+ * @param y the y-coordinate of the pixel
+ * @param color the color of the pixel, true for white, false for black
+ */
+static void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
   if (x >= OLED_WIDTH || y >= OLED_HEIGHT) {
     return;
   }
@@ -302,8 +308,15 @@ void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
   }
 }
 
-/* Draw character */
-void OLED_DrawChar(uint8_t x, uint8_t y, char c) {
+
+/**
+ * @brief Draws a single character on the OLED display.
+ *
+ * @param x the x-coordinate of the position
+ * @param y the y-coordinate of the position
+ * @param c the character to draw
+ */
+static void OLED_DrawChar(uint8_t x, uint8_t y, char c) {
   uint8_t i, j;
 
   if (c < 32 || c > 122) {
@@ -336,8 +349,16 @@ void OLED_DrawString(uint8_t x, uint8_t y, const char *str) {
   }
 }
 
-/* Draw line using Bresenham's algorithm */
-void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color) {
+/**
+ * @brief Draws a single line on the OLED display.
+ *
+ * @param x0 the x-coordinate of the start of the line
+ * @param y0 the y-coordinate of the start of the line
+ * @param x1 the x-coordinate of the end of the line
+ * @param y1 the y-coordinate of the end of the line
+ * @param color the color of the line, true for white, false for black
+ */
+static void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color) {
   int16_t dx = abs(x1 - x0);
   int16_t dy = abs(y1 - y0);
   int16_t sx = x0 < x1 ? 1 : -1;

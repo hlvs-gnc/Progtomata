@@ -62,55 +62,7 @@
 // FreeRTOS Hook functions
 #include <hooks.h>
 
-// Mono Audio samples
-#include <kick_22050_mono.h>
-#include <openhat_22050_mono.h>
-
-#define NUM_SAMPLES 2
-#define NUM_STEPS 4
-#define STEP_DURATION  (BUFFERSIZE / NUM_STEPS)
-#define CLIP16(x)      ( (x) > 32767 ? 32767 : ( (x) < -32768 ? -32768 : (x) ) )
-
-// Step grid to hold sample triggers for each step
-uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
-
-// Current step index
-static uint8_t playHeadStep = 0;
-
-// N Buttons' states - each bit indicate respective button's ON/OFF state
-static uint16_t sampleButtonState = 0;
-
-static uint16_t stepButtonState = 0;
-
-/// @brief Static semaphore buffer for buffer modification
-StaticSemaphore_t xSemaphoreModifyBufferStatic;
-
-/// @brief Binary semaphore handle used to signal buffer modification
-SemaphoreHandle_t xSemaphoreModifyBufferHandle;
-
-/// @brief Static semaphore for OLED events
-StaticSemaphore_t xSemaphoreOledStatic;
-
-/// @brief Binary semaphore buffer for buffer modification
-SemaphoreHandle_t xSemaphoreOledHandle;
-
-/// @brief Binary semaphore for button events
-StaticSemaphore_t xButtonSemaphoreStatic;
-
-/// @brief Binary semaphore handle for button events
-SemaphoreHandle_t xButtonSemaphoreHandle;
-
-static const int16_t * const sampleData[NUM_SAMPLES] = {
-  kick_22050_mono,         /* SAMPLE 0 */
-  openhat_22050_mono       /* SAMPLE 1 */
-};
-
-static const uint32_t sampleLen[NUM_SAMPLES] = {
-  SOUNDSIZE1,
-  SOUNDSIZE2
-};
-
-void Sequencer_SetBpm(uint16_t bpm) {
+static void Sequencer_SetBpm(uint16_t bpm) {
   if (bpm < MIN_BPM) bpm = MIN_BPM;
   if (bpm > MAX_BPM) bpm = MAX_BPM;
 
@@ -120,18 +72,17 @@ void Sequencer_SetBpm(uint16_t bpm) {
   taskEXIT_CRITICAL();
 }
 
-/* ----------  new globals  ---------- */
-static uint32_t stepPos   = 0;        /* samples already rendered in curr-step */
-static uint8_t  stepIndex = 0;        /* grid column currently playing        */
-
-/* mix <cnt> samples of the current step, starting at src offset <ofs> */
 static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
   for (uint8_t s = 0; s < NUM_SAMPLES; ++s) {
-    if (!stepGrid[s][stepIndex]) continue;
+    if (!stepGrid[s][stepIndex]) {
+      continue;
+    }
 
     const int16_t *src = sampleData[s] + ofs;
     uint32_t       len = sampleLen[s] - ofs;
-    if (len > cnt) len = cnt;
+    if (len > cnt) {
+      len = cnt;
+    }
 
     for (uint32_t i = 0; i < len; ++i) {
       int32_t v = playbackBuffer[dst + i] + (src[i] >> 1);
@@ -143,10 +94,10 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
 /* Render two consecutive steps starting at 'firstStep' into half 'base' */
 static void renderHalf(uint32_t base) {
   const uint32_t halfSamples = BUFFERSIZE / 2;
-  uint32_t todo = halfSamples;               /* samples still to generate     */
+  uint32_t todo = halfSamples; /* samples still to generate     */
 
   while (todo) {
-    uint32_t stepSamples  = nbrSamplesStep;      /* atomic copy                   */
+    uint32_t stepSamples  = nbrSamplesStep;
     uint32_t leftInStep   = stepSamples - stepPos;
     uint32_t chunk        = (leftInStep < todo) ? leftInStep : todo;
 
@@ -155,7 +106,7 @@ static void renderHalf(uint32_t base) {
     stepPos  += chunk;
     todo     -= chunk;
 
-    if (stepPos == stepSamples) {          /* reached next step border ?    */
+    if (stepPos == stepSamples) { /* reached next step border ? */
       stepPos = 0;
       stepIndex = (stepIndex + 1) % NUM_STEPS;
     }
@@ -165,7 +116,7 @@ static void renderHalf(uint32_t base) {
 /**
  * @brief Configure the system clock to 168 MHz (for STM32F4)
  */
-void SystemClock_Config(void) {
+static void SystemClock_Config(void) {
   // Enable the power interface clock and configure voltage regulator
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
@@ -210,6 +161,67 @@ void SystemClock_Config(void) {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
 
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+}
+
+/**
+ * @brief Configures the user button GPIO (PA0) as an input.
+ *
+ * Initializes GPIO settings, enabling input mode without pull-up or
+ * pull-down resistors. Prepares the pin to detect user button presses.
+ */
+static void config_userbutton(void) {
+  // Enable clock for GPIOD
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+  // Declare a variable of type struct GPIO_InitTypeDef
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  // Set pin mode to input
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+
+  // Select pin PA0 only
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+
+  // Set no internal pull-up or pull-down resistor
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+  // Initialize PA0 pins by passing port name and address of PushButton struct
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  // Configure PD1 and PD2 (new buttons) as input with internal pull-up
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; // Enable internal pull-up
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+}
+
+/**
+ * @brief Initializes GPIO pins connected to LEDs.
+ *
+ * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
+ * proper configuration for controlling LED states.
+ */
+static void leds_init(void) {
+  // Initialize board LEDs
+  STM_EVAL_LEDInit(LED3);
+
+  STM_EVAL_LEDInit(LED4);
+
+  STM_EVAL_LEDInit(LED5);
+
+  STM_EVAL_LEDInit(LED6);
+
+  // External LEDs
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |
+                                GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 int main(void) {
@@ -295,7 +307,7 @@ int main(void) {
   }
 }
 
-void vButtonSampleTask(void *p) {
+static void vButtonSampleTask(void *p) {
   uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
   uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
   uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
@@ -486,55 +498,6 @@ void vOledAnimationTask(void *pvParameters) {
 
     vTaskDelay(pdMS_TO_TICKS(5));
   }
-}
-
-void config_userbutton(void) {
-  // Enable clock for GPIOD
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-
-  // Declare a variable of type struct GPIO_InitTypeDef
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  // Set pin mode to input
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-
-  // Select pin PA0 only
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-
-  // Set no internal pull-up or pull-down resistor
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-
-  // Initialize PA0 pins by passing port name and address of PushButton struct
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  // Configure PD1 and PD2 (new buttons) as input with internal pull-up
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; // Enable internal pull-up
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
-}
-
-void leds_init(void) {
-  // Initialize board LEDs
-  STM_EVAL_LEDInit(LED3);
-
-  STM_EVAL_LEDInit(LED4);
-
-  STM_EVAL_LEDInit(LED5);
-
-  STM_EVAL_LEDInit(LED6);
-
-  // External LEDs
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |
-                                GPIO_Pin_15 | GPIO_Pin_5 | GPIO_Pin_6;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {

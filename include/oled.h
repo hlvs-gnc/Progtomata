@@ -188,26 +188,11 @@ static const uint8_t Font5x7[][5] = {
 void OLED_Init(void);
 
 /**
- * @brief Writes a single command to the OLED display.
- *
- * @param cmd the command to write
- */
-void OLED_WriteCommand(uint8_t cmd);
-
-/**
  * @brief Writes a single data byte to the OLED display.
  *
  * @param data the data to write
  */
 void OLED_WriteData(uint8_t data);
-
-/**
- * @brief Writes multiple data bytes to the OLED display.
- *
- * @param data the data to write
- * @param size the number of bytes to write
- */
-void OLED_WriteMultipleData(uint8_t* data, uint16_t size);
 
 /**
  * @brief Sets the cursor position of the OLED display.
@@ -247,24 +232,6 @@ void OLED_SetContrast(uint8_t contrast);
 void OLED_InvertDisplay(bool invert);
 
 /**
- * @brief Draws a single pixel on the OLED display.
- *
- * @param x the x-coordinate of the pixel
- * @param y the y-coordinate of the pixel
- * @param color the color of the pixel, true for white, false for black
- */
-void OLED_DrawPixel(uint8_t x, uint8_t y, bool color);
-
-/**
- * @brief Draws a single character on the OLED display.
- *
- * @param x the x-coordinate of the position
- * @param y the y-coordinate of the position
- * @param c the character to draw
- */
-void OLED_DrawChar(uint8_t x, uint8_t y, char c);
-
-/**
  * @brief Draws a string on the OLED display.
  *
  * @param x the x-coordinate of the position
@@ -272,17 +239,6 @@ void OLED_DrawChar(uint8_t x, uint8_t y, char c);
  * @param str the string to draw
  */
 void OLED_DrawString(uint8_t x, uint8_t y, const char* str);
-
-/**
- * @brief Draws a single line on the OLED display.
- *
- * @param x0 the x-coordinate of the start of the line
- * @param y0 the y-coordinate of the start of the line
- * @param x1 the x-coordinate of the end of the line
- * @param y1 the y-coordinate of the end of the line
- * @param color the color of the line, true for white, false for black
- */
-void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color);
 
 /**
  * @brief Draws a rectangle on the OLED display.

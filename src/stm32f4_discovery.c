@@ -187,19 +187,19 @@ void STM_EVAL_LEDToggle(Led_TypeDef Led)
   */
 void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
 {
-  GPIO_InitTypeDef GPIO_InitStructure;
-  EXTI_InitTypeDef EXTI_InitStructure;
-  NVIC_InitTypeDef NVIC_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  EXTI_InitTypeDef EXTI_InitStruct;
+  NVIC_InitTypeDef NVIC_InitStruct;
 
   /* Enable the BUTTON Clock */
   RCC_AHB1PeriphClockCmd(BUTTON_CLK[Button], ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
   /* Configure Button pin as input */
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Pin = BUTTON_PIN[Button];
-  GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStructure);
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStruct.GPIO_Pin = BUTTON_PIN[Button];
+  GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStruct);
 
   if (Button_Mode == BUTTON_MODE_EXTI)
   {
@@ -207,19 +207,19 @@ void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
     SYSCFG_EXTILineConfig(BUTTON_PORT_SOURCE[Button], BUTTON_PIN_SOURCE[Button]);
 
     /* Configure Button EXTI line */
-    EXTI_InitStructure.EXTI_Line = BUTTON_EXTI_LINE[Button];
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
+    EXTI_InitStruct.EXTI_Line = BUTTON_EXTI_LINE[Button];
+    EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;  
+    EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStruct);
 
     /* Enable and set Button EXTI Interrupt to the lowest priority */
-    NVIC_InitStructure.NVIC_IRQChannel = BUTTON_IRQn[Button];
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_InitStruct.NVIC_IRQChannel = BUTTON_IRQn[Button];
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0F;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0F;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 
-    NVIC_Init(&NVIC_InitStructure); 
+    NVIC_Init(&NVIC_InitStruct); 
   }
 }
 
