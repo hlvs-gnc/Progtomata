@@ -58,12 +58,13 @@ jobs:
                    --suppress=missingInclude \
                    --suppress=missingIncludeSystem \
                    --suppress=incompleteArrayFill \
+                   --suppress=unmatchedSuppression \
                    --suppress=unusedFunction \
                    --suppress=normalCheckLevelMaxBranches \
                    --checkers-report=staticAnalysis_report \
                    .
   lint:
-    name: Code-style check (clang-format)
+    name: Code-style check
     runs-on: ubuntu-latest
 
     steps:
