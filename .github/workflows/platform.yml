@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build with PlatformIO
+    name: Build (PlatformIO)
     runs-on: ubuntu-latest
 
     steps:
@@ -64,7 +64,7 @@ jobs:
                    .
 
   lint:
-    name: Code-style check
+    name: Lint code
     runs-on: ubuntu-latest
 
     steps:

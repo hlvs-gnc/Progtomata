@@ -1,9 +1,12 @@
 /**
  * @file core.h
  *
- * @brief 
+ * @brief Core header file for the functional task instances.
  *
- * @details
+ * @details This file provides the core definitions, macros, and function
+ * declarations for the FreeRTOS task instances. It includes the necessary
+ * header files, defines the application constants, and declares the functions
+ * used in the application.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
@@ -34,6 +37,7 @@
 /// @brief Number of samples in open hat mono audio file
 #define SOUNDSIZE2 (9882)
 
+/// @brief Audio sample identifiers
 typedef enum { SAMPLE1 = 0, SAMPLE2 } audioSampleId;
 
 /// @brief Current step index
@@ -54,9 +58,10 @@ StaticSemaphore_t xButtonSemaphoreStatic;
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
 
+/// @brief Array of audio sample data pointers
 static const int16_t *const sampleData[NUM_SAMPLES] = {
-  kick_22050_mono,   /* SAMPLE 0 */
-  openhat_22050_mono /* SAMPLE 1 */
+  kick_22050_mono,
+  openhat_22050_mono
 };
 
 static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
