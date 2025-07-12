@@ -62,11 +62,44 @@
 // FreeRTOS Hook functions
 #include <hooks.h>
 
+// Core definitions
+#include <core.h>
+
+/// @brief Minimum delay for LED blinking in milliseconds
+const uint32_t MIN_BLINK_DELAY = 10;
+/// @brief Maximum delay for LED blinking in milliseconds
+const uint32_t MAX_BLINK_DELAY = 250;
+
+/// @brief Step grid to hold sample triggers for each step
+uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
+
+/// @brief Size of the audio playback buffer in bytes
+#define BUFFERSIZE (32768)
+
+/// @brief Buffer for storing audio data for playback
+int16_t playbackBuffer[BUFFERSIZE] = {0};
+
+// Tempo
+#define SAMPLE_RATE 22050U // I²S sample-rate
+#define MIN_BPM 40U
+#define MAX_BPM 200U
+
+static volatile uint16_t currBpm;        // current tempo
+static volatile uint32_t nbrSamplesStep; // samples per sequencer step
+
+/// @brief Counts when the OS has no task to execute
+uint64_t u64IdleTicksCnt = 0;
+
+/// @brief Counts OS ticks (default = 1000Hz)
+uint64_t tickTime = 0;
+
 static void Sequencer_SetBpm(uint16_t bpm) {
-  if (bpm < MIN_BPM)
+  if (bpm < MIN_BPM) {
     bpm = MIN_BPM;
-  if (bpm > MAX_BPM)
+  }
+  if (bpm > MAX_BPM) {
     bpm = MAX_BPM;
+  }
 
   taskENTER_CRITICAL(); // protect against DMA callbacks
   currBpm = bpm;
@@ -438,7 +471,7 @@ void vBlinkTask(void *p) {
     if (kBlinkDelay >= MAX_BLINK_DELAY) {
       kBlinkStep -= MIN_BLINK_DELAY; // Reverse step direction
 
-    } else if (kBlinkDelay < MIN_BLINK_DELAY || kBlinkStep == 0) {
+    } else if ((kBlinkDelay < MIN_BLINK_DELAY) || (kBlinkStep == 0)) {
       kBlinkDelay = MIN_BLINK_DELAY;
       kBlinkStep = MIN_BLINK_DELAY;
     }

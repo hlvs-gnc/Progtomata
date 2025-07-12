@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - development
-      - '[0-9]*'  # Matches any branch starting with a number, no matter how big
+      - '[0-9]*' # Matches any branch starting with a number, no matter how big
   pull_request:
     branches:
       - main
@@ -53,16 +53,16 @@ jobs:
         run: |
           # Fail on any error/warning:
           cppcheck --enable=all --inline-suppr --inconclusive \
-                   --error-exitcode=1 -I src/ -I include/ \
+                   --language=c --std=c99 \
+                   --error-exitcode=1 \
+                   -I src/ -I include/ \
                    -i lib/audio_codec -i lib/trice -i build \
-                   --suppress=missingInclude \
-                   --suppress=missingIncludeSystem \
-                   --suppress=incompleteArrayFill \
-                   --suppress=unmatchedSuppression \
-                   --suppress=unusedFunction \
-                   --suppress=normalCheckLevelMaxBranches \
-                   --checkers-report=staticAnalysis_report \
+                   --suppress=missingInclude --suppress=missingIncludeSystem \
+                   --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
+                   --xml --xml-version=2 \
+                   --output-file=cppcheck-result.xml \
                    .
+
   lint:
     name: Code-style check
     runs-on: ubuntu-latest
@@ -86,8 +86,6 @@ jobs:
   docs:
     name: Generate documentation (Doxygen)
     runs-on: ubuntu-latest
-    # Optional: wait for a successful build (or static-analysis) first
-    # needs: [build]
 
     steps:
       - uses: actions/checkout@v3
@@ -112,11 +110,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: doxygen-html
-          # Default Doxygen output folder is ./html or ./docs/html;
-          # adjust if your Doxyfile sets a different OUTPUT_DIRECTORY
           path: |
             html/**
             docs/html/**
+  
   #test:
   #  name: Run Unit Tests
   #  runs-on: ubuntu-latest

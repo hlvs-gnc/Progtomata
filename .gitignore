@@ -13,3 +13,4 @@ til.json
 CMakeCache.txt
 staticAnalysis_report
 Doxyfile.bak
+cppcheck-result.xml
