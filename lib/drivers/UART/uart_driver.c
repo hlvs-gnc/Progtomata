@@ -77,7 +77,7 @@ void uart_init(void) {
 
 /**
  * @brief Transmits a single character over USART2.
- * 
+ *
  * This function waits until the USART2 transmit buffer is empty before sending
  * the specified character over the USART2 interface.
  *
