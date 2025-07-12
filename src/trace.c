@@ -12,6 +12,7 @@
  * (creating it if it doesn’t exist) and write TRICE data to it.
  */
 
+#include <hooks.h>
 #include <trace.h>
 
 /**
@@ -26,9 +27,6 @@
 #define TRACE_TASK_STACK_SIZE 256
 #define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
-/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
-#define CCM_RAM __attribute__((section(".ccmram")))
-
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
 
@@ -40,7 +38,7 @@ StaticTask_t traceTaskBuffer CCM_RAM;
  */
 static bool g_isTraceInitialized = false;
 
-void DWT_Init(void) {
+static void DWT_Init(void) {
   // Enable trace and debug block
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -56,8 +54,8 @@ void DWT_Init(void) {
  *
  * @param pvParameters Not used.
  */
-static void vTriceTask(void* pvParameters) {
-  (void) pvParameters;  // Unused parameter
+static void vTriceTask(void *pvParameters) {
+  (void)pvParameters; // Unused parameter
 
   for (;;) {
     // Wait for the given interval
@@ -74,7 +72,7 @@ void TraceInit(void) {
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
-      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
+                      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }

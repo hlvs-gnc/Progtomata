@@ -57,17 +57,17 @@
 
 /* Audio Transfer mode (DMA, Interrupt or Polling) */
 // Uncomment this line to enable the audio transfer using DMA
-#define AUDIO_MAL_MODE_NORMAL
+// #define AUDIO_MAL_MODE_NORMAL
 
 // Uncomment this line to enable the audio transfer using DMA
-// #define AUDIO_MAL_MODE_CIRCULAR
+#define AUDIO_MAL_MODE_CIRCULAR
 
 /* For the DMA modes select the interrupt that will be used */
 // Uncomment this line to enable DMA Transfer Complete interrupt
 #define AUDIO_MAL_DMA_IT_TC_EN
 
 // Uncomment this line to enable DMA Half Transfer Complete interrupt */
-// #define AUDIO_MAL_DMA_IT_HT_EN
+#define AUDIO_MAL_DMA_IT_HT_EN
 
 // Uncomment this line to enable DMA Transfer Error interrupt
 #define AUDIO_MAL_DMA_IT_TE_EN
@@ -293,6 +293,6 @@ void EVAL_AUDIO_Error_CallBack(void *pData);
    application. */
 uint32_t Codec_TIMEOUT_UserCallback(void);
 
-#endif  // LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
+#endif // LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

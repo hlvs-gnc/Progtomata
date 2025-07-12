@@ -29,15 +29,15 @@
  *       correctly enabled before compiling the project.
  *
  * @copyright Radar2000
- * This work is licensed under Creative Commons 
+ * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
 #ifndef LIB_DRIVERS_UART_UART_DRIVER_H_
 #define LIB_DRIVERS_UART_UART_DRIVER_H_
 
-#include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f4xx_rcc.h>
 #include <stm32f4xx_usart.h>
 
 #include <stdarg.h> // For va_list, va_start, va_end
@@ -60,33 +60,10 @@ typedef enum {
 void uart_init(void);
 
 /**
- * @brief Transmits a single character over USART1.
- *
- * @param c Character to send.
- */
-void uart_send_char(char c);
-
-/**
- * @brief Transmits a string over USART1.
- *
- * @param str Pointer to the null-terminated string to send.
- */
-void uart_send_string(const char *str);
-
-/**
- * @brief Convert an integer (signed or unsigned) to a string and send it over UART.
- *        Handles signed decimal, unsigned decimal, and hexadecimal.
- *
- * @param value  The integer value to print (pass as long for convenience).
- * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC, PRINT_HEX).
- */
-void uart_print_type(double value, PrintFormat_t format);
-
-/**
  * @brief Transmits a formatted string over USART2.
  *
- * This function formats a string using the provided format specifier and arguments,
- * then sends the resulting string over USART2.
+ * This function formats a string using the provided format specifier and
+ * arguments, then sends the resulting string over USART2.
  *
  * @param format The format string (like printf).
  * @param ... The variable arguments to format.

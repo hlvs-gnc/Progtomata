@@ -85,17 +85,9 @@ SECTIONS
   /* Add a section for the audio samples in FLASH */
   .audio_samples :
   {
-    _audio_buffer_start = .;       /* Start address of the section */
+    _audio_samples_start = .;       /* Start address of the section */
     KEEP(*(.audio_samples))         /* Keep all .audio_samples sections */
-    _audio_buffer_end = .;         /* End address of the section */
-  } >FLASH
-
-  /* Add a section for the playback buffer in FLASH */
-  .audio_buffer :
-  {
-    _audio_buffer_start = .;       /* Start address of the section */
-    KEEP(*(.audio_buffer))         /* Keep all .audio_buffer sections */
-    _audio_buffer_end = .;         /* End address of the section */
+    _audio_samples_end = .;         /* End address of the section */
   } >FLASH
 
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
