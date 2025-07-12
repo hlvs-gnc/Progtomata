@@ -84,7 +84,7 @@ jobs:
                 clang-format -n --Werror $FILES
 
   docs:
-    name: Generate documentation (Doxygen)
+    name: Generate documentation
     runs-on: ubuntu-latest
 
     steps:
