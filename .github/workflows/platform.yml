@@ -13,9 +13,57 @@ on:
       - '[0-9]*'
 
 jobs:
+  static_analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          # Fail on any error/warning:
+          cppcheck --enable=all --inline-suppr --inconclusive \
+                    --language=c --std=c99 \
+                    --error-exitcode=1 \
+                    -I src/ -I include/ \
+                    -i lib/audio_codec -i lib/trice -i build \
+                    --suppress=missingInclude --suppress=missingIncludeSystem \
+                    --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
+                    --xml --xml-version=2 \
+                    --output-file=cppcheck-result.xml \
+                    .
+
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    needs: static_analysis
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Verify formatting
+        run: |
+          # List all C/C header files and make the job fail if any are wrongly formatted
+          FILES="$(git ls-files \
+                '*.c' '*.h' \
+                ':(exclude)lib/trice/**')"
+                clang-format -n --Werror $FILES
+
   build:
     name: Build (PlatformIO)
     runs-on: ubuntu-latest
+    needs: lint
 
     steps:
       - name: Checkout code
@@ -37,55 +85,10 @@ jobs:
       - name: Build project
         run: pio run
 
-  static_analysis:
-    name: Static analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install cppcheck
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cppcheck
-
-      - name: Run cppcheck
-        run: |
-          # Fail on any error/warning:
-          cppcheck --enable=all --inline-suppr --inconclusive \
-                   --language=c --std=c99 \
-                   --error-exitcode=1 \
-                   -I src/ -I include/ \
-                   -i lib/audio_codec -i lib/trice -i build \
-                   --suppress=missingInclude --suppress=missingIncludeSystem \
-                   --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
-                   --xml --xml-version=2 \
-                   --output-file=cppcheck-result.xml \
-                   .
-
-  lint:
-    name: Lint code
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install clang-format
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
-
-      - name: Verify formatting
-        run: |
-          # List all C/C header files and make the job fail if any are wrongly formatted
-          FILES="$(git ls-files \
-                '*.c' '*.h' \
-                ':(exclude)lib/trice/**')"
-                clang-format -n --Werror $FILES
-
   docs:
     name: Generate documentation
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - uses: actions/checkout@v3
