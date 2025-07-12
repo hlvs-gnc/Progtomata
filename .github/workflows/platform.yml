@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - development
-      - '[0-9]*'  # Matches any branch starting with a number, no matter how big
+      - '[0-9]*' # Matches any branch starting with a number, no matter how big
   pull_request:
     branches:
       - main
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build with PlatformIO
+    name: Build (PlatformIO)
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,83 @@ jobs:
       - name: Build project
         run: pio run
 
+  static_analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          # Fail on any error/warning:
+          cppcheck --enable=all --inline-suppr --inconclusive \
+                   --language=c --std=c99 \
+                   --error-exitcode=1 \
+                   -I src/ -I include/ \
+                   -i lib/audio_codec -i lib/trice -i build \
+                   --suppress=missingInclude --suppress=missingIncludeSystem \
+                   --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
+                   --xml --xml-version=2 \
+                   --output-file=cppcheck-result.xml \
+                   .
+
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Verify formatting
+        run: |
+          # List all C/C header files and make the job fail if any are wrongly formatted
+          FILES="$(git ls-files \
+                '*.c' '*.h' \
+                ':(exclude)lib/trice/**')"
+                clang-format -n --Werror $FILES
+
+  docs:
+    name: Generate documentation (Doxygen)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Doxygen & Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Generate Doxygen docs
+        run: |
+          # If you already keep a customised Doxyfile in the repo root:
+          if [ -f Doxyfile ]; then
+            doxygen Doxyfile
+          else
+            # One-liner: create a default config, then build docs
+            doxygen -g  # writes ./Doxyfile
+            doxygen
+          fi
+
+      - name: Upload HTML as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-html
+          path: |
+            html/**
+            docs/html/**
+  
   #test:
   #  name: Run Unit Tests
   #  runs-on: ubuntu-latest
