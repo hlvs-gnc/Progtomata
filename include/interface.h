@@ -13,14 +13,14 @@
  * The definitions are based on the STM32F4DISCOVERY board pinout.
  * @{
  */
-#define Encoder1_Port GPIOA /*!< GPIO port for encoder 1 */
-#define Encoder1_Q0 GPIO_Pin_8 /*!< Pin number for encoder 1 Q0 */
-#define Encoder1_Q1 GPIO_Pin_9 /*!< Pin number for encoder 1 Q1 */
+#define Encoder1_Port GPIOA     /*!< GPIO port for encoder 1 */
+#define Encoder1_Q0 GPIO_Pin_8  /*!< Pin number for encoder 1 Q0 */
+#define Encoder1_Q1 GPIO_Pin_9  /*!< Pin number for encoder 1 Q1 */
 #define Encoder1_Q2 GPIO_Pin_15 /*!< Pin number for encoder 1 Q2 */
 // #define Encoder1_EN GPIO_Pin_8 /*!< Pin number for encoder 1 enable */
 
-#define Shifter1_Port GPIOB /*!< GPIO port for shifter 1 */
-#define Shifter1_DS GPIO_Pin_14 /*!< Pin number for shifter 1 data */
+#define Shifter1_Port GPIOB      /*!< GPIO port for shifter 1 */
+#define Shifter1_DS GPIO_Pin_14  /*!< Pin number for shifter 1 data */
 #define Shifter1_CLK GPIO_Pin_15 /*!< Pin number for shifter 1 clock */
 /**
  * @}
@@ -34,7 +34,8 @@
 void Interface_Init();
 
 /**
- * @brief Determines if any button from the 4-step playback grid has been pressed.
+ * @brief Determines if any button from the 4-step playback grid has been
+ * pressed.
  * @return Non-zero if a button has been pressed, 0 otherwise.
  */
 // int Interface_ButtonStepPressed();

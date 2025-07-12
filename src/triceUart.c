@@ -6,7 +6,6 @@
 
 #if TRICE_DEFERRED_UARTA == 1
 
-
 uint32_t triceTxDataRegisterEmptyUartA(void) {
   // Return 1 if TXE is SET, meaning transmit data register is empty:
   return (USART_GetFlagStatus(TRICE_UARTA, USART_FLAG_TXE) == SET);
@@ -27,7 +26,7 @@ void triceDisableTxEmptyInterruptUartA(void) {
   USART_ITConfig(TRICE_UARTA, USART_IT_TXE, DISABLE);
 }
 
-#endif  // #if TRICE_DEFERRED_UARTA == 1
+#endif // #if TRICE_DEFERRED_UARTA == 1
 
 #if TRICE_DEFERRED_UARTB == 1
 
@@ -49,4 +48,4 @@ void triceDisableTxEmptyInterruptUartB(void) {
   USART_ITConfig(TRICE_UARTB, USART_IT_TXE, DISABLE);
 }
 
-#endif  // #if TRICE_DEFERRED_UARTB == 1
+#endif // #if TRICE_DEFERRED_UARTB == 1

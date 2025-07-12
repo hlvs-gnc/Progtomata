@@ -228,7 +228,7 @@ uint16_t *CurrentPos;
 __IO uint32_t CODECTimeout = CODEC_LONG_TIMEOUT;
 __IO uint8_t OutputDev = 0;
 
-__IO uint32_t CurrAudioInterface = AUDIO_INTERFACE_I2S;  // AUDIO_INTERFACE_DAC
+__IO uint32_t CurrAudioInterface = AUDIO_INTERFACE_I2S; // AUDIO_INTERFACE_DAC
 /**
  * @}
  */
@@ -485,8 +485,8 @@ static void Audio_MAL_IRQHandler(void) {
       DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
 
       /* Re-Configure the buffer address and size */
-      DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t) CurrentPos;
-      DMA_InitStructure.DMA_BufferSize = (uint32_t) (DMA_MAX(AudioRemSize));
+      DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)CurrentPos;
+      DMA_InitStructure.DMA_BufferSize = (uint32_t)(DMA_MAX(AudioRemSize));
 
       /* Configure the DMA Stream with the new parameters */
       DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
@@ -554,7 +554,8 @@ static void Audio_MAL_IRQHandler(void) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;
   }
 
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) != RESET) {
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
+      RESET) {
     TRice(iD(4388), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
@@ -567,10 +568,9 @@ static void Audio_MAL_IRQHandler(void) {
     EVAL_AUDIO_Error_CallBack((uint32_t *)CurrentPos);
 
     /* Clear the Interrupt flag */
-    DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
-                  AUDIO_MAL_DMA_FLAG_TE |
-                  AUDIO_MAL_DMA_FLAG_FE |
-                  AUDIO_MAL_DMA_FLAG_DME);
+    DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE |
+                                            AUDIO_MAL_DMA_FLAG_FE |
+                                            AUDIO_MAL_DMA_FLAG_DME);
   }
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 }
@@ -878,7 +878,8 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
   /*!< While the bus is busy */
   CODECTimeout = CODEC_LONG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BUSY)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0)
+      return Codec_TIMEOUT_UserCallback();
   }
 
   /* Start the config sequence */
@@ -887,7 +888,8 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
   /* Test on EV5 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0)
+      return Codec_TIMEOUT_UserCallback();
   }
 
   /* Transmit the slave address and enable writing operation */
@@ -897,7 +899,8 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (
       !I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0)
+      return Codec_TIMEOUT_UserCallback();
   }
 
   /* Transmit the first address for write operation */
@@ -906,7 +909,8 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
   /* Test on EV8 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) {
-    if ((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0)
+      return Codec_TIMEOUT_UserCallback();
   }
 
   /* Prepare the register value to be sent */
@@ -915,7 +919,8 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
   /*!< Wait till all data have been physically transferred on the bus */
   CODECTimeout = CODEC_LONG_TIMEOUT;
   while (!I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BTF)) {
-    if ((CODECTimeout--) == 0) Codec_TIMEOUT_UserCallback();
+    if ((CODECTimeout--) == 0)
+      Codec_TIMEOUT_UserCallback();
   }
 
   /* End the configuration sequence */
@@ -943,7 +948,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /*!< While the bus is busy */
   CODECTimeout = CODEC_LONG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BUSY)) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /* Start the config sequence */
@@ -952,7 +959,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Test on EV5 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT)) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /* Transmit the slave address and enable writing operation */
@@ -962,7 +971,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (
       !I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /* Transmit the register address to be read */
@@ -971,7 +982,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Test on EV8 and clear it */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BTF) == RESET) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /*!< Send START condition a second time */
@@ -980,7 +993,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /*!< Test on EV5 and clear it (cleared by reading SR1 then writing to DR) */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT)) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /*!< Send Codec address for read */
@@ -989,7 +1004,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait on ADDR flag to be set (ADDR is still not cleared at this level */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_ADDR) == RESET) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /*!< Disable Acknowledgment */
@@ -1005,7 +1022,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait for the byte to be received */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_RXNE) == RESET) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /*!< Read the byte received from the Codec */
@@ -1014,7 +1033,9 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   /* Wait to make sure that STOP flag has been cleared */
   CODECTimeout = CODEC_FLAG_TIMEOUT;
   while (CODEC_I2C->CR1 & I2C_CR1_STOP) {
-    if ((CODECTimeout--) == 0) { return Codec_TIMEOUT_UserCallback(); }
+    if ((CODECTimeout--) == 0) {
+      return Codec_TIMEOUT_UserCallback();
+    }
   }
 
   /*!< Re-Enable Acknowledgment to be ready for another reception */
@@ -1258,7 +1279,10 @@ static void Codec_GPIO_DeInit(void) {
  * @param  nCount: specifies the delay time length.
  * @retval None
  */
-static void Delay(__IO uint32_t nCount) { for (; nCount != 0; nCount--); }
+static void Delay(__IO uint32_t nCount) {
+  for (; nCount != 0; nCount--)
+    ;
+}
 
 #ifdef USE_DEFAULT_TIMEOUT_CALLBACK
 /**
@@ -1298,7 +1322,7 @@ static void Audio_MAL_Init(void) {
 
   I2S_Cmd(SPI3, ENABLE);
 #else
-#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) || \
+#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
     defined(AUDIO_MAL_DMA_IT_TE_EN)
   NVIC_InitTypeDef NVIC_InitStructure;
 #endif
@@ -1349,7 +1373,7 @@ static void Audio_MAL_Init(void) {
                  ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
-#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) || \
+#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
     defined(AUDIO_MAL_DMA_IT_TE_EN)
     /* I2S DMA IRQ Channel configuration */
     NVIC_InitStructure.NVIC_IRQChannel = AUDIO_MAL_DMA_IRQ;
@@ -1408,7 +1432,7 @@ static void Audio_MAL_Init(void) {
                  ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
-#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) || \
+#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
     defined(AUDIO_MAL_DMA_IT_TE_EN)
     /* I2S DMA IRQ Channel configuration */
     NVIC_InitStructure.NVIC_IRQChannel = AUDIO_MAL_DMA_IRQ;
@@ -1453,7 +1477,7 @@ static void Audio_MAL_Init(void) {
  * @retval None
  */
 static void Audio_MAL_DeInit(void) {
-#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) || \
+#if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
     defined(AUDIO_MAL_DMA_IT_TE_EN)
   NVIC_InitTypeDef NVIC_InitStructure;
 
@@ -1550,7 +1574,7 @@ static void Audio_MAL_Stop(void) {
   /* Clear all the DMA flags for the next transfer */
   DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
                 AUDIO_MAL_DMA_FLAG_TC | AUDIO_MAL_DMA_FLAG_HT |
-                AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
+                    AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
 
   /*
            The I2S DMA requests are not disabled here.

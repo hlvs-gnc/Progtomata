@@ -293,6 +293,6 @@ void EVAL_AUDIO_Error_CallBack(void *pData);
    application. */
 uint32_t Codec_TIMEOUT_UserCallback(void);
 
-#endif  // LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
+#endif // LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

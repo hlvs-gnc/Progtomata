@@ -7,7 +7,7 @@
  * managing an LCD screen using STM32F4 microcontrollers.
  *
  * @copyright Radar2000
- * This work is licensed under Creative Commons 
+ * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
  * @author Radar2000
@@ -16,11 +16,11 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#include <string.h>
-
 #include <stm32f4xx.h>
-#include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f4xx_rcc.h>
+
+#include <string.h>
 
 //*****************************************************************************
 //* CONNECTIONS: *
@@ -30,7 +30,7 @@
 //* 1............VSS.......................GND                       *
 //* 2............VDD.......................+5V                       *
 //* 3............CONTRAST..................POT 5K                    *
-//Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3-> GND
+// Potentiometer Pins: pin 1 to V+, wiper (2nd pin) to pin 3 of LCD, pin 3-> GND
 //* 4............RS  - Register Select.....PE3                       *
 //* 5............RW  - Read/Write..........GND                       *
 //* 6............E   - Enable..............PE5                       *
@@ -48,48 +48,48 @@
 
 // Pin definitions
 /// @brief GPIO Port for LCD
-#define LCD_PORT            GPIOE
+#define LCD_PORT GPIOE
 /// @brief GPIO Pin for LCD Register Select
-#define LCD_RS_PIN          GPIO_Pin_3
+#define LCD_RS_PIN GPIO_Pin_3
 /// @brief GPIO Pin for LCD Enable
-#define LCD_E_PIN           GPIO_Pin_5
+#define LCD_E_PIN GPIO_Pin_5
 /// @brief GPIO Pin for LCD Data Bit 4
-#define LCD_D4_PIN          GPIO_Pin_10
+#define LCD_D4_PIN GPIO_Pin_10
 /// @brief GPIO Pin for LCD Data Bit 5
-#define LCD_D5_PIN          GPIO_Pin_11
+#define LCD_D5_PIN GPIO_Pin_11
 /// @brief GPIO Pin for LCD Data Bit 6
-#define LCD_D6_PIN          GPIO_Pin_12
+#define LCD_D6_PIN GPIO_Pin_12
 /// @brief GPIO Pin for LCD Data Bit 7
-#define LCD_D7_PIN          GPIO_Pin_13
+#define LCD_D7_PIN GPIO_Pin_13
 
 // Macros for setting/clearing bits
 /// @brief Set RS pin high
-#define LCD_RS_HIGH()       GPIO_SetBits(LCD_PORT, LCD_RS_PIN)
+#define LCD_RS_HIGH() GPIO_SetBits(LCD_PORT, LCD_RS_PIN)
 /// @brief Set RS pin low
-#define LCD_RS_LOW()        GPIO_ResetBits(LCD_PORT, LCD_RS_PIN)
+#define LCD_RS_LOW() GPIO_ResetBits(LCD_PORT, LCD_RS_PIN)
 
 /// @brief Set E pin high
-#define LCD_E_HIGH()        GPIO_SetBits(LCD_PORT, LCD_E_PIN)
+#define LCD_E_HIGH() GPIO_SetBits(LCD_PORT, LCD_E_PIN)
 /// @brief Set E pin low
-#define LCD_E_LOW()         GPIO_ResetBits(LCD_PORT, LCD_E_PIN)
+#define LCD_E_LOW() GPIO_ResetBits(LCD_PORT, LCD_E_PIN)
 
 // Helper macros to set data bits
 /// @brief Set D4 pin high
-#define LCD_D4_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D4_PIN)
+#define LCD_D4_HIGH() GPIO_SetBits(LCD_PORT, LCD_D4_PIN)
 /// @brief Set D4 pin low
-#define LCD_D4_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D4_PIN)
+#define LCD_D4_LOW() GPIO_ResetBits(LCD_PORT, LCD_D4_PIN)
 /// @brief Set D5 pin high
-#define LCD_D5_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D5_PIN)
+#define LCD_D5_HIGH() GPIO_SetBits(LCD_PORT, LCD_D5_PIN)
 /// @brief Set D5 pin low
-#define LCD_D5_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D5_PIN)
+#define LCD_D5_LOW() GPIO_ResetBits(LCD_PORT, LCD_D5_PIN)
 /// @brief Set D6 pin high
-#define LCD_D6_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D6_PIN)
+#define LCD_D6_HIGH() GPIO_SetBits(LCD_PORT, LCD_D6_PIN)
 /// @brief Set D6 pin low
-#define LCD_D6_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D6_PIN)
+#define LCD_D6_LOW() GPIO_ResetBits(LCD_PORT, LCD_D6_PIN)
 /// @brief Set D7 pin high
-#define LCD_D7_HIGH()       GPIO_SetBits(LCD_PORT, LCD_D7_PIN)
+#define LCD_D7_HIGH() GPIO_SetBits(LCD_PORT, LCD_D7_PIN)
 /// @brief Set D7 pin low
-#define LCD_D7_LOW()        GPIO_ResetBits(LCD_PORT, LCD_D7_PIN)
+#define LCD_D7_LOW() GPIO_ResetBits(LCD_PORT, LCD_D7_PIN)
 
 // Function prototypes
 
@@ -125,4 +125,4 @@ void LCD_WriteString(const char *str);
  */
 void LCD_GotoXY(uint8_t row, uint8_t col);
 
-#endif  // LCD_H_
+#endif // LCD_H_

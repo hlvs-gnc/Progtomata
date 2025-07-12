@@ -12,8 +12,8 @@
  * (creating it if it doesn’t exist) and write TRICE data to it.
  */
 
-#include <trace.h>
 #include <hooks.h>
+#include <trace.h>
 
 /**
  * @brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
@@ -54,8 +54,8 @@ static void DWT_Init(void) {
  *
  * @param pvParameters Not used.
  */
-static void vTriceTask(void* pvParameters) {
-  (void) pvParameters;  // Unused parameter
+static void vTriceTask(void *pvParameters) {
+  (void)pvParameters; // Unused parameter
 
   for (;;) {
     // Wait for the given interval
@@ -72,7 +72,7 @@ void TraceInit(void) {
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
-      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
+                      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }

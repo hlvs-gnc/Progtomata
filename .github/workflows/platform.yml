@@ -78,9 +78,10 @@ jobs:
       - name: Verify formatting
         run: |
           # List all C/C header files and make the job fail if any are wrongly formatted
-          FILES="$(git ls-files '*.c' '*.h') \
+          FILES="$(git ls-files \
+                '*.c' '*.h' \
                 ':(exclude)lib/trice/**')"
-          clang-format -n --Werror $FILES
+                clang-format -n --Werror $FILES
 
   docs:
     name: Generate documentation (Doxygen)

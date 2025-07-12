@@ -115,13 +115,13 @@ uint8_t Interface_ReadButtonStep() {
   uint8_t button_code = 0;
 
   if (GPIO_ReadInputDataBit(Encoder1_Port, Encoder1_Q0) != 0x00) {
-    button_code |= 0b001;  // O0
+    button_code |= 0b001; // O0
   }
   if (GPIO_ReadInputDataBit(Encoder1_Port, Encoder1_Q1) != 0x00) {
-    button_code |= 0b010;  // O1
+    button_code |= 0b010; // O1
   }
   if (GPIO_ReadInputDataBit(Encoder1_Port, Encoder1_Q2) != 0x00) {
-    button_code |= 0b100;  // O2
+    button_code |= 0b100; // O2
   }
 
   // If no valid button is detected, return STEPIDLE_VALUE

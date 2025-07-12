@@ -5,13 +5,13 @@
  * @details
  *   This header declares the \c TraceInit() function for setting up Trice
  *   in deferred mode and creating the associated FreeRTOS task.
- * 
+ *
  * @copyright Radar2000
- * This work is licensed under Creative Commons 
+ * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
  * @author Radar2000
- * 
+ *
  */
 
 #ifndef TRACE_H_
@@ -45,4 +45,4 @@ void TraceInit(void);
 }
 #endif
 
-#endif  // TRACE_H_
+#endif // TRACE_H_

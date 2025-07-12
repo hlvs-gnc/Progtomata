@@ -33,11 +33,11 @@
 
 // STD Library
 #include <stm32f4xx.h>
+#include <stm32f4xx_dma.h>
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_pwr.h>
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_tim.h>
-#include <stm32f4xx_dma.h>
 
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
@@ -63,8 +63,10 @@
 #include <hooks.h>
 
 static void Sequencer_SetBpm(uint16_t bpm) {
-  if (bpm < MIN_BPM) bpm = MIN_BPM;
-  if (bpm > MAX_BPM) bpm = MAX_BPM;
+  if (bpm < MIN_BPM)
+    bpm = MIN_BPM;
+  if (bpm > MAX_BPM)
+    bpm = MAX_BPM;
 
   taskENTER_CRITICAL(); // protect against DMA callbacks
   currBpm = bpm;
@@ -79,7 +81,7 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
     }
 
     const int16_t *src = sampleData[s] + ofs;
-    uint32_t       len = sampleLen[s] - ofs;
+    uint32_t len = sampleLen[s] - ofs;
     if (len > cnt) {
       len = cnt;
     }
@@ -97,14 +99,14 @@ static void renderHalf(uint32_t base) {
   uint32_t todo = halfSamples; /* samples still to generate     */
 
   while (todo) {
-    uint32_t stepSamples  = nbrSamplesStep;
-    uint32_t leftInStep   = stepSamples - stepPos;
-    uint32_t chunk        = (leftInStep < todo) ? leftInStep : todo;
+    uint32_t stepSamples = nbrSamplesStep;
+    uint32_t leftInStep = stepSamples - stepPos;
+    uint32_t chunk = (leftInStep < todo) ? leftInStep : todo;
 
     mixSegment(base + (halfSamples - todo), chunk, stepPos);
 
-    stepPos  += chunk;
-    todo     -= chunk;
+    stepPos += chunk;
+    todo -= chunk;
 
     if (stepPos == stepSamples) { /* reached next step border ? */
       stepPos = 0;
@@ -255,9 +257,10 @@ int main(void) {
   LCD_WriteString("****************");
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
-  
+
   // Create the semaphore before any button processing
-  xButtonSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
+  xButtonSemaphoreHandle =
+      xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
   if (xButtonSemaphoreHandle == NULL) {
     TRice(iD(7573), "error: Button semaphore creation failed\n");
   }
@@ -269,7 +272,7 @@ int main(void) {
   }
 
   Sequencer_SetBpm(120);
-  
+
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
   // Start audio playback
@@ -280,24 +283,21 @@ int main(void) {
   TRice(iD(1375), "msg: Audio setup complete\n");
 
   sampleButtonTaskHandle = xTaskCreateStatic(
-      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE, NULL,
-      SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
+      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE,
+      NULL, SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
       &sampleButtonTaskBuffer);
 
   stepButtonTaskHandle = xTaskCreateStatic(
       vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL,
-      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack,
-      &stepButtonTaskBuffer);
+      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
-  blinkTaskHandle = xTaskCreateStatic(
-      vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-      BLINK_TASK_PRIORITY, blinkTaskStack,
-      &blinkTaskBuffer);
+  blinkTaskHandle =
+      xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
+                        BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
 
   animationTaskHandle = xTaskCreateStatic(
       vOledAnimationTask, "OledAnimationTask", ANIMATION_TASK_STACK_SIZE, NULL,
-      ANIMATION_TASK_PRIORITY, animationTaskStack,
-      &animationTaskBuffer);
+      ANIMATION_TASK_PRIORITY, animationTaskStack, &animationTaskBuffer);
 
   TRice(iD(7392), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
@@ -480,7 +480,7 @@ void vOledAnimationTask(void *pvParameters) {
       if (x - radius <= 0) {
         x = radius + 1;
       }
-      
+
       if (x + radius >= 128) {
         x = 128 - radius - 1;
       }
@@ -506,9 +506,9 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  memset(&playbackBuffer[0], 0, (BUFFERSIZE/2)*sizeof(int16_t));
-  renderHalf(0);                 /* renders first half-buffer            */
-  playHeadStep = stepIndex;      /* UI can flash LEDs exactly on beat    */
+  memset(&playbackBuffer[0], 0, (BUFFERSIZE / 2) * sizeof(int16_t));
+  renderHalf(0);            /* renders first half-buffer            */
+  playHeadStep = stepIndex; /* UI can flash LEDs exactly on beat    */
 
 #ifdef DEBUG
   TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
@@ -516,8 +516,9 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
 }
 
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  memset(&playbackBuffer[BUFFERSIZE/2], 0, (BUFFERSIZE/2)*sizeof(int16_t));
-  renderHalf(BUFFERSIZE / 2);    /* renders second half-buffer           */
+  memset(&playbackBuffer[BUFFERSIZE / 2], 0,
+         (BUFFERSIZE / 2) * sizeof(int16_t));
+  renderHalf(BUFFERSIZE / 2); /* renders second half-buffer           */
   playHeadStep = stepIndex;
 
 #ifdef DEBUG
@@ -534,10 +535,6 @@ uint32_t Codec_TIMEOUT_UserCallback(void) {
   return 1;
 }
 
-void vApplicationTickHook(void) {
-  ++tickTime;
-}
+void vApplicationTickHook(void) { ++tickTime; }
 
-void vApplicationIdleHook(void) {
-  ++u64IdleTicksCnt;
-}
+void vApplicationIdleHook(void) { ++u64IdleTicksCnt; }

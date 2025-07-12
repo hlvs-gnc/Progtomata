@@ -1,6 +1,8 @@
 # Generated folders
 build
 CMakeFiles
+html
+latex
 
 .pio
 .vscode/*
@@ -10,3 +12,4 @@ li.json
 til.json
 CMakeCache.txt
 staticAnalysis_report
+Doxyfile.bak

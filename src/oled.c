@@ -308,7 +308,6 @@ static void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
   }
 }
 
-
 /**
  * @brief Draws a single character on the OLED display.
  *
@@ -358,7 +357,8 @@ void OLED_DrawString(uint8_t x, uint8_t y, const char *str) {
  * @param y1 the y-coordinate of the end of the line
  * @param color the color of the line, true for white, false for black
  */
-static void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color) {
+static void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                          bool color) {
   int16_t dx = abs(x1 - x0);
   int16_t dy = abs(y1 - y0);
   int16_t sx = x0 < x1 ? 1 : -1;
