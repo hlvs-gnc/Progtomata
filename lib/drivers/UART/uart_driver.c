@@ -76,9 +76,12 @@ void uart_init(void) {
 }
 
 /**
- * @brief Transmits a single character over USART1.
+ * @brief Transmits a single character over USART2.
  *
- * @param c Character to send.
+ * This function waits until the USART2 transmit buffer is empty before sending
+ * the specified character over the USART2 interface.
+ *
+ * @param c The character to send.
  */
 static void uart_send_char(char c) {
   // Wait until transmit buffer is empty
