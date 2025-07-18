@@ -36,9 +36,6 @@ target_link_libraries(progtomata
         core
         audio_codec
         uart_driver
-        trice
-        sound_bank
-        lib
+        stm32_framework
         freertos_kernel
-        spl
 )

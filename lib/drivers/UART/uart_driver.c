@@ -28,7 +28,7 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#include "uart_driver.h"
+#include <uart_driver.h>
 
 void uart_init(void) {
   // GPIO Configuration

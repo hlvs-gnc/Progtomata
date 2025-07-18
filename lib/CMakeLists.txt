@@ -1,75 +1,74 @@
-set(SPL_DIR "C:/Users/henri/.platformio/packages/framework-spl/stm32/spl")
-set(SPL_CMSIS_DIR "C:/Users/henri/.platformio/packages/framework-spl/stm32/cmsis")
+# FreeRTOS Kernel target
+set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS)
 
-file(GLOB SPL_SRC
-    ${SPL_DIR}/variants/stm32f4/src/*.c
-    ${SPL_CMSIS_DIR}/variants/stm32f4/*.c
-)
-
-add_library(spl STATIC ${SPL_SRC})
-target_include_directories(spl PUBLIC
-    ${SPL_DIR}/variants/stm32f4/inc
-    ${SPL_CMSIS_DIR}/variants/stm32f4
-)
-
-# ---- FreeRTOS location ------------------------------------------------------
-set(FREERTOS_DIR
-    "C:/Users/henri/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.1/Middlewares/Third_Party/FreeRTOS"
-)
-
-include_directories(
-    ${FREERTOS_DIR}/Source/include
-    ${FREERTOS_DIR}/Source/portable/GCC/ARM_CM4F
-)
-
-# Public headers for every architecture
-set(FREERTOS_INC_DIR     ${FREERTOS_DIR}/Source/include)
-
-# Port-specific headers (Cortex-M4F + GCC in your STM32F4Cube package)
-set(FREERTOS_PORT_INC    ${FREERTOS_DIR}/Source/portable/GCC/ARM_CM4F)
-
-# Header-only interface target
-add_library(freertos_headers INTERFACE)
-target_include_directories(freertos_headers INTERFACE
-    ${FREERTOS_INC_DIR}
-    ${FREERTOS_PORT_INC}
-
-    ${SPL_CMSIS_DIR}/variants/stm32f4
-    ${SPL_CMSIS_DIR}/cores/stm32
-)
+set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
 
 set(FREERTOS_SRC
-  ${FREERTOS_DIR}/Source/list.c
-  ${FREERTOS_DIR}/Source/queue.c
-  ${FREERTOS_DIR}/Source/tasks.c
-  ${FREERTOS_DIR}/Source/timers.c
-  ${FREERTOS_DIR}/Source/event_groups.c
-
-  # Memory manager you prefer (heap_1-5.c) – pick ONE:
-  ${FREERTOS_DIR}/Source/portable/MemMang/heap_4.c
-
-  # Cortex-M4F / GCC port layer:
-  ${FREERTOS_DIR}/Source/portable/GCC/ARM_CM4F/port.c
+    ${FREERTOS_DIR}/event_groups.c
+    ${FREERTOS_DIR}/list.c
+    ${FREERTOS_DIR}/queue.c
+    ${FREERTOS_DIR}/tasks.c
+    ${FREERTOS_DIR}/timers.c
+    ${FREERTOS_PORT_DIR}/port.c
 )
 
 add_library(freertos_kernel STATIC ${FREERTOS_SRC})
-target_link_libraries(freertos_kernel PUBLIC spl)
 
-# Each sub-folder is responsible for its own CMakeLists.txt
-add_subdirectory(audio_codec)
-add_subdirectory(drivers/UART)
-
-file(GLOB_RECURSE TRICE_SRC trice/src/*.c)
-add_library(trice STATIC ${TRICE_SRC})
-target_include_directories(trice PUBLIC trice/src trice)
-target_link_libraries(trice PUBLIC spl)
-
-# If you have .c sitting directly in lib/, collect them into a helper lib
-file(GLOB LIB_ROOT_SRC CONFIGURE_DEPENDS
-     *.c
+target_include_directories(freertos_kernel PUBLIC
+    ${FREERTOS_DIR}/include
+    ${FREERTOS_PORT_DIR}
 )
 
-if(LIB_ROOT_SRC)
-    add_library(lib STATIC ${LIB_ROOT_SRC})
-    target_include_directories(lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
-endif()
+target_link_libraries(freertos_kernel PUBLIC mcu_defs)
+
+# CMSIS configuration
+set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FrameworkSTM/cmsis)
+file(GLOB CMSIS_SRC
+    ${CMSIS_DIR}/stm32f4/*.c
+)
+include_directories(${CMSIS_DIR}/stm32f4
+                    ${CMSIS_DIR}/cores/stm32)
+
+# SPL configuration
+set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FrameworkSTM/spl/stm32f4)
+file(GLOB SPL_SRC
+    ${SPL_DIR}/src/*.c
+)
+
+include_directories(${SPL_DIR}/inc)
+
+add_library(stm32_framework STATIC ${CMSIS_SRC} ${SPL_SRC})
+
+target_include_directories(stm32_framework PUBLIC
+    ${CMSIS_DIR}/stm32f4
+    ${CMSIS_DIR}/cores/stm32
+    ${SPL_DIR}/inc
+)
+
+target_link_libraries(stm32_framework PUBLIC freertos_kernel mcu_defs)
+
+# Audio Codec configuration
+set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
+file(GLOB AUDIO_CODEC_SRC
+    ${AUDIO_CODEC_DIR}/*.c
+)
+include_directories(${AUDIO_CODEC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
+
+add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
+
+target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
+
+target_link_libraries(audio_codec PUBLIC stm32_framework freertos_kernel mcu_defs)
+
+# UART Driver configuration
+set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
+file(GLOB UART_SRC
+    ${UART_DIR}/*.c
+)
+include_directories(${UART_DIR})
+
+add_library(uart_driver STATIC ${UART_SRC})
+
+target_include_directories(uart_driver PUBLIC ${UART_DIR})
+
+target_link_libraries(uart_driver PUBLIC stm32_framework freertos_kernel mcu_defs)

@@ -14,7 +14,7 @@
  * @author Radar2000
  */
 
-#include "oled.h"
+#include <oled.h>
 
 /* Private variables */
 static uint8_t OLED_Buffer[OLED_WIDTH * OLED_HEIGHT / 8];
