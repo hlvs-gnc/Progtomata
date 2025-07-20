@@ -13,8 +13,7 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 set(CMAKE_OBJCOPY      ${TOOLROOT}/arm-none-eabi-objcopy)
 set(CMAKE_SIZE         ${TOOLROOT}/arm-none-eabi-size)
 
-# ---- CPU / FPU flags -------------------------------------------------------
-# NOTE: **each** flag is its own list item.
+# ---- Flags -------------------------------------------------------
 set(ARCH_FLAGS
     -mcpu=cortex-m4
     -mthumb
@@ -23,4 +22,4 @@ set(ARCH_FLAGS
 
 # Apply them to every target CMake will create.
 add_compile_options(${ARCH_FLAGS} -ffunction-sections -fdata-sections)
-add_link_options(${ARCH_FLAGS} -Wl,--gc-sections)
+add_link_options(${ARCH_FLAGS} -Wl,--gc-sections -specs=nosys.specs)

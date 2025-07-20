@@ -7,8 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 add_library(mcu_defs INTERFACE)
 
-# The macro CMSIS/SPL expect for an F407/F417 device family:
-target_compile_definitions(mcu_defs INTERFACE STM32F40_41xxx)
+target_compile_definitions(mcu_defs INTERFACE STM32F40_41xxx USE_STDPERIPH_DRIVER)
 
 # Global include directories
 include_directories(
@@ -20,9 +19,7 @@ include_directories(
 add_subdirectory(lib)
 add_subdirectory(src)
 
-include_directories(
-    ${PROJECT_SOURCE_DIR}/lib/sound_bank
-)
+include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
 # ─── Final executable ────────────────────────────────────────────────────────
 add_executable(progtomata
@@ -34,8 +31,9 @@ add_executable(progtomata
 target_link_libraries(progtomata
     PRIVATE
         core
-        audio_codec
-        uart_driver
         stm32_framework
         freertos_kernel
+        audio_codec
+        uart_driver
+        trice
 )

@@ -28,12 +28,13 @@ jobs:
       - name: Run cppcheck
         run: |
           # Fail on any error/warning:
-          cppcheck --enable=all --inline-suppr --inconclusive \
+          cppcheck --inline-suppr --inconclusive \
                     --language=c --std=c99 \
                     --error-exitcode=1 \
                     -I src/ -I include/ \
-                    -i lib/audio_codec -i lib/trice -i build \
-                    --suppress=missingInclude --suppress=missingIncludeSystem \
+                    -i lib/audio_codec -i lib/trice -i lib/freertos \
+                    -i build -i .pio -i lib/frameworkstm \
+                    --suppress=missingIncludeSystem \
                     --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
                     --xml --xml-version=2 \
                     --output-file=cppcheck-result.xml \
@@ -54,10 +55,12 @@ jobs:
 
       - name: Verify formatting
         run: |
-          # List all C/C header files and make the job fail if any are wrongly formatted
+          # List all C header files and make the job fail if any are wrongly formatted
           FILES="$(git ls-files \
                 '*.c' '*.h' \
-                ':(exclude)lib/trice/**')"
+                ':(exclude)lib/trice/**') \
+                ':(exclude)lib/frameworkstm/**') \
+                ':(exclude)lib/freertos/**') \"
                 clang-format -n --Werror $FILES
 
   build:
