@@ -32,7 +32,7 @@ jobs:
                     --language=c --std=c99 \
                     --error-exitcode=1 \
                     -I src/ -I include/ \
-                    -i lib/audio_codec -i lib/trice -i lib/freertos \
+                    -i lib/audio_codec -i lib/trice -i lib/freertos_kernel \
                     -i build -i .pio -i lib/frameworkstm \
                     --suppress=missingIncludeSystem \
                     --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
@@ -58,7 +58,7 @@ jobs:
           # List all C header files and make the job fail if any are wrongly formatted
           FILES="$(git ls-files \
                 '*.c' '*.h' \
-                ':(exclude)lib/trice/**' ':(exclude)lib/frameworkstm/**' ':(exclude)lib/freertos/**')"
+                ':(exclude)lib/trice/**' ':(exclude)lib/frameworkstm/**' ':(exclude)lib/freertos_kernel/**')"
                 clang-format -n --Werror $FILES
 
   build:
