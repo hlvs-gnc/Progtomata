@@ -31,10 +31,3 @@ target_link_libraries(progtomata PRIVATE
                       audio_codec
                       uart_driver
                       trice)
-
-                                FILES="$(git ls-files \
-                '*.c' '*.h' \
-                ':(exclude)lib/trice/**') \
-                ':(exclude)lib/frameworkstm/**') \
-                ':(exclude)lib/freertos/**') \"
-                clang-format -n --Werror $FILES
