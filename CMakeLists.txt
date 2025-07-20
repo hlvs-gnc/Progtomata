@@ -10,10 +10,8 @@ add_library(mcu_defs INTERFACE)
 target_compile_definitions(mcu_defs INTERFACE STM32F40_41xxx USE_STDPERIPH_DRIVER)
 
 # Global include directories
-include_directories(
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/config
-)
+include_directories(${PROJECT_SOURCE_DIR}/include
+                    ${PROJECT_SOURCE_DIR}/config)
 
 # ─── Sub-directories that build libraries / object code ─────────────────────
 add_subdirectory(lib)
@@ -22,18 +20,21 @@ add_subdirectory(src)
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
 # ─── Final executable ────────────────────────────────────────────────────────
-add_executable(progtomata
-    src/main.c
-)
+add_executable(progtomata src/main.c)
 
 # Link every static lib we produced.
 # Add or remove targets here as you create new libraries.
-target_link_libraries(progtomata
-    PRIVATE
-        core
-        stm32_framework
-        freertos_kernel
-        audio_codec
-        uart_driver
-        trice
-)
+target_link_libraries(progtomata PRIVATE 
+                      core
+                      stm32_framework
+                      freertos_kernel
+                      audio_codec
+                      uart_driver
+                      trice)
+
+                                FILES="$(git ls-files \
+                '*.c' '*.h' \
+                ':(exclude)lib/trice/**') \
+                ':(exclude)lib/frameworkstm/**') \
+                ':(exclude)lib/freertos/**') \"
+                clang-format -n --Werror $FILES
