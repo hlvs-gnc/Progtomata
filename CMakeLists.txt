@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(PROGTOMATA C)
 
-# ─── Project-wide options ────────────────────────────────────────────────────
+# Project-wide options
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
@@ -13,13 +13,13 @@ target_compile_definitions(mcu_defs INTERFACE STM32F40_41xxx USE_STDPERIPH_DRIVE
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/config)
 
-# ─── Sub-directories that build libraries / object code ─────────────────────
+# Sub-directories that build libraries / object code
 add_subdirectory(lib)
 add_subdirectory(src)
 
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
-# ─── Final executable ────────────────────────────────────────────────────────
+# Final executable
 add_executable(progtomata src/main.c)
 
 # Link every static lib we produced.
