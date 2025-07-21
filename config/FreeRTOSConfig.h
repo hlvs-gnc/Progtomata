@@ -87,7 +87,7 @@
 #include <stdint.h>
 #endif
 
-#include "system_stm32f4xx.h"
+#include <system_stm32f4xx.h>
 
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 0

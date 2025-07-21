@@ -14,7 +14,7 @@
  * @author Radar2000
  */
 
-#include "lcd.h"
+#include <lcd.h>
 
 uint16_t Register_Select = GPIO_Pin_3;
 uint16_t Enable = GPIO_Pin_5;

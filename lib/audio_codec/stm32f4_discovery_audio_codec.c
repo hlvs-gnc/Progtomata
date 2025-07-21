@@ -139,16 +139,16 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "stm32f4_discovery_audio_codec.h"
+#include <stm32f4_discovery_audio_codec.h>
 
 #include <trice.h>
 
-#include "misc.h"
-#include "stm32f4xx_dac.h"
-#include "stm32f4xx_dma.h"
-#include "stm32f4xx_i2c.h"
-#include "stm32f4xx_rcc.h"
-#include "stm32f4xx_spi.h"
+#include <misc.h>
+#include <stm32f4xx_dac.h>
+#include <stm32f4xx_dma.h>
+#include <stm32f4xx_i2c.h>
+#include <stm32f4xx_rcc.h>
+#include <stm32f4xx_spi.h>
 
 /** @addtogroup Utilities
  * @{

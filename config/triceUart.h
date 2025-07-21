@@ -1,4 +1,4 @@
-/*!
+/*
  * \file triceUart.h
  * \brief Deferred-mode UART adapter for Trice using STM32 SPL drivers
  *
@@ -7,8 +7,8 @@
  * USART1) and/or TRICE_UARTB (e.g., USART2) to match your hardware setup.
  */
 
-#ifndef TRICE_UART_H_
-#define TRICE_UART_H_
+#ifndef CONFIG_TRICEUART_H_
+#define CONFIG_TRICEUART_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,4 +83,4 @@ TRICE_INLINE void triceDisableTxEmptyInterruptUartB(void);
 }
 #endif
 
-#endif /* TRICE_UART_H_ */
+#endif /* CONFIG_TRICEUART_H_ */

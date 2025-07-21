@@ -2,7 +2,7 @@
 *****************************************************************************
 **
 
-**  File        : stm32f407vg_flash.ld
+**  File        : stm32f407vg.ld
 **
 **  Abstract    : Linker script for STM32F407VG Device with
 **                1024KByte FLASH, 128KByte RAM

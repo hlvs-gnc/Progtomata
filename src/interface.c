@@ -3,7 +3,7 @@
  * Used to read buttons and write to LEDs
  */
 
-#include "interface.h"
+#include <interface.h>
 
 // @TODO: check
 /**

@@ -22,7 +22,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4_discovery.h"
+#include <stm32f4_discovery.h>
 
 /** @addtogroup Utilities
  * @{

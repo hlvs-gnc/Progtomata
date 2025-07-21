@@ -45,7 +45,7 @@
  * @author Radar2000
  */
 
-#include "hooks.h"
+#include <hooks.h>
 
 #if (vAppTickHook == 1)
 void vApplicationTickHook(void) {}
