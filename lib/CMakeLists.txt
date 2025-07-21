@@ -1,4 +1,4 @@
-# FreeRTOS Kernel target
+# FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
 
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
@@ -20,12 +20,12 @@ target_include_directories(freertos_kernel PUBLIC
 
 target_link_libraries(freertos_kernel PUBLIC mcu_defs)
 
-# SPL configuration
+# Standard Peripheral Library
 set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/spl/stm32f4)
 file(GLOB SPL_SRC
     ${SPL_DIR}/src/*.c)
 
-# CMSIS configuration
+# CMSIS 
 set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/cmsis)
 file(GLOB CMSIS_SRC
     ${CMSIS_DIR}/stm32f4/*.c)
@@ -43,7 +43,7 @@ target_include_directories(stm32_framework PUBLIC
 
 target_link_libraries(stm32_framework PUBLIC mcu_defs)
 
-# Audio Codec configuration
+# Audio Codec
 set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
 file(GLOB AUDIO_CODEC_SRC
     ${AUDIO_CODEC_DIR}/*.c)
@@ -54,9 +54,9 @@ add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
 
 target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
 
-target_link_libraries(audio_codec PUBLIC stm32_framework freertos_kernel mcu_defs)
+target_link_libraries(audio_codec PUBLIC)
 
-# UART Driver configuration
+# UART Driver
 set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
 file(GLOB UART_SRC
     ${UART_DIR}/*.c)
@@ -67,9 +67,9 @@ add_library(uart_driver STATIC ${UART_SRC})
 
 target_include_directories(uart_driver PUBLIC ${UART_DIR})
 
-target_link_libraries(uart_driver PUBLIC stm32_framework freertos_kernel mcu_defs)
+target_link_libraries(uart_driver PUBLIC)
 
-# Trice configuration
+# Trice Logger
 set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 file(GLOB TRICE_SRC
     ${TRICE_DIR}/*.c)

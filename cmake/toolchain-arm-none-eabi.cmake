@@ -1,25 +1,27 @@
 # cmake/toolchain-arm-none-eabi.cmake
-# ------------------------------------------------------------
-# Tell CMake we are cross‑compiling bare metal firmware
-set(CMAKE_SYSTEM_NAME        Generic)
+cmake_minimum_required(VERSION 3.22)
+
+# Target side
+set(CMAKE_SYSTEM_NAME       Generic)
+set(CMAKE_SYSTEM_PROCESSOR  cortex-m4)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# ---- Tool locations --------------------------------------------------------
-# One folder up from the gcc‑13.3.1 you showed in your screenshot.
-set(TOOLROOT /opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32/bin)
+if(DEFINED ENV{GNUARMEMB_TOOLCHAIN})
+  set(_TOOLROOT $ENV{GNUARMEMB_TOOLCHAIN})
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  set(_TOOLROOT "C:/ST/STM32CubeCLT_1.18.0/GNU-Tools-for-STM32/bin")
+else()
+  set(_TOOLROOT "/opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32/bin")
+endif()
 
-set(CMAKE_C_COMPILER   ${TOOLROOT}/arm-none-eabi-gcc)
+find_program(CMAKE_C_COMPILER arm-none-eabi-gcc HINTS ${_TOOLROOT} REQUIRED)
 set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
-set(CMAKE_OBJCOPY      ${TOOLROOT}/arm-none-eabi-objcopy)
-set(CMAKE_SIZE         ${TOOLROOT}/arm-none-eabi-size)
+foreach(tool objcopy size)
+  find_program(ARM_${tool} arm-none-eabi-${tool} HINTS ${_TOOLROOT} REQUIRED)
+endforeach()
+set(CMAKE_OBJCOPY ${ARM_objcopy})
+set(CMAKE_SIZE    ${ARM_size})
 
-# ---- Flags -------------------------------------------------------
-set(ARCH_FLAGS
-    -mcpu=cortex-m4
-    -mthumb
-    -mfpu=fpv4-sp-d16
-    -mfloat-abi=hard)
-
-# Apply them to every target CMake will create.
+set(ARCH_FLAGS -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard)
 add_compile_options(${ARCH_FLAGS} -ffunction-sections -fdata-sections)
-add_link_options(${ARCH_FLAGS} -Wl,--gc-sections -specs=nosys.specs)
+add_link_options   (${ARCH_FLAGS} -Wl,--gc-sections -specs=nosys.specs)
