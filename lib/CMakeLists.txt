@@ -1,6 +1,5 @@
 # FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
-
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
 
 set(FREERTOS_SRC

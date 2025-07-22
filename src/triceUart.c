@@ -1,6 +1,14 @@
-/*!
- * \file triceUart.c
- ******************************************************************************/
+/**
+ * @file triceUart.c
+ *
+ * @brief This file contains the definitions and configuration for UART
+ * communication used by the Trice library.
+ *
+ * @details
+ *   - Provides initialization and handling routines for UART peripheral.
+ *   - Supports sending and receiving TRICE data over UART.
+ *   - Designed for integration with FreeRTOS and STM32F4 platform.
+ */
 
 #include <triceUart.h>
 

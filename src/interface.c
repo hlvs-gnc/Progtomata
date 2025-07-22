@@ -1,6 +1,14 @@
 /**
- * Controls communication with encoders and shift registers
- * Used to read buttons and write to LEDs
+ * @file interface.c
+ *
+ * @brief Controls communication with encoders and shift registers for button
+ * reading and LED writing.
+ *
+ * @details
+ *   - Provides initialization and access routines for GPIO pins connected to
+ * encoders (buttons) and shift registers (LEDs).
+ *   - Implements functions to read button states and control LED outputs.
+ *   - Designed for STM32F4 platform integration.
  */
 
 #include <interface.h>

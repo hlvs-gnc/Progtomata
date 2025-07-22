@@ -1,4 +1,4 @@
-/*!
+/**
  * @file trace.c
  * @brief This file contains the definitions of user-provided functions and
  * function pointers for use with the Trice library in deferred mode.
