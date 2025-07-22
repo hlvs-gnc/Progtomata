@@ -1,4 +1,3 @@
-# Grab everything in src/, except main.c which is linked directly
 file(GLOB SRC_FILES CONFIGURE_DEPENDS
      *.c
 )
