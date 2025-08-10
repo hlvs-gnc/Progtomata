@@ -20,14 +20,12 @@ target_include_directories(freertos_kernel PUBLIC
 target_link_libraries(freertos_kernel PUBLIC mcu_defs)
 
 # Standard Peripheral Library
-set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/spl/stm32f4)
-file(GLOB SPL_SRC
-    ${SPL_DIR}/src/*.c)
+set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
+file(GLOB SPL_SRC ${SPL_DIR}/src/*.c)
 
 # CMSIS 
-set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/cmsis)
-file(GLOB CMSIS_SRC
-    ${CMSIS_DIR}/stm32f4/*.c)
+set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/cmsis)
+file(GLOB CMSIS_SRC ${CMSIS_DIR}/stm32f4/*.c)
 
 include_directories(${SPL_DIR}/inc
                     ${CMSIS_DIR}/stm32f4
@@ -44,8 +42,7 @@ target_link_libraries(stm32_framework PUBLIC mcu_defs)
 
 # Audio Codec
 set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
-file(GLOB AUDIO_CODEC_SRC
-    ${AUDIO_CODEC_DIR}/*.c)
+file(GLOB AUDIO_CODEC_SRC ${AUDIO_CODEC_DIR}/*.c)
 
 include_directories(${AUDIO_CODEC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 
@@ -57,8 +54,7 @@ target_link_libraries(audio_codec PUBLIC)
 
 # UART Driver
 set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
-file(GLOB UART_SRC
-    ${UART_DIR}/*.c)
+file(GLOB UART_SRC ${UART_DIR}/*.c)
 
 include_directories(${UART_DIR})
 
@@ -70,8 +66,7 @@ target_link_libraries(uart_driver PUBLIC)
 
 # Trice Logger
 set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
-file(GLOB TRICE_SRC
-    ${TRICE_DIR}/*.c)
+file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)
 
 include_directories(${TRICE_DIR})
 

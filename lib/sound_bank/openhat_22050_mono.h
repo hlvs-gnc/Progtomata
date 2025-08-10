@@ -1,5 +1,7 @@
 // Audio data: 9882 samples, 22050 Hz, Mono
 
+#include <stdint.h>
+
 __attribute__((section(".audio_samples")))
 const int16_t openhat_22050_mono[] = {
     0x0003, 0xFFFB, 0x0007, 0xFFF7, 0x000C, 0xFFF1, 0x0012, 0xFFEA, 0x0019,

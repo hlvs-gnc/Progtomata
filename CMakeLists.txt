@@ -21,7 +21,7 @@ add_subdirectory(src)
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
 # Executable
-add_executable(${PROJECT_NAME}.elf src/main.c lib/frameworkstm/cmsis/stm32f4/startup_stm32f40xx.S)
+add_executable(${PROJECT_NAME}.elf src/main.c lib/framework_stm/cmsis/stm32f4/startup_stm32f40xx.S)
 
 target_link_libraries(${PROJECT_NAME}.elf PRIVATE 
                       core
@@ -34,5 +34,4 @@ target_link_libraries(${PROJECT_NAME}.elf PRIVATE
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
   COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.bin
   COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.hex
-  COMMENT "Generating .bin and .hex from ELF"
-)
+  COMMENT "Generating .bin and .hex from ELF")
