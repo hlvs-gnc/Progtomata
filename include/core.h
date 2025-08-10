@@ -59,8 +59,8 @@ StaticSemaphore_t xButtonSemaphoreStatic;
 SemaphoreHandle_t xButtonSemaphoreHandle;
 
 /// @brief Array of audio sample data pointers
-static const int16_t *const sampleData[NUM_SAMPLES] = {kick_22050_mono,
-                                                       openhat_22050_mono};
+static const int16_t *const sampleData[NUM_SAMPLES] = {kick_mono,
+                                                       openhat_mono};
 
 static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
 
