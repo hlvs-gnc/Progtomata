@@ -1,3 +1,5 @@
+set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 # FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
@@ -17,7 +19,7 @@ target_include_directories(freertos_kernel PUBLIC
     ${FREERTOS_DIR}/include
     ${FREERTOS_PORT_DIR})
 
-target_link_libraries(freertos_kernel PUBLIC mcu_defs)
+target_link_libraries(freertos_kernel PUBLIC platform_defs core)
 
 # Standard Peripheral Library
 set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/spl/stm32f4)
@@ -40,7 +42,7 @@ target_include_directories(stm32_framework PUBLIC
     ${CMSIS_DIR}/stm32f4
     ${CMSIS_DIR}/cores/stm32)
 
-target_link_libraries(stm32_framework PUBLIC mcu_defs)
+target_link_libraries(stm32_framework PUBLIC platform_defs)
 
 # Audio Codec
 set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
@@ -53,7 +55,7 @@ add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
 
 target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
 
-target_link_libraries(audio_codec PUBLIC)
+target_link_libraries(audio_codec PUBLIC platform_defs)
 
 # UART Driver
 set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
@@ -66,8 +68,6 @@ add_library(uart_driver STATIC ${UART_SRC})
 
 target_include_directories(uart_driver PUBLIC ${UART_DIR})
 
-target_link_libraries(uart_driver PUBLIC)
-
 # Trice Logger
 set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 file(GLOB TRICE_SRC
@@ -79,4 +79,12 @@ add_library(trice STATIC ${TRICE_SRC})
 
 target_include_directories(trice PUBLIC ${TRICE_DIR})
 
-target_link_libraries(trice PUBLIC core)
+# Unity framework
+set(UNITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Unity/src
+    CACHE PATH "Path to Unity sources")
+
+file(GLOB UNITY_SRC ${UNITY_DIR}/unity.c
+    CACHE FILEPATH "Unity single C source file")
+
+add_library(unity STATIC ${UNITY_SRC})
+target_include_directories(unity PUBLIC ${UNITY_DIR})

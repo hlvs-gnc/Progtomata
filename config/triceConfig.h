@@ -1,8 +1,19 @@
-/*! \file triceConfig.h
-*******************************************************************************/
-
-#ifndef TRICE_CONFIG_H_
-#define TRICE_CONFIG_H_
+/**
+ * @file triceConfig.h
+ *
+ * @brief Configuration header for Trice logging tool
+ *
+ * @details This file contains configuration values for Trice, a logging tool
+ * for embedded systems.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ *
+ * @author Radar2000
+ */
+#ifndef CONFIG_TRICECONFIG_H_
+#define CONFIG_TRICECONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +26,8 @@ extern "C" {
 // TRICE_CLEAN, when found in triceConfig.h is set to 0 with command "trice
 // insert". and set to 1 with command "trice clean" to get rid of potential
 // editor warnings in the trice clean state.
-#define TRICE_CLEAN                                                            \
-  0 // Do not define this at an other place! But you can delete this here.
+// Do not define this at an other place! But you can delete this here.
+#define TRICE_CLEAN 0
 #endif
 
 #ifndef TRICE_OFF
@@ -66,7 +77,7 @@ extern "C" {
 #ifndef TRICE_DEFERRED_UARTB
 #define TRICE_DEFERRED_UARTB                                                   \
   0 //!< TRICE_DEFERRED_UARTB enables a user defined deferred trice write over
-    //!< TRICE_UARTB.
+//!< TRICE_UARTB.
 #endif
 
 #ifndef TRICE_DIRECT_AUXILIARY8
@@ -229,7 +240,7 @@ extern "C" {
 //! TRICE_DIRECT_OUTPUT is 1. Enable this only, if you want only a specific ID
 //! range for direct Trice output. If you use different direct output channels,
 //! you can change this only for all together.
-#define TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING 0 // (experimental)
+#define TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING 0  // (experimental)
 #endif
 
 #ifndef TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING
@@ -237,7 +248,7 @@ extern "C" {
 //! TRICE_DEFERRED_OUTPUT is 1. Enable this only, if you want only a specific ID
 //! range for direct Trice output. If you use different direct output channels,
 //! you can change this only for all together.
-#define TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING 0 // (experimental)
+#define TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING 0  // (experimental)
 #endif
 
 #ifndef TRICE_DATA_OFFSET

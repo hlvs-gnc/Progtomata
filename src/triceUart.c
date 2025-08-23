@@ -30,6 +30,8 @@ void triceEnableTxEmptyInterruptUartA(void) {
   USART_ITConfig(TRICE_UARTA, USART_IT_TXE, ENABLE);
 }
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/*******  7714aea5-8f77-48ad-97ff-e7824ca6e46d  *******/
 void triceDisableTxEmptyInterruptUartA(void) {
   USART_ITConfig(TRICE_UARTA, USART_IT_TXE, DISABLE);
 }

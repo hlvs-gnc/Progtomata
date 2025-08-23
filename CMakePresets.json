@@ -1,0 +1,34 @@
+{
+  "version": 5,
+  "configurePresets": [
+    {
+      "name": "fw",
+      "displayName": "Firmware (STM32, ARM toolchain)",
+      "generator": "Ninja",
+      "binaryDir": "build-fw",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-gcc-stm32f4.cmake",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "host-tests-mingw",
+      "displayName": "Host unit tests (MinGW-w64 GCC)",
+      "generator": "Ninja",
+      "binaryDir": "build-host",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "C:/msys64/mingw64/bin/ninja.exe",
+        "BUILD_TESTING": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "fw", "configurePreset": "fw" },
+    { "name": "host-tests-mingw", "configurePreset": "host-tests-mingw" }
+  ],
+  "testPresets": [
+    { "name": "host-tests-mingw", "configurePreset": "host-tests-mingw" }
+  ]
+}
