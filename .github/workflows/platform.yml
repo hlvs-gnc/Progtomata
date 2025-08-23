@@ -87,7 +87,7 @@ jobs:
         run: pio run
 
   test:
-    name: PlatformIO Tests
+    name: Unit-tests
     runs-on: ubuntu-latest
     needs: build
 
