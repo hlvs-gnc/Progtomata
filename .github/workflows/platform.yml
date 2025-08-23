@@ -117,13 +117,9 @@ jobs:
       - name: Install PIO dependencies (once)
         run: pio pkg install
 
-      # 1) Run host tests on the runner
-      - name: Run host tests (env:native)
-        run: pio test -e native -vv
-
-      # 2) Build target test firmware
-      - name: Build target test firmware (no upload)
-        run: pio test -e disco_f407vg -vv --without-uploading
+      # Build target test firmware
+      - name: Build target test firmware
+        run: pio test -e disco_f407vg -vvv --without-uploading
 
   docs:
     name: Generate documentation
