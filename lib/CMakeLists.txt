@@ -19,7 +19,7 @@ target_include_directories(freertos_kernel PUBLIC
     ${FREERTOS_DIR}/include
     ${FREERTOS_PORT_DIR})
 
-target_link_libraries(freertos_kernel PUBLIC platform_defs core)
+target_link_libraries(freertos_kernel PUBLIC platform_defs)
 
 # Standard Peripheral Library
 set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
@@ -52,7 +52,7 @@ add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
 
 target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
 
-target_link_libraries(audio_codec PUBLIC platform_defs)
+target_link_libraries(audio_codec PUBLIC)
 
 # UART Driver
 set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
@@ -64,6 +64,8 @@ add_library(uart_driver STATIC ${UART_SRC})
 
 target_include_directories(uart_driver PUBLIC ${UART_DIR})
 
+target_link_libraries(uart_driver PUBLIC)
+
 # Trice Logger
 set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)
@@ -73,6 +75,8 @@ include_directories(${TRICE_DIR})
 add_library(trice STATIC ${TRICE_SRC})
 
 target_include_directories(trice PUBLIC ${TRICE_DIR})
+
+target_link_libraries(trice PUBLIC core)
 
 # Unity framework
 set(UNITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Unity/src

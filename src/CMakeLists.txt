@@ -13,9 +13,4 @@ target_include_directories(core
     ${PROJECT_SOURCE_DIR}/lib/sound_bank
     ${PROJECT_SOURCE_DIR}/lib/trice/src)
 
-# Link conditionally: embedded pulls MCU libs; host only adds platform defs.
-if(BUILD_EMBEDDED)
-  target_link_libraries(core PUBLIC freertos_kernel stm32_framework platform_defs)
-else()
-  target_link_libraries(core PUBLIC platform_defs)
-endif()
+target_link_libraries(core PUBLIC freertos_kernel stm32_framework platform_defs)
