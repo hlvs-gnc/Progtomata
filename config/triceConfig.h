@@ -240,7 +240,7 @@ extern "C" {
 //! TRICE_DIRECT_OUTPUT is 1. Enable this only, if you want only a specific ID
 //! range for direct Trice output. If you use different direct output channels,
 //! you can change this only for all together.
-#define TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING 0  // (experimental)
+#define TRICE_DIRECT_OUTPUT_IS_WITH_ROUTING 0 // (experimental)
 #endif
 
 #ifndef TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING
@@ -248,7 +248,7 @@ extern "C" {
 //! TRICE_DEFERRED_OUTPUT is 1. Enable this only, if you want only a specific ID
 //! range for direct Trice output. If you use different direct output channels,
 //! you can change this only for all together.
-#define TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING 0  // (experimental)
+#define TRICE_DEFERRED_OUTPUT_IS_WITH_ROUTING 0 // (experimental)
 #endif
 
 #ifndef TRICE_DATA_OFFSET

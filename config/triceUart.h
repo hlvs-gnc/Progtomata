@@ -58,7 +58,7 @@ void triceEnableTxEmptyInterruptUartA(void);
  */
 void triceDisableTxEmptyInterruptUartA(void);
 
-#endif  // TRICE_DEFERRED_UARTA
+#endif // TRICE_DEFERRED_UARTA
 
 #if TRICE_DEFERRED_UARTB == 1
 
@@ -84,10 +84,10 @@ TRICE_INLINE void triceEnableTxEmptyInterruptUartB(void);
  */
 TRICE_INLINE void triceDisableTxEmptyInterruptUartB(void);
 
-#endif  // TRICE_DEFERRED_UARTB
+#endif // TRICE_DEFERRED_UARTB
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // CONFIG_TRICEUART_H_
+#endif // CONFIG_TRICEUART_H_

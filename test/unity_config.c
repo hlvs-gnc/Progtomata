@@ -55,6 +55,4 @@ void unityOutputFlush(void) {
   }
 }
 
-void unityOutputComplete(void) {
-
-}
+void unityOutputComplete(void) {}

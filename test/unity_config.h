@@ -12,9 +12,9 @@ void unityOutputChar(char);
 void unityOutputFlush();
 void unityOutputComplete();
 
-#define UNITY_OUTPUT_START()    unityOutputStart()
-#define UNITY_OUTPUT_CHAR(c)    unityOutputChar(c)
-#define UNITY_OUTPUT_FLUSH()    unityOutputFlush()
+#define UNITY_OUTPUT_START() unityOutputStart()
+#define UNITY_OUTPUT_CHAR(c) unityOutputChar(c)
+#define UNITY_OUTPUT_FLUSH() unityOutputFlush()
 #define UNITY_OUTPUT_COMPLETE() unityOutputComplete()
 
 #ifdef __cplusplus
