@@ -295,13 +295,13 @@ int main(void) {
   xButtonSemaphoreHandle =
       xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
   if (xButtonSemaphoreHandle == NULL) {
-    TRice(iD(7573), "error: Button semaphore creation failed\n");
+    TRice(iD(3926), "error: Button semaphore creation failed\n");
   }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 65, I2S_AudioFreq_22k) != 0) {
-    TRice(iD(2873), "msg: Audio codec initialization failed\n");
+    TRice(iD(4708), "msg: Audio codec initialization failed\n");
   }
 
   Sequencer_SetBpm(120);
@@ -313,7 +313,7 @@ int main(void) {
     TRice(iD(3630), "error: Failed to start audio playback\n");
   }
 
-  TRice(iD(1375), "msg: Audio setup complete\n");
+  TRice(iD(3720), "msg: Audio setup complete\n");
 
   sampleButtonTaskHandle = xTaskCreateStatic(
       vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE,
@@ -332,7 +332,7 @@ int main(void) {
       vOledAnimationTask, "OledAnimationTask", ANIMATION_TASK_STACK_SIZE, NULL,
       ANIMATION_TASK_PRIORITY, animationTaskStack, &animationTaskBuffer);
 
-  TRice(iD(7392), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(1106), "info: 🐛 PROGTOMATA2000 System initialized\n");
 
   vTaskStartScheduler(); // This shall never return
 
@@ -361,7 +361,7 @@ static void vButtonSampleTask(void *p) {
     }
     prevStatePA0 = currentStatePA0;
 
-    //  PD1 => PD5
+    //  PD1 => PD5<
     if (currentStatePD1 == Bit_RESET) {
       // Button is pressed
       GPIO_SetBits(GPIOD, GPIO_Pin_5);

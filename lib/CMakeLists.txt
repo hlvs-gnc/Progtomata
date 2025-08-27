@@ -1,6 +1,7 @@
+set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 # FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
-
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
 
 set(FREERTOS_SRC
@@ -18,17 +19,15 @@ target_include_directories(freertos_kernel PUBLIC
     ${FREERTOS_DIR}/include
     ${FREERTOS_PORT_DIR})
 
-target_link_libraries(freertos_kernel PUBLIC mcu_defs)
+target_link_libraries(freertos_kernel PUBLIC platform_defs)
 
 # Standard Peripheral Library
-set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/spl/stm32f4)
-file(GLOB SPL_SRC
-    ${SPL_DIR}/src/*.c)
+set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
+file(GLOB SPL_SRC ${SPL_DIR}/src/*.c)
 
 # CMSIS 
-set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frameworkstm/cmsis)
-file(GLOB CMSIS_SRC
-    ${CMSIS_DIR}/stm32f4/*.c)
+set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/cmsis)
+file(GLOB CMSIS_SRC ${CMSIS_DIR}/stm32f4/*.c)
 
 include_directories(${SPL_DIR}/inc
                     ${CMSIS_DIR}/stm32f4
@@ -41,12 +40,11 @@ target_include_directories(stm32_framework PUBLIC
     ${CMSIS_DIR}/stm32f4
     ${CMSIS_DIR}/cores/stm32)
 
-target_link_libraries(stm32_framework PUBLIC mcu_defs)
+target_link_libraries(stm32_framework PUBLIC platform_defs)
 
 # Audio Codec
 set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
-file(GLOB AUDIO_CODEC_SRC
-    ${AUDIO_CODEC_DIR}/*.c)
+file(GLOB AUDIO_CODEC_SRC ${AUDIO_CODEC_DIR}/*.c)
 
 include_directories(${AUDIO_CODEC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 
@@ -58,8 +56,7 @@ target_link_libraries(audio_codec PUBLIC)
 
 # UART Driver
 set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
-file(GLOB UART_SRC
-    ${UART_DIR}/*.c)
+file(GLOB UART_SRC ${UART_DIR}/*.c)
 
 include_directories(${UART_DIR})
 
@@ -71,8 +68,7 @@ target_link_libraries(uart_driver PUBLIC)
 
 # Trice Logger
 set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
-file(GLOB TRICE_SRC
-    ${TRICE_DIR}/*.c)
+file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)
 
 include_directories(${TRICE_DIR})
 
@@ -81,3 +77,13 @@ add_library(trice STATIC ${TRICE_SRC})
 target_include_directories(trice PUBLIC ${TRICE_DIR})
 
 target_link_libraries(trice PUBLIC core)
+
+# Unity framework
+set(UNITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Unity/src
+    CACHE PATH "Path to Unity sources")
+
+file(GLOB UNITY_SRC ${UNITY_DIR}/unity.c
+    CACHE FILEPATH "Unity single C source file")
+
+add_library(unity STATIC ${UNITY_SRC})
+target_include_directories(unity PUBLIC ${UNITY_DIR})

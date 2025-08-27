@@ -1,6 +1,14 @@
-/*!
- * \file triceUart.c
- ******************************************************************************/
+/**
+ * @file triceUart.c
+ *
+ * @brief This file contains the definitions and configuration for UART
+ * communication used by the Trice library.
+ *
+ * @details
+ *   - Provides initialization and handling routines for UART peripheral.
+ *   - Supports sending and receiving TRICE data over UART.
+ *   - Designed for integration with FreeRTOS and STM32F4 platform.
+ */
 
 #include <triceUart.h>
 
@@ -22,6 +30,8 @@ void triceEnableTxEmptyInterruptUartA(void) {
   USART_ITConfig(TRICE_UARTA, USART_IT_TXE, ENABLE);
 }
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/*******  7714aea5-8f77-48ad-97ff-e7824ca6e46d  *******/
 void triceDisableTxEmptyInterruptUartA(void) {
   USART_ITConfig(TRICE_UARTA, USART_IT_TXE, DISABLE);
 }

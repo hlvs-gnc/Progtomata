@@ -59,9 +59,9 @@ StaticSemaphore_t xButtonSemaphoreStatic;
 SemaphoreHandle_t xButtonSemaphoreHandle;
 
 /// @brief Array of audio sample data pointers
-static const int16_t *const sampleData[NUM_SAMPLES] = {kick_22050_mono,
-                                                       openhat_22050_mono};
+static const int16_t *const sampleData[NUM_SAMPLES] = {kick_mono, openhat_mono};
 
+/// @brief Array of sample lengths in bytes
 static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
 
 // Task stack sizes
@@ -73,12 +73,6 @@ static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
 
 /// @brief Stack size for the blink task in bytes
 #define BLINK_TASK_STACK_SIZE 128
-
-/// @brief Stack size for the modify task in bytes
-#define MODIFYBUFFER_TASK_STACK_SIZE 512
-
-/// @brief Stack size for the sequencer task in bytes
-#define SEQUENCER_TASK_STACK_SIZE 256
 
 /// @brief Stack size for the animation task in bytes
 #define ANIMATION_TASK_STACK_SIZE 256
@@ -93,16 +87,7 @@ static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
 /// @brief Priority level for the blink task (1 = low)
 #define BLINK_TASK_PRIORITY 1
 
-/// @brief Priority level for the playback task (3 = high)
-#define PLAYBACK_TASK_PRIORITY 3
-
-/// @brief Priority level for the modify task (4 = very high)
-#define MODIFYBUFFER_TASK_PRIORITY 4
-
-/// @brief Priority level for the sequencer task (4 = very high)
-#define SEQUENCER_TASK_PRIORITY 4
-
-/// @brief Priority level for the animation task (4 = very high)
+/// @brief Priority level for the animation task (1 = low)
 #define ANIMATION_TASK_PRIORITY 1
 
 /// @brief Initial step size for delay increment and initial delay
