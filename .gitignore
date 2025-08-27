@@ -1,10 +1,11 @@
 # Generated folders
+.pio
 build
+build-host
 CMakeFiles
 html
 latex
 
-.pio
 .vscode/*
 
 # Generated files

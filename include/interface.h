@@ -1,10 +1,25 @@
+/**
+ * @file interface.h
+ *
+ * @brief Interface pin definitions and function prototypes for encoder and
+ * shift register configuration.
+ *
+ * @details
+ *   - Defines pin assignments for encoders and shift registers on
+ * STM32F4DISCOVERY.
+ *   - Declares initialization and button reading functions for use in
+ * application code.
+ *   - Designed for STM32F4 platform integration.
+ *
+ */
+
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_gpio.h"
-#include "stm32f4xx_rcc.h"
-#include "stm32f4xx_syscfg.h"
+#include <stm32f4xx.h>
+#include <stm32f4xx_gpio.h>
+#include <stm32f4xx_rcc.h>
+#include <stm32f4xx_syscfg.h>
 
 /**
  * @defgroup Interface_Pins Interface Pin Definitions

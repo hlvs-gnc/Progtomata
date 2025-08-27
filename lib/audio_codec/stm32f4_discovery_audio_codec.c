@@ -139,16 +139,16 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "stm32f4_discovery_audio_codec.h"
+#include <stm32f4_discovery_audio_codec.h>
 
 #include <trice.h>
 
-#include "misc.h"
-#include "stm32f4xx_dac.h"
-#include "stm32f4xx_dma.h"
-#include "stm32f4xx_i2c.h"
-#include "stm32f4xx_rcc.h"
-#include "stm32f4xx_spi.h"
+#include <misc.h>
+#include <stm32f4xx_dac.h>
+#include <stm32f4xx_dma.h>
+#include <stm32f4xx_i2c.h>
+#include <stm32f4xx_rcc.h>
+#include <stm32f4xx_spi.h>
 
 /** @addtogroup Utilities
  * @{
@@ -545,18 +545,18 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE) != RESET) {
-    TRice(iD(5229), "error: Transfer Error\n");
+    TRice(iD(7754), "error: Transfer Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE) != RESET) {
-    TRice(iD(2519), "error: FIFO Error\n");
+    TRice(iD(2816), "error: FIFO Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
       RESET) {
-    TRice(iD(4388), "error: Direct Mode Error\n");
+    TRice(iD(5279), "error: Direct Mode Error\n");
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
 

@@ -63,12 +63,10 @@
   http://www.SafeRTOS.com - High Integrity Systems also provide a safety
   engineered and independently SIL3 certified version for use in safety and
   mission critical applications that require provable dependability.
-
-  1 tab == 4 spaces!
 */
 
-#ifndef FREERTOS_CONFIG_H
-#define FREERTOS_CONFIG_H
+#ifndef CONFIG_FREERTOSCONFIG_H_
+#define CONFIG_FREERTOSCONFIG_H_
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -87,7 +85,7 @@
 #include <stdint.h>
 #endif
 
-#include "system_stm32f4xx.h"
+#include <system_stm32f4xx.h>
 
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 0
@@ -176,4 +174,4 @@
 #define xPortPendSVHandler PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
 
-#endif // FREERTOS_CONFIG_H
+#endif // CONFIG_FREERTOSCONFIG_H_

@@ -1,14 +1,21 @@
-/*!
- * \file triceUart.h
- * \brief Deferred-mode UART adapter for Trice using STM32 SPL drivers
+/**
+ * @file triceUart.h
  *
- * In your project, define TRICE_DEFERRED_UARTA or TRICE_DEFERRED_UARTB as 1 to
+ * @brief Deferred-mode UART adapter for Trice using STM32 SPL drivers
+ *
+ * @details Define TRICE_DEFERRED_UARTA or TRICE_DEFERRED_UARTB as 1 to
  * enable the corresponding UART functionality. Also define TRICE_UARTA (e.g.,
- * USART1) and/or TRICE_UARTB (e.g., USART2) to match your hardware setup.
+ * USART1) and/or TRICE_UARTB (e.g., USART2) to match the hardware setup.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ *
+ * @author Radar2000
  */
 
-#ifndef TRICE_UART_H_
-#define TRICE_UART_H_
+#ifndef CONFIG_TRICEUART_H_
+#define CONFIG_TRICEUART_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,4 +90,4 @@ TRICE_INLINE void triceDisableTxEmptyInterruptUartB(void);
 }
 #endif
 
-#endif /* TRICE_UART_H_ */
+#endif // CONFIG_TRICEUART_H_

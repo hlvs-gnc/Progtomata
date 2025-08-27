@@ -21,12 +21,12 @@
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
-#define LIB_AUDIOCODEC_STM32F4_DISCOVERY_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
+#ifndef LIB_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
+#define LIB_AUDIO_CODEC_STM32F4_DISCOVERY_AUDIO_CODEC_H_
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
-#include "stm32f4xx_gpio.h"
+#include <stm32f4xx.h>
+#include <stm32f4xx_gpio.h>
 
 /** @addtogroup Utilities
  * @{

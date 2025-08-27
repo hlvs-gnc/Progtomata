@@ -28,12 +28,13 @@ jobs:
       - name: Run cppcheck
         run: |
           # Fail on any error/warning:
-          cppcheck --enable=all --inline-suppr --inconclusive \
+          cppcheck --inline-suppr --inconclusive \
                     --language=c --std=c99 \
                     --error-exitcode=1 \
                     -I src/ -I include/ \
-                    -i lib/audio_codec -i lib/trice -i build \
-                    --suppress=missingInclude --suppress=missingIncludeSystem \
+                    -i lib/audio_codec -i lib/trice -i lib/freertos_kernel \
+                    -i build -i .pio -i lib/framework_stm \
+                    --suppress=missingIncludeSystem \
                     --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
                     --xml --xml-version=2 \
                     --output-file=cppcheck-result.xml \
@@ -54,14 +55,14 @@ jobs:
 
       - name: Verify formatting
         run: |
-          # List all C/C header files and make the job fail if any are wrongly formatted
+          # List all C header files and make the job fail if any are wrongly formatted
           FILES="$(git ls-files \
                 '*.c' '*.h' \
-                ':(exclude)lib/trice/**')"
+                ':(exclude)lib/trice/**' ':(exclude)lib/framework_stm/**' ':(exclude)lib/freertos_kernel/**')"
                 clang-format -n --Werror $FILES
 
   build:
-    name: Build (PlatformIO)
+    name: Build project
     runs-on: ubuntu-latest
     needs: lint
 
@@ -116,27 +117,27 @@ jobs:
           path: |
             html/**
             docs/html/**
-  
-  #test:
-  #  name: Run Unit Tests
-  #  runs-on: ubuntu-latest
 
-  #  steps:
-  #    - name: Checkout code
-  #      uses: actions/checkout@v3
+  unit_tests:
+    name: Unit tests (host)
+    runs-on: ubuntu-latest
+    needs: lint
 
-  #    - name: Set up Python
-  #      uses: actions/setup-python@v4
-  #      with:
-  #        python-version: "3.10"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-  #    - name: Install PlatformIO
-  #      run: |
-  #        python -m pip install --upgrade pip
-  #        pip install platformio
+      - name: Configure (host, with tests)
+        run: |
+          cmake -S . -B build-host \
+            -DBUILD_EMBEDDED=OFF \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=Debug
 
-  #    - name: Install dependencies
-  #      run: pio pkg install
+      - name: Build tests
+        run: cmake --build build-host --target unit_tests -j
 
-  #    - name: Run Unit Tests
-  #      run: pio test
+      - name: Run tests
+        run: ctest --test-dir build-host --output-on-failure

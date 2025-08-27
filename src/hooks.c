@@ -9,16 +9,16 @@
  * capabilities.
  *
  * @details
- * - **Tick Hook**: Placeholder for periodic operations executed in each system
+ * - Tick Hook: Placeholder for periodic operations executed in each system
  * tick.
- * - **Malloc Failed Hook**: Handles memory allocation failures and enters a
+ * - Malloc Failed Hook: Handles memory allocation failures and enters a
  * safe state.
- * - **Idle Hook**: Custom behavior during idle time.
- * - **Stack Overflow Hook**: Handles stack overflow errors and prevents further
+ * - Idle Hook: Custom behavior during idle time.
+ * - Stack Overflow Hook: Handles stack overflow errors and prevents further
  * damage.
- * - **Idle Task Memory Allocation**: Provides static memory for the FreeRTOS
+ * - Idle Task Memory Allocation: Provides static memory for the FreeRTOS
  * idle task.
- * - **Timer Task Memory Allocation**: Provides static memory for the FreeRTOS
+ * - Timer Task Memory Allocation: Provides static memory for the FreeRTOS
  * timer task.
  *
  * Features:
@@ -45,7 +45,7 @@
  * @author Radar2000
  */
 
-#include "hooks.h"
+#include <hooks.h>
 
 #if (vAppTickHook == 1)
 void vApplicationTickHook(void) {}
