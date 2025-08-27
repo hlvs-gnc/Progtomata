@@ -14,7 +14,7 @@ target_include_directories(unit_tests PRIVATE
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/config)
 
-target_link_libraries(unit_tests PRIVATE core stm32_framework unity)
+target_link_libraries(unit_tests PRIVATE unity)
 
 set_target_properties(unit_tests PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
