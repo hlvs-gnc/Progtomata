@@ -177,8 +177,8 @@ int main(void) {
   if (xButtonSemaphoreHandle == NULL) {
 #ifdef LOG_TRICE
     TRice(iD(3926), "error: Button semaphore creation failed\n");
-  }
 #endif
+  }
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 

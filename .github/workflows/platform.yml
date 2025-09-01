@@ -30,9 +30,9 @@ jobs:
           # Fail on any error/warning:
           cppcheck --inline-suppr --inconclusive \
                     --language=c --std=c99 \
-                    --error-exitcode=1 \
+                    --error-exitcode=1 --force \
                     -I src/ -I include/ \
-                    -i lib/audio_codec -i lib/trice -i lib/freertos_kernel \
+                    -i lib/audio_codec -i lib/trice -i lib/freertos_kernel -i lib/Unity \
                     -i build -i .pio -i lib/framework_stm \
                     --suppress=missingIncludeSystem \
                     --suppress=unusedFunction --suppress=unmatchedSuppression:{} \
@@ -122,7 +122,7 @@ jobs:
       - name: Configure (host, with tests)
         run: |
           cmake -S . -B build-host \
-            -DBUILD_EMBEDDED=OFF \
+            -DBUILD_EMBEDDED=0 \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=Debug
 
@@ -138,7 +138,7 @@ jobs:
           name: pio-test-results
           path: .pio/test-results/**/*.xml
           if-no-files-found: ignore
-  
+
   docs:
     name: Generate documentation
     runs-on: ubuntu-latest

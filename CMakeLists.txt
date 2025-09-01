@@ -7,6 +7,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
+set(BUILD_EMBEDDED 1)
+
 # Global include directories
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/config)
@@ -25,7 +27,7 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
 # Executable
-if(BUILD_EMBEDDED)
+if (BUILD_EMBEDDED)
   add_library(platform_defs INTERFACE)
   target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
   target_compile_definitions(platform_defs INTERFACE HSE_VALUE=8000000)
