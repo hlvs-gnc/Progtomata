@@ -1,5 +1,4 @@
 #pragma once
-// PlatformIO defines UNITY_INCLUDE_CONFIG_H for you.
 
 #ifdef __cplusplus
 extern "C" {
