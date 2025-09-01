@@ -1,8 +1,9 @@
 #include <stdint.h>
 #include <uart_driver.h>
 
+static int initialized = 0;
+
 void unityOutputStart(void) {
-  static int initialized = 0;
   if (!initialized) {
     uart_init();
     initialized = 1;
