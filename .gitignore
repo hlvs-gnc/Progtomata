@@ -5,7 +5,7 @@ build-host
 CMakeFiles
 html
 latex
-
+Testing/*
 .vscode/*
 
 # Generated files

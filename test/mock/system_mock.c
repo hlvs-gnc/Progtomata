@@ -9,7 +9,7 @@ int mock_pll_ready = 1;
 int mock_systemcoreclock_update_called = 0;
 int mock_gpio_init_called = 0;
 
-/* Minimal mock implementations used by SystemClock_Config and gpio init */
+/* Minimal mock implementations used by systemClock_config and gpio init */
 
 void RCC_AHB1PeriphClockCmd(uint32_t Periph, int NewState) {
   (void)Periph;
@@ -95,4 +95,8 @@ int GPIO_ReadInputDataBit(void *a, uint32_t b) {
   (void)a;
   (void)b;
   return 0;
+}
+
+void systemClock_config(void) {
+  // empty implementation
 }

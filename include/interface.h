@@ -46,7 +46,7 @@
  * @brief Initializes all the GPIO pins being used.
  * They connect to the encoders (buttons) and shift registers (LEDs).
  */
-void Interface_Init();
+void interface_init();
 
 /**
  * @brief Determines if any button from the 4-step playback grid has been
@@ -59,10 +59,10 @@ void Interface_Init();
  * @brief Determines which button from the 4-step grid has been pressed.
  * @return The code of the pressed button or 0xFF if no button is pressed.
  */
-uint8_t Interface_ReadButtonStep();
+uint8_t interface_readButtonStep();
 
-// void Interface_SetRegister(uint8_t bits);
+// void interface_setRegister(uint8_t bits);
 
-// uint8_t Interface_ReadFxButton();
+// uint8_t interface_readFxButton();
 
-#endif //  INTERFACE_H_
+#endif // INTERFACE_H_
