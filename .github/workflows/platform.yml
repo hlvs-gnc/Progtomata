@@ -30,7 +30,7 @@ jobs:
           # Fail on any error/warning:
           cppcheck --inline-suppr --inconclusive \
                     --language=c --std=c99 \
-                    --error-exitcode=1 --force \
+                    --error-exitcode=1 \
                     -I src/ -I include/ \
                     -i lib/audio_codec -i lib/trice -i lib/freertos_kernel -i lib/Unity \
                     -i build -i .pio -i lib/framework_stm \
