@@ -65,4 +65,4 @@ uint8_t interface_readButtonStep();
 
 // uint8_t interface_readFxButton();
 
-#endif  // INTERFACE_H_
+#endif // INTERFACE_H_

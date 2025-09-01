@@ -97,7 +97,6 @@ int GPIO_ReadInputDataBit(void *a, uint32_t b) {
   return 0;
 }
 
-
 void systemClock_config(void) {
   // empty implementation
 }
