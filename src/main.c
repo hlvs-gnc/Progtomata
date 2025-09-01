@@ -540,8 +540,8 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   memset(&playbackBuffer[0], 0, (BUFFERSIZE / 2) * sizeof(int16_t));
-  renderHalf(0);            /* renders first half-buffer            */
-  playHeadStep = stepIndex; /* UI can flash LEDs exactly on beat    */
+  renderHalf(0);            /* renders first half-buffer */
+  playHeadStep = stepIndex; /* UI can flash LEDs exactly on beat */
 
 #ifdef DEBUG
   TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
@@ -551,7 +551,7 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
   memset(&playbackBuffer[BUFFERSIZE / 2], 0,
          (BUFFERSIZE / 2) * sizeof(int16_t));
-  renderHalf(BUFFERSIZE / 2); /* renders second half-buffer           */
+  renderHalf(BUFFERSIZE / 2); /* renders second half-buffer */
   playHeadStep = stepIndex;
 
 #ifdef DEBUG

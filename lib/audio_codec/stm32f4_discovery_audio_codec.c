@@ -598,7 +598,7 @@ void Audio_I2S_IRQHandler(void) {
   /* Check on the I2S TXE flag */
   if (SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_TXE) != RESET) {
     if (CurrAudioInterface == AUDIO_INTERFACE_DAC) {
-      /* Wirte data to the DAC interface */
+      /* Write data to the DAC interface */
       DAC_SetChannel1Data(DAC_Align_12b_L, EVAL_AUDIO_GetSampleCallBack());
     }
 
