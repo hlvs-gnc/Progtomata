@@ -18,7 +18,7 @@
 Initialise all the GPIO pins being used
 They connect to the encoders (buttons) and shift registers (LEDs)
 */
-void Interface_Init() {
+void interface_init() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
@@ -47,7 +47,7 @@ void Interface_Init() {
  * Instead of using an SPI peripheral, a GPIO pin is manually toggled to
  * simulate the clock line
  *
-void Interface_SetFunctionLED(uint8_t bits) {
+void interface_setFunctionLED(uint8_t bits) {
   int i = 0;
   uint8_t mask = 0b10000000;
 
@@ -77,7 +77,7 @@ void Interface_SetFunctionLED(uint8_t bits) {
  * This function is used for the second shift register as pins allocations are
  * different on each shift register
  *
-void Interface_SetRegister(uint8_t bits) {
+void interface_setRegister(uint8_t bits) {
   int i = 0;
   uint8_t mask = 0b10000000;
 
@@ -99,7 +99,7 @@ void Interface_SetRegister(uint8_t bits) {
 /**
  * Read an effect button
  *
-uint8_t Interface_ReadFxButton() {
+uint8_t interface_readFxButton() {
   uint8_t button_pressed = 0;
   if (GPIO_ReadInputDataBit(Encoder3_Port, Encoder3_Q0) == 1) {
     button_pressed = button_pressed | 0b001;
@@ -119,7 +119,7 @@ uint8_t Interface_ReadFxButton() {
 /**
 Determine which button from the 4-step grid has been pressed
 */
-uint8_t Interface_ReadButtonStep() {
+uint8_t interface_readButtonStep() {
   uint8_t button_code = 0;
 
   if (GPIO_ReadInputDataBit(Encoder1_Port, Encoder1_Q0) != 0x00) {

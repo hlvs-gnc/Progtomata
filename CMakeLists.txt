@@ -5,6 +5,8 @@ project(progtomata LANGUAGES C ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Global include directories
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/config)
@@ -16,18 +18,16 @@ add_subdirectory(lib)
 add_subdirectory(src)
 
 if(BUILD_TESTING)
-  add_subdirectory(tests)
+  add_subdirectory(test)
 endif()
 
 # Sound bank content
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
-set(BUILD_EMBEDDED ON)
-
 # Executable
 if(BUILD_EMBEDDED)
   add_library(platform_defs INTERFACE)
-  target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER)
+  target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
   target_compile_definitions(platform_defs INTERFACE HSE_VALUE=8000000)
 
   add_executable(${PROJECT_NAME}.elf src/main.c lib/framework_stm/cmsis/stm32f4/startup_stm32f40xx.S)
