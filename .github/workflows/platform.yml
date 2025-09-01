@@ -87,7 +87,7 @@ jobs:
         run: pio run
 
   tests:
-    name: System testing procedure
+    name: System test
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -106,7 +106,7 @@ jobs:
           pip install platformio
 
       - name: Build embedded test environment (no HW in CI)
-        run: pio test -e disco_f407vg_test --without-uploading -vvv --junit-output-path .pio/test-results/embedded.xml
+        run: pio test -e disco_f407vg_test --without-uploading -vvv
 
       - name: Checkout
         uses: actions/checkout@v4
