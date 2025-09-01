@@ -126,13 +126,6 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build-host --output-on-failure
 
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: pio-test-results
-          path: .pio/test-results/**/*.xml
-          if-no-files-found: ignore
-
   docs:
     name: Generate documentation
     runs-on: ubuntu-latest
