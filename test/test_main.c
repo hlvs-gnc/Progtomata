@@ -1,7 +1,6 @@
 #include <progtomata_system.h>
 #include <unity.h>
 
-
 // Replicate system timing variables
 static volatile uint64_t u64IdleTicksCnt = 0;
 

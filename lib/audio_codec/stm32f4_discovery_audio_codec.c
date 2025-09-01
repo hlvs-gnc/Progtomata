@@ -563,7 +563,7 @@ static void Audio_MAL_IRQHandler(void) {
 #ifdef LOG_TRICE
     TRice(iD(5279), "error: Direct Mode Error\n");
 #endif
-   dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
+    dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
 
   /* If any errors occurred, invoke the callback and clear the flags */
