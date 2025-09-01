@@ -10,6 +10,7 @@ int _close(int fd) {
   errno = ENOSYS;
   return -1;
 }
+
 int _fstat(int fd, struct stat *st) {
   (void)fd;
   if (st)
@@ -35,8 +36,6 @@ int _read(int fd, void *buf, size_t n) {
   return -1;
 }
 
-// If your Unity output uses USART, you can make _write send bytes there.
-// For now just claim "written".
 int _write(int fd, const void *buf, size_t n) {
   (void)fd;
   (void)buf;
