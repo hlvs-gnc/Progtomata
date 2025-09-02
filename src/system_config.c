@@ -43,7 +43,6 @@ void systemClock_config(void) {
 
   // Enable peripheral clocks
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
-
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
@@ -76,11 +75,8 @@ void config_userButton(void) {
 void leds_init(void) {
   // Initialize board LEDs
   STM_EVAL_LEDInit(LED3);
-
   STM_EVAL_LEDInit(LED4);
-
   STM_EVAL_LEDInit(LED5);
-
   STM_EVAL_LEDInit(LED6);
 
   // External LEDs
@@ -92,6 +88,5 @@ void leds_init(void) {
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
