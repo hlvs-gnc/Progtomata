@@ -17,11 +17,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include
 add_subdirectory(lib)
 add_subdirectory(src)
 
-if(BUILD_TESTING)
-  include(CTest)
-  add_subdirectory(test)
-endif()
-
 # Sound bank content
 include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
@@ -46,4 +41,9 @@ if (BUILD_EMBEDDED)
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.bin
     COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.hex
     COMMENT "Generating .bin and .hex from ELF")
+endif()
+
+if(BUILD_TESTING)
+  include(CTest)
+  add_subdirectory(test)
 endif()

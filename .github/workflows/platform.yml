@@ -95,6 +95,9 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Cache PlatformIO
         uses: actions/cache@v4
@@ -110,11 +113,6 @@ jobs:
 
       - name: Build embedded test environment (no HW in CI)
         run: pio test -e disco_f407vg_test --without-uploading -vvv
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Configure (host, with tests)
         run: |
