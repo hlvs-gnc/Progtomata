@@ -1,5 +1,6 @@
 {
   "name": "freertos_kernel",
+  "version": "1.0.0",
   "build": {
     "includeDir": "freertos_kernel/include",
     "srcFilter": [
