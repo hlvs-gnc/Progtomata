@@ -1,3 +1,18 @@
+/**
+ * @file system_config.c
+ *
+ * @brief System clock configuration module
+ *
+ * @details
+ * This module provides functions to configure the MCU's clock system,
+ * button interface and LEDs.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ *
+ */
+
 #include <progtomata_system.h>
 
 void systemClock_config(void) {
@@ -46,7 +61,7 @@ void systemClock_config(void) {
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
-void config_userButton(void) {
+void userButton_config(void) {
   // Enable clock for GPIOD
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
@@ -72,7 +87,7 @@ void config_userButton(void) {
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-void leds_init(void) {
+void boardLeds_config(void) {
   // Initialize board LEDs
   STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);

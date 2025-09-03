@@ -13,13 +13,12 @@ set(BUILD_EMBEDDED 1)
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/config)
 
-include(CTest)
-
 # Sub-directories that build libraries, object code and tests
 add_subdirectory(lib)
 add_subdirectory(src)
 
 if(BUILD_TESTING)
+  include(CTest)
   add_subdirectory(test)
 endif()
 
@@ -28,6 +27,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
 # Executable
 if (BUILD_EMBEDDED)
+
   add_library(platform_defs INTERFACE)
   target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
   target_compile_definitions(platform_defs INTERFACE HSE_VALUE=8000000)
@@ -35,7 +35,7 @@ if (BUILD_EMBEDDED)
   add_executable(${PROJECT_NAME}.elf src/main.c lib/framework_stm/cmsis/stm32f4/startup_stm32f40xx.S)
 
   target_link_libraries(${PROJECT_NAME}.elf PRIVATE
-    freertos_kernel
+    kernel_freertos
     core
     stm32_framework
     audio_codec

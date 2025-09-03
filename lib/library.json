@@ -1,0 +1,18 @@
+{
+  "name": "freertos_kernel",
+  "build": {
+    "includeDir": "freertos_kernel/include",
+    "srcFilter": [
+      "-<freertos_kernel/portable/*>",
+      "+<freertos_kernel/croutine.c>",
+      "+<freertos_kernel/event_groups.c>",
+      "+<freertos_kernel/list.c>",
+      "+<freertos_kernel/queue.c>",
+      "+<freertos_kernel/stream_buffer.c>",
+      "+<freertos_kernel/tasks.c>",
+      "+<freertos_kernel/timers.c>",
+      "+<freertos_kernel/portable/GCC/ARM_CM4F/port.c>",
+      "+<freertos_kernel/portable/GCC/ARM_CM4F/portasm.S>"
+    ]
+  }
+}

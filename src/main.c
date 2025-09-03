@@ -156,20 +156,24 @@ int main(void) {
   // Update the display to show the content
   OLED_UpdateScreen();
 
-  interface_init();
-
-  TraceInit();
-
-  config_userButton();
-  leds_init();
-  uart_init();
-
+  // Initialize LCD display
   LCD_Init();
 
   LCD_GotoXY(0, 0);
   LCD_WriteString("****************");
   LCD_GotoXY(1, 0);
   LCD_WriteString("*PROGTOMATA2000*");
+
+  // Initialize system interface
+  userButton_config();
+  boardLeds_config();
+  interface_init();
+
+  // Initialize UART driver
+  uart_init();
+
+  // Initialize trace
+  TraceInit();
 
   // Create the semaphore before any button processing
   xButtonSemaphoreHandle =
@@ -188,6 +192,7 @@ int main(void) {
 #endif
   }
 
+  // Set master tempo
   Sequencer_SetBpm(120);
 
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));

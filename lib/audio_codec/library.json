@@ -18,10 +18,10 @@
     }
   ],
   "license": "MIT",
-  "frameworks": "spl",
+  "framework": "spl",
   "platforms": "ststm32",
   "dependencies": {
-    "CMSIS": "*"
+    "Framework_STM": "*"
   },
   "build": {
     "flags": [

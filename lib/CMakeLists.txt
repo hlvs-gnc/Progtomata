@@ -3,6 +3,7 @@ set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
+set(FREERTOS_PORT "GCC_ARM_CM4F")
 
 set(FREERTOS_SRC
     ${FREERTOS_DIR}/event_groups.c
@@ -13,19 +14,19 @@ set(FREERTOS_SRC
     ${FREERTOS_DIR}/timers.c
     ${FREERTOS_PORT_DIR}/port.c)
 
-add_library(freertos_kernel STATIC ${FREERTOS_SRC})
+add_library(kernel_freertos STATIC ${FREERTOS_SRC})
 
-target_include_directories(freertos_kernel PUBLIC
+target_include_directories(kernel_freertos PUBLIC
     ${FREERTOS_DIR}/include
     ${FREERTOS_PORT_DIR})
 
-target_link_libraries(freertos_kernel PUBLIC platform_defs)
+target_link_libraries(kernel_freertos PUBLIC platform_defs)
 
 # Standard Peripheral Library
 set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
 file(GLOB SPL_SRC ${SPL_DIR}/src/*.c)
 
-# CMSIS 
+# CMSIS
 set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/cmsis)
 file(GLOB CMSIS_SRC ${CMSIS_DIR}/stm32f4/*.c)
 
@@ -86,4 +87,5 @@ file(GLOB UNITY_SRC ${UNITY_DIR}/unity.c
     CACHE FILEPATH "Unity single C source file")
 
 add_library(unity STATIC ${UNITY_SRC})
+
 target_include_directories(unity PUBLIC ${UNITY_DIR})

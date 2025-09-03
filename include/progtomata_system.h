@@ -17,7 +17,7 @@
 #ifndef PROGTOMATA_SYSTEM_H_
 #define PROGTOMATA_SYSTEM_H_
 
-#if (BUILD_EMBEDDED == 1)
+//#if (BUILD_EMBEDDED == 1)
 // STD Peripheral Library
 #include <stm32f4xx.h>
 #include <stm32f4xx_dma.h>
@@ -29,7 +29,7 @@
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
-#endif
+//#endif
 
 /**
  * @brief
@@ -88,7 +88,7 @@ void systemClock_config(void);
  * Initializes GPIO settings, enabling input mode without pull-up or
  * pull-down resistors. Prepares the pin to detect user button presses.
  */
-void config_userButton(void);
+void userButton_config(void);
 
 /**
  * @brief Initializes GPIO pins connected to LEDs.
@@ -96,6 +96,6 @@ void config_userButton(void);
  * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
  * proper configuration for controlling LED states.
  */
-void leds_init(void);
+void boardLeds_config(void);
 
 #endif // PROGTOMATA_SYSTEM_H_
