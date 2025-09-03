@@ -17,7 +17,7 @@
 #ifndef PROGTOMATA_SYSTEM_H_
 #define PROGTOMATA_SYSTEM_H_
 
-//#if (BUILD_EMBEDDED == 1)
+#if (BUILD_EMBEDDED == 1)
 // STD Peripheral Library
 #include <stm32f4xx.h>
 #include <stm32f4xx_dma.h>
@@ -29,7 +29,7 @@
 // STM32F4 Discovery
 #include <stm32f4_discovery.h>
 #include <stm32f4_discovery_audio_codec.h>
-//#endif
+#endif
 
 /**
  * @brief
