@@ -1,5 +1,12 @@
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(platform_defs INTERFACE)
+target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
+target_compile_definitions(platform_defs INTERFACE BUILD_EMBEDDED=1 HSE_VALUE=8000000)
+
+# Sound bank content
+include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
+
 # FreeRTOS Kernel
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
 set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
@@ -34,7 +41,7 @@ include_directories(${SPL_DIR}/inc
                     ${CMSIS_DIR}/stm32f4
                     ${CMSIS_DIR}/cores/stm32)
 
-add_library(stm32_framework STATIC ${CMSIS_SRC} ${SPL_SRC})
+add_library(stm32_framework STATIC ${SPL_SRC} ${CMSIS_SRC})
 
 target_include_directories(stm32_framework PUBLIC
     ${SPL_DIR}/inc

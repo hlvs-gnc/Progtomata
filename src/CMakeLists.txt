@@ -8,10 +8,7 @@ target_include_directories(core
   PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/config
-    ${PROJECT_SOURCE_DIR}/lib/freertos_kernel/include
-    ${PROJECT_SOURCE_DIR}/lib/freertos_kernel/portable/GCC/ARM_CM4F
     ${PROJECT_SOURCE_DIR}/lib/audio_codec
-    ${PROJECT_SOURCE_DIR}/lib/drivers/UART
     ${PROJECT_SOURCE_DIR}/lib/sound_bank
     ${PROJECT_SOURCE_DIR}/lib/trice/src)
 
