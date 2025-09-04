@@ -28,7 +28,7 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#include "uart_driver.h"
+#include <uart_driver.h>
 
 void uart_init(void) {
   // GPIO Configuration
@@ -65,7 +65,8 @@ void uart_init(void) {
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_HardwareFlowControl =
+      USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
   USART_Init(USART2, &USART_InitStructure);
@@ -74,6 +75,14 @@ void uart_init(void) {
   USART_Cmd(USART2, ENABLE);
 }
 
+/**
+ * @brief Transmits a single character over USART2.
+ *
+ * This function waits until the USART2 transmit buffer is empty before sending
+ * the specified character over the USART2 interface.
+ *
+ * @param c The character to send.
+ */
 void uart_send_char(char c) {
   // Wait until transmit buffer is empty
   while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
@@ -81,7 +90,12 @@ void uart_send_char(char c) {
   USART_SendData(USART2, c);
 }
 
-void uart_send_string(const char *str) {
+/**
+ * @brief Transmits a string.
+ *
+ * @param str Pointer to the null-terminated string to send.
+ */
+static void uart_send_string(const char *str) {
   while (*str) {
     uart_send_char(*str++);
   }
@@ -92,12 +106,12 @@ void uart_send_string(const char *str) {
  * @brief Print a signed long integer (decimal) without recursion.
  */
 static void print_signed_long(long val) {
-  char buffer[12];  // Enough for "-2147483648\0"
+  char buffer[12]; // Enough for "-2147483648\0"
   int i = 0;
   int is_negative = (val < 0);
 
   if (is_negative) {
-    val = -val;  // Make positive
+    val = -val; // Make positive
   }
 
   // Convert in reverse
@@ -133,7 +147,7 @@ static void print_signed_long(long val) {
  * @brief Print an unsigned long integer (decimal) without recursion.
  */
 static void print_unsigned_long(unsigned long val) {
-  char buffer[11];  // Enough for "4294967295\0"
+  char buffer[11]; // Enough for "4294967295\0"
   int i = 0;
 
   if (val == 0) {
@@ -162,7 +176,7 @@ static void print_unsigned_long(unsigned long val) {
  * @brief Print an unsigned long integer as hexadecimal without recursion.
  */
 static void print_hex(unsigned long val) {
-  char buffer[9];  // 8 hex digits + '\0'
+  char buffer[9]; // 8 hex digits + '\0'
   int i = 0;
 
   if (val == 0) {
@@ -243,23 +257,31 @@ static void print_float(double value) {
   }
 }
 
-void uart_print_type(double value, PrintFormat_t format) {
+/**
+ * @brief Convert an integer (signed or unsigned) to a string and send it over
+ * UART. Handles signed decimal, unsigned decimal, and hexadecimal.
+ *
+ * @param value  The integer value to print (pass as long for convenience).
+ * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC,
+ * PRINT_HEX).
+ */
+static void uart_print_type(double value, PrintFormat_t format) {
   switch (format) {
-    case PRINT_SIGNED_DEC:
-      print_signed_long((long)value);
-      break;
+  case PRINT_SIGNED_DEC:
+    print_signed_long((long)value);
+    break;
 
-    case PRINT_UNSIGNED_DEC:
-      print_unsigned_long((unsigned long)value);
-      break;
+  case PRINT_UNSIGNED_DEC:
+    print_unsigned_long((unsigned long)value);
+    break;
 
-    case PRINT_HEX:
-      print_hex((unsigned long)value);
-      break;
+  case PRINT_HEX:
+    print_hex((unsigned long)value);
+    break;
 
-    case PRINT_FLOAT:
-      print_float(value);
-      break;
+  case PRINT_FLOAT:
+    print_float(value);
+    break;
   }
 }
 
@@ -273,45 +295,45 @@ void uart_print(const char *format, ...) {
     if (*format == '%') {
       format++;
       switch (*format) {
-        case 'd': {
-          int val = va_arg(args, int);
-          uart_print_type((long)val, PRINT_SIGNED_DEC);
-          break;
+      case 'd': {
+        int val = va_arg(args, int);
+        uart_print_type((long)val, PRINT_SIGNED_DEC);
+        break;
+      }
+      case 'u': {
+        unsigned int val = va_arg(args, unsigned int);
+        uart_print_type((long)val, PRINT_UNSIGNED_DEC);
+        break;
+      }
+      case 'x': {
+        unsigned int val = va_arg(args, unsigned int);
+        uart_print_type((long)val, PRINT_HEX);
+        break;
+      }
+      case 'f': {
+        double val = va_arg(args, double);
+        uart_print_type(val, PRINT_FLOAT);
+        break;
+      }
+      case 'c': {
+        char c = (char)va_arg(args, int);
+        uart_send_char(c);
+        break;
+      }
+      case 's': {
+        const char *s = va_arg(args, char *);
+        if (s) {
+          uart_send_string(s);
+        } else {
+          uart_send_string("(null)");
         }
-        case 'u': {
-          unsigned int val = va_arg(args, unsigned int);
-          uart_print_type((long)val, PRINT_UNSIGNED_DEC);
-          break;
-        }
-        case 'x': {
-          unsigned int val = va_arg(args, unsigned int);
-          uart_print_type((long)val, PRINT_HEX);
-          break;
-        }
-        case 'f': {
-          double val = va_arg(args, double);
-          uart_print_type(val, PRINT_FLOAT);
-          break;
-        }
-        case 'c': {
-          char c = (char)va_arg(args, int);
-          uart_send_char(c);
-          break;
-        }
-        case 's': {
-          char *s = va_arg(args, char *);
-          if (s) {
-            uart_send_string(s);
-          } else {
-            uart_send_string("(null)");
-          }
-          break;
-        }
-        default: {
-          // Unknown specifier, just print it as normal char
-          uart_send_char(*format);
-          break;
-        }
+        break;
+      }
+      default: {
+        // Unknown specifier, just print it as normal char
+        uart_send_char(*format);
+        break;
+      }
       }
     } else {
       // Normal character

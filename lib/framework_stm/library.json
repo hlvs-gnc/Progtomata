@@ -1,0 +1,16 @@
+{
+  "name": "Framework_STM",
+  "version": "1.0.0",
+  "platforms": "ststm32",
+  "build": {
+    "flags": [
+      "-I lib/framework_stm/cmsis/cores/stm32",
+      "-I lib/framework_stm/cmsis/stm32f4",
+      "-I lib/framework_stm/spl/stm32f4/inc",
+      "-I lib/framework_stm/spl/stm32f4/src"
+    ],
+    "srcFilter": [
+      "+<*>"
+    ]
+  }
+}

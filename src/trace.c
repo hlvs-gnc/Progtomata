@@ -1,9 +1,9 @@
-/*!
- * \file trace.c
- * \brief This file contains the definitions of user-provided functions and
+/**
+ * @file trace.c
+ * @brief This file contains the definitions of user-provided functions and
  * function pointers for use with the Trice library in deferred mode.
  *
- * \details
+ * @details
  *   - A FreeRTOS task is created to periodically invoke \c TriceTransfer()
  *     (here, every 10,000 clock ticks).
  *   - \c TraceInit() calls \c TriceInit(), creates the task, and ensures it
@@ -12,25 +12,20 @@
  * (creating it if it doesn’t exist) and write TRICE data to it.
  */
 
+#include <hooks.h>
 #include <trace.h>
 
-/*!
- * \brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
+/**
+ * @brief Interval (in FreeRTOS ticks) between each TriceTransfer call.
  */
 #define TRICE_TASK_INTERVAL (100)
 
-/*!
- * \brief Stack size and priority for the Trice task.
- * \note  Adjust as needed for your system.
+/**
+ * @brief Stack size and priority for the Trice task.
+ * @note  Adjust as needed for your system.
  */
-#define TRICE_TASK_STACK_SIZE 512
-#define TRICE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
-
-/// @brief Macro to use CCM (Core Coupled Memory) in STM32F4
-#define CCM_RAM __attribute__((section(".ccmram")))
-
-/// @brief Stack size for the button task in bytes
 #define TRACE_TASK_STACK_SIZE 256
+#define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
@@ -38,12 +33,12 @@ StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
 /// @brief Task control block (TCB) for the button task stored in CCM
 StaticTask_t traceTaskBuffer CCM_RAM;
 
-/*!
- * \brief Flag to ensure TraceInit() is only called once.
+/**
+ * @brief Flag to ensure TraceInit() is only called once.
  */
 static bool g_isTraceInitialized = false;
 
-void DWT_Init(void) {
+static void DWT_Init(void) {
   // Enable trace and debug block
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -54,41 +49,30 @@ void DWT_Init(void) {
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-/*!
- * \brief The FreeRTOS task that periodically invokes TriceTransfer().
+/**
+ * @brief The FreeRTOS task that periodically invokes TriceTransfer().
  *
- * \param pvParameters Not used in this example.
+ * @param pvParameters Not used.
  */
-static void vTriceTask(void* pvParameters) {
-  (void) pvParameters;  // Unused parameter
+static void vTriceTask(void *pvParameters) {
+  (void)pvParameters; // Unused parameter
 
   for (;;) {
     // Wait for the given interval
     vTaskDelay(TRICE_TASK_INTERVAL);
-
-    // uart_print("TriceStamp16: %d\r\n", TriceStamp16);
-    // uart_print("TriceStamp32: %d\r\n", TriceStamp32);
 
     // Every loop, call TriceTransfer() to handle deferred output
     TriceTransfer();
   }
 }
 
-/*!
- * \brief TraceInit
- *
- * \details
- *   - Initializes the Trice library via TriceInit().
- *   - Creates a FreeRTOS task that periodically calls TriceTransfer().
- *   - Ensures it only happens once.
- */
 void TraceInit(void) {
   DWT_Init();
 
   if (!g_isTraceInitialized) {
     // Create the FreeRTOS task for periodic TriceTransfer
-    xTaskCreateStatic(vTriceTask, "TriceTask", TRICE_TASK_STACK_SIZE, NULL,
-                      configTIMER_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
+    xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
+                      TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);
 
     g_isTraceInitialized = true;
   }
