@@ -465,7 +465,7 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
 #ifdef LOG_TRICE
-  TRice(iD(4389), "error: Error. Position: %x\n", pData);
+  TRice(iD(4389), "error: Error. pData: %x\n", pData);
 #endif
 }
 

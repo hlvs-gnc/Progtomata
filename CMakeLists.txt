@@ -7,6 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Option to build embedded system target
 set(BUILD_EMBEDDED 1)
 
 # Global include directories
@@ -19,9 +20,10 @@ add_subdirectory(src)
 
 # Executable
 if (BUILD_EMBEDDED)
-
+  # Main firmware ELF executable (C and startup ASM)
   add_executable(${PROJECT_NAME}.elf src/main.c lib/framework_stm/cmsis/stm32f4/startup_stm32f40xx.S)
 
+  # Link with all required static libraries
   target_link_libraries(${PROJECT_NAME}.elf PRIVATE
     kernel_freertos
     core
@@ -30,6 +32,7 @@ if (BUILD_EMBEDDED)
     uart_driver
     trice)
 
+  # Post-build: generate .bin and .hex files from ELF
   add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.bin
     COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.hex
