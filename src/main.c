@@ -17,35 +17,26 @@
 #include <math.h>
 #include <stdbool.h>
 
+// System definition/ configuration
+#include <core.h>
+#include <progtomata_system.h>
+
 // Real-time operating system
 #include <FreeRTOS.h>
 #include <semphr.h>
 #include <task.h>
-
-// System configuration
-#include <progtomata_system.h>
+#include <hooks.h>
 
 // Displays
 #include <interface.h>
 #include <oled.h>
-
-// Peripherals
 #include <lcd.h>
 
-// Drivers
+// Communication drivers
 #include <uart_driver.h>
-
-// System definitions
-#include <progtomata_system.h>
 
 // Information logging
 #include <trace.h>
-
-// FreeRTOS Hook functions
-#include <hooks.h>
-
-// Core definitions
-#include <core.h>
 
 /// @brief Minimum delay for LED blinking in milliseconds
 const uint32_t MIN_BLINK_DELAY = 10;
@@ -75,7 +66,7 @@ volatile uint64_t u64IdleTicksCnt = 0;
 /// @brief Counts OS ticks (default = 1000Hz)
 volatile uint64_t tickTime = 0;
 
-static void Sequencer_SetBpm(uint16_t bpm) {
+static void sequencer_setBpm(uint16_t bpm) {
   if (bpm < MIN_BPM) {
     bpm = MIN_BPM;
   }
@@ -184,7 +175,7 @@ int main(void) {
   }
 
   // Set master tempo
-  Sequencer_SetBpm(120);
+  sequencer_setBpm(120);
 
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
