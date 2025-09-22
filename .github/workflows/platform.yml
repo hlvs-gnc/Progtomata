@@ -55,7 +55,8 @@ jobs:
 
       - name: Verify formatting
         run: |
-          # List all C header files and make the job fail if any are wrongly formatted
+          # List all C files and make the job fail if any are wrongly formatted
+          # excluding external libraries
           FILES="$(git ls-files \
                 '*.c' '*.h' \
                 ':(exclude)lib/trice/**' ':(exclude)lib/framework_stm/**' ':(exclude)lib/freertos_kernel/**')"

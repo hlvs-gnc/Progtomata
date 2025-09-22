@@ -23,14 +23,14 @@
 
 // Real-time operating system
 #include <FreeRTOS.h>
+#include <hooks.h>
 #include <semphr.h>
 #include <task.h>
-#include <hooks.h>
 
 // Displays
 #include <interface.h>
-#include <oled.h>
 #include <lcd.h>
+#include <oled.h>
 
 // Communication drivers
 #include <uart_driver.h>
