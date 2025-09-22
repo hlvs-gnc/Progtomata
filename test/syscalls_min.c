@@ -1,3 +1,18 @@
+/**
+ * @file syscalls_min.c
+ *
+ * @brief Minimal system call stubs for host/unit-test environment.
+ *
+ * @details This file provides minimal implementations of required POSIX
+ * system calls to allow building and running unit tests on the host computer
+ * within a simulated environment.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ * 
+ */
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>

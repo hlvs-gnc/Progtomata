@@ -1,20 +1,13 @@
 /**
  * @file main.c
  *
- * @brief STM32F4 FreeRTOS LED Control and Button Handling Application.
- *
- * This file implements an embedded application using FreeRTOS on an STM32F4
- * microcontroller. The application controls LEDs and responds to user button
- * presses, demonstrating task scheduling and semaphore usage.
+ * @brief Audio sequencer & synthesizer project main source code file.
  *
  * @details
  *
  * Dependencies:
  * - FreeRTOS Kernel
  * - STM32F4xx Standard Peripheral Library
- *
- * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly
- *       configured before compiling the project.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
