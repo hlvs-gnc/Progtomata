@@ -3,16 +3,13 @@
  *
  * @brief Audio sequencer & synthesizer project main source code file.
  *
- * @details
- *
- * Dependencies:
- * - FreeRTOS Kernel
- * - STM32F4xx Standard Peripheral Library
+ * @details This file implements an embedded application for the system.
+ * It controls task interaction and user interface functionalities.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
- * 
+ *
  * @author Radar2000
  */
 
