@@ -4,7 +4,8 @@
  * @brief Audio sequencer & synthesizer project main source code file.
  *
  * @details This file implements an embedded application for the system.
- * It controls task interaction and user interface functionalities.
+ * Implementation of tasks (sequencer, audio playback, effect chain)
+ * and interface functionalities (LED, button pannel, display).
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
