@@ -1,3 +1,19 @@
+/**
+ * @file test_main.c
+ *
+ * @brief Unit test runner for Progtomata system using Unity framework.
+ *
+ * @details This file contains the main entry point and test setup for running
+ * unit tests on the project using the Unity test framework. It replicates
+ * minimal system timing requirements and provides simple implementations for
+ * required hooks and delays to allow tests to be executed in a
+ * simulated environment.
+ *
+ * @copyright Radar2000
+ * This work is licensed under Creative Commons
+ * Attribution-NonCommercial-ShareAlike 4.0 International License.
+ */
+
 #include <progtomata_system.h>
 #include <unity.h>
 

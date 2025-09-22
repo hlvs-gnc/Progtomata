@@ -1,60 +1,43 @@
 /**
  * @file main.c
  *
- * @brief STM32F4 FreeRTOS LED Control and Button Handling Application.
+ * @brief Audio sequencer & synthesizer project main source code file.
  *
- * This file implements an embedded application using FreeRTOS on an STM32F4
- * microcontroller. The application controls LEDs and responds to user button
- * presses, demonstrating task scheduling and semaphore usage.
- *
- * @details
- *
- * Dependencies:
- * - FreeRTOS Kernel
- * - STM32F4xx Standard Peripheral Library
- *
- * @note Ensure that FreeRTOS and STM32 peripheral drivers are correctly
- *       configured before compiling the project.
+ * @details This file implements an embedded application for the system.
+ * Implementation of tasks (sequencer, audio playback, effect chain)
+ * and interface functionalities (LED, button pannel, display).
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  *
+ * @author Radar2000
  */
 
 // System libraries
 #include <math.h>
 #include <stdbool.h>
 
+// System definition/ configuration
+#include <core.h>
+#include <progtomata_system.h>
+
 // Real-time operating system
 #include <FreeRTOS.h>
+#include <hooks.h>
 #include <semphr.h>
 #include <task.h>
 
-// System configuration
-#include <progtomata_system.h>
-
 // Displays
 #include <interface.h>
+#include <lcd.h>
 #include <oled.h>
 
-// Peripherals
-#include <lcd.h>
-
-// Drivers
+// Communication drivers
 #include <uart_driver.h>
-
-// System definitions
-#include <progtomata_system.h>
 
 // Information logging
 #include <trace.h>
-
-// FreeRTOS Hook functions
-#include <hooks.h>
-
-// Core definitions
-#include <core.h>
 
 /// @brief Minimum delay for LED blinking in milliseconds
 const uint32_t MIN_BLINK_DELAY = 10;
@@ -84,7 +67,7 @@ volatile uint64_t u64IdleTicksCnt = 0;
 /// @brief Counts OS ticks (default = 1000Hz)
 volatile uint64_t tickTime = 0;
 
-static void Sequencer_SetBpm(uint16_t bpm) {
+static void sequencer_setBpm(uint16_t bpm) {
   if (bpm < MIN_BPM) {
     bpm = MIN_BPM;
   }
@@ -193,7 +176,7 @@ int main(void) {
   }
 
   // Set master tempo
-  Sequencer_SetBpm(120);
+  sequencer_setBpm(120);
 
   memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
 
@@ -465,7 +448,7 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
 
 void EVAL_AUDIO_Error_CallBack(void *pData) {
 #ifdef LOG_TRICE
-  TRice(iD(4389), "error: Error. Position: %x\n", pData);
+  TRice(iD(4389), "error: Error. pData: %x\n", pData);
 #endif
 }
 
