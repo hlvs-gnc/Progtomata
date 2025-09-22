@@ -10,7 +10,6 @@
  * @copyright Radar2000
  * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
- * 
  */
 
 #include <errno.h>

@@ -9,7 +9,6 @@
  * @copyright Radar2000
  * This work is licensed under Creative Commons
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
- * 
  */
 
 #pragma once
@@ -28,7 +27,6 @@ extern "C" {
  * Must be safe to call multiple times (implementations should be idempotent).
  */
 void unityOutputStart();
-
 
 /**
  * @brief Emit a single character to the Unity output backend.
