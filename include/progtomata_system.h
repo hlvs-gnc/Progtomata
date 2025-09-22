@@ -17,6 +17,20 @@
 #ifndef PROGTOMATA_SYSTEM_H_
 #define PROGTOMATA_SYSTEM_H_
 
+#if (BUILD_EMBEDDED == 1)
+// STD Peripheral Library
+#include <stm32f4xx.h>
+#include <stm32f4xx_dma.h>
+#include <stm32f4xx_flash.h>
+#include <stm32f4xx_pwr.h>
+#include <stm32f4xx_spi.h>
+#include <stm32f4xx_tim.h>
+
+// STM32F4 Discovery
+#include <stm32f4_discovery.h>
+#include <stm32f4_discovery_audio_codec.h>
+#endif
+
 /**
  * @brief
  *
@@ -26,14 +40,14 @@
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-static void vButtonSampleTask(void *p);
+void vButtonSampleTask(void *p);
 
 /**
  * @brief
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-static void vButtonStepTask(void *pvParameters);
+void vButtonStepTask(void *pvParameters);
 
 /**
  * @brief Controls LED blinking behavior with variable delay.
@@ -44,7 +58,7 @@ static void vButtonStepTask(void *pvParameters);
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-static void vBlinkTask(void *p);
+void vBlinkTask(void *p);
 
 /**
  * @brief Task to animate the OLED display.
@@ -55,7 +69,7 @@ static void vBlinkTask(void *p);
  *
  * @param[in] pvParameters Pointer to task parameters (unused).
  */
-static void vOledAnimationTask(void *pvParameters);
+void vOledAnimationTask(void *pvParameters);
 
 /**
  * @brief Configures the system clock to 168 MHz for STM32F4.
@@ -66,6 +80,22 @@ static void vOledAnimationTask(void *pvParameters);
  * configures the main PLL to achieve a 168 MHz system clock frequency.
  * It also configures the Flash memory latency and enables the prefetch buffer.
  */
-static void SystemClock_Config(void);
+void systemClock_config(void);
+
+/**
+ * @brief Configures the user button GPIO (PA0) as an input.
+ *
+ * Initializes GPIO settings, enabling input mode without pull-up or
+ * pull-down resistors. Prepares the pin to detect user button presses.
+ */
+void userButton_config(void);
+
+/**
+ * @brief Initializes GPIO pins connected to LEDs.
+ *
+ * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
+ * proper configuration for controlling LED states.
+ */
+void boardLeds_config(void);
 
 #endif // PROGTOMATA_SYSTEM_H_

@@ -545,18 +545,24 @@ static void Audio_MAL_IRQHandler(void) {
 
   /* Error interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE) != RESET) {
-    TRice(iD(7754), "error: Transfer Error\n");
+#ifdef LOG_TRICE
+    TRice(iD(2191), "error: Transfer Error\n");
+#endif
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE) != RESET) {
-    TRice(iD(2816), "error: FIFO Error\n");
+#ifdef LOG_TRICE
+    TRice(iD(1159), "error: FIFO Error\n");
+#endif
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;
   }
 
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
       RESET) {
-    TRice(iD(5279), "error: Direct Mode Error\n");
+#ifdef LOG_TRICE
+    TRice(iD(4470), "error: Direct Mode Error\n");
+#endif
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
 
@@ -598,7 +604,7 @@ void Audio_I2S_IRQHandler(void) {
   /* Check on the I2S TXE flag */
   if (SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_TXE) != RESET) {
     if (CurrAudioInterface == AUDIO_INTERFACE_DAC) {
-      /* Wirte data to the DAC interface */
+      /* Write data to the DAC interface */
       DAC_SetChannel1Data(DAC_Align_12b_L, EVAL_AUDIO_GetSampleCallBack());
     }
 

@@ -1,9 +1,8 @@
 {
   "name": "UART_Driver",
   "version": "1.0.0",
-  "description": "UART Driver for STM32F4 USART1",
+  "description": "UART Driver for STM32F407VG",
   "keywords": "uart, stm32f4, usart",
-  "frameworks": "spl",
   "platforms": "ststm32",
   "build": {
     "flags": [

@@ -83,7 +83,7 @@ void uart_init(void) {
  *
  * @param c The character to send.
  */
-static void uart_send_char(char c) {
+void uart_send_char(char c) {
   // Wait until transmit buffer is empty
   while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
   }
@@ -91,7 +91,7 @@ static void uart_send_char(char c) {
 }
 
 /**
- * @brief Transmits a string over USART1.
+ * @brief Transmits a string.
  *
  * @param str Pointer to the null-terminated string to send.
  */
