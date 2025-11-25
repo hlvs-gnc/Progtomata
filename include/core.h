@@ -42,15 +42,18 @@ typedef enum { SAMPLE1 = 0, SAMPLE2 } audioSampleId;
 
 /// @brief Current step index
 static uint8_t playHeadStep = 0;
+
 /// @brief Samples already rendered in current beat-step
 static uint32_t stepPos = 0;
+
 /// @brief Grid column currently playing
 static uint8_t stepIndex = 0;
 
-/// @brief Sample button state - for N samples
-static uint16_t sampleButtonState = 0;
-/// @brief Step button's state - for N steps
-static uint16_t stepButtonState = 0;
+/// @brief Sample button - for N samples
+static uint16_t sampleButton = 0;
+
+/// @brief Step button's - for N steps
+static uint16_t stepButton = 0;
 
 /// @brief Binary semaphore for button events
 StaticSemaphore_t xButtonSemaphoreStatic;
@@ -89,11 +92,6 @@ static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
 
 /// @brief Priority level for the animation task (1 = low)
 #define ANIMATION_TASK_PRIORITY 1
-
-/// @brief Initial step size for delay increment and initial delay
-/// value in milliseconds
-static uint32_t kBlinkStep = 10;
-static uint32_t kBlinkDelay = 50;
 
 /// @brief Minimum delay for LED blinking in milliseconds
 extern const uint32_t MIN_BLINK_DELAY;
