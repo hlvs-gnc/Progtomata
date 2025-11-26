@@ -23,7 +23,6 @@
 #include <progtomata_system.h>
 #include <tasks.h>
 
-
 // Real-time operating system
 #include <FreeRTOS.h>
 #include <hooks.h>
