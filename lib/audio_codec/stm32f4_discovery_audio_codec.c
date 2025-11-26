@@ -544,15 +544,16 @@ static void Audio_MAL_IRQHandler(void) {
   int32_t dmaErrorFlags = 0;
 
   /* Error interrupt */
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)!=RESET) {
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE) != RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;
   }
 
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)!=RESET) {
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE) != RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;
   }
 
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)!=RESET) {
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
+      RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
 
@@ -1374,7 +1375,8 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
     /* Only enable transfer and direct mode errors  */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME, ENABLE);
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
+                 ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
@@ -1433,7 +1435,8 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
     /* Only enable transfer and direct mode errors */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME, ENABLE);
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
+                 ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
@@ -1578,7 +1581,7 @@ static void Audio_MAL_Stop(void) {
   /* Clear all the DMA flags for the next transfer */
   DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
                 AUDIO_MAL_DMA_FLAG_TC | AUDIO_MAL_DMA_FLAG_HT |
-                AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
+                    AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
 
   /*
            The I2S DMA requests are not disabled here.
