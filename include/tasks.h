@@ -1,9 +1,11 @@
 /**
  * @file tasks.h
  *
- * @brief 
+ * @brief FreeRTOS task definitions and configurations for the Progtomata system
  *
- * @details 
+ * @details This header defines all FreeRTOS tasks used in the system
+ * It includes task stack sizes, priority levels, task handles, and
+ * semaphore definitions for inter-task synchronization.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
