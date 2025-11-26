@@ -21,6 +21,7 @@
 // System definition/ configuration
 #include <core.h>
 #include <progtomata_system.h>
+#include <tasks.h>
 
 // Real-time operating system
 #include <FreeRTOS.h>
@@ -39,34 +40,6 @@
 // Information logging
 #include <trace.h>
 
-/// @brief Minimum delay for LED blinking in milliseconds
-const uint32_t MIN_BLINK_DELAY = 10;
-/// @brief Maximum delay for LED blinking in milliseconds
-const uint32_t MAX_BLINK_DELAY = 250;
-
-/// @brief Step grid to hold sample triggers for each step
-uint8_t stepGrid[NUM_SAMPLES][NUM_STEPS] = {0};
-
-/// @brief Size of the audio playback buffer in bytes
-#define BUFFERSIZE (32768)
-
-/// @brief Buffer for storing audio data for playback
-int16_t playbackBuffer[BUFFERSIZE] = {0};
-
-// Tempo
-#define SAMPLE_RATE 22050U // I²S sample-rate
-#define MIN_BPM 40U
-#define MAX_BPM 200U
-
-static volatile uint16_t currBpm;        // current tempo
-static volatile uint32_t nbrSamplesStep; // samples per sequencer step
-
-/// @brief Counts when the OS has no task to execute
-volatile uint64_t u64IdleTicksCnt = 0;
-
-/// @brief Counts OS ticks (default = 1000Hz)
-volatile uint64_t tickTime = 0;
-
 static void sequencer_setBpm(uint16_t bpm) {
   if (bpm < MIN_BPM) {
     bpm = MIN_BPM;
@@ -75,15 +48,28 @@ static void sequencer_setBpm(uint16_t bpm) {
     bpm = MAX_BPM;
   }
 
-  taskENTER_CRITICAL(); // protect against DMA callbacks
   currBpm = bpm;
   nbrSamplesStep = (SAMPLE_RATE * 60U) / bpm;
-  taskEXIT_CRITICAL();
+  bpmInterval = 60000 / currBpm;
 }
 
 static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
+  // Cache stepIndex to avoid race condition during rendering
+  uint8_t currentStepIdx = stepIndex;
+
+  // Initialize buffer to silence
+  for (uint32_t i = 0; i < cnt; ++i) {
+    playbackBuffer[dst + i] = 0;
+  }
+
+  // Mix in samples that are triggered at current step
   for (uint8_t s = 0; s < NUM_SAMPLES; ++s) {
-    if (!stepGrid[s][stepIndex]) {
+    if (!stepGrid[s][currentStepIdx]) {
+      continue;
+    }
+
+    // Bounds check to prevent buffer overflow
+    if (ofs >= sampleLen[s]) {
       continue;
     }
 
@@ -93,6 +79,7 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
       len = cnt;
     }
 
+    // Mix with gain reduction (>>1 = /2 for headroom)
     for (uint32_t i = 0; i < len; ++i) {
       int32_t v = playbackBuffer[dst + i] + (src[i] >> 1);
       playbackBuffer[dst + i] = CLIP16(v);
@@ -100,22 +87,20 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
   }
 }
 
-/* Render two consecutive steps starting at 'firstStep' into half 'base' */
 static void renderHalf(uint32_t base) {
-  const uint32_t halfSamples = BUFFERSIZE / 2;
-  uint32_t todo = halfSamples; /* samples still to generate     */
+  toRender = BUFFERSIZE / 2;
 
-  while (todo) {
-    uint32_t stepSamples = nbrSamplesStep;
-    uint32_t leftInStep = stepSamples - stepPos;
-    uint32_t chunk = (leftInStep < todo) ? leftInStep : todo;
+  while (toRender) {
+    stepSamples = nbrSamplesStep;
+    leftInStep = stepSamples - stepPos;
+    chunk = (leftInStep < toRender) ? leftInStep : toRender;
 
-    mixSegment(base + (halfSamples - todo), chunk, stepPos);
+    mixSegment(base + (BUFFERSIZE / 2 - toRender), chunk, stepPos);
 
     stepPos += chunk;
-    todo -= chunk;
+    toRender -= chunk;
 
-    if (stepPos == stepSamples) { /* reached next step border ? */
+    if (stepPos >= stepSamples) {
       stepPos = 0;
       stepIndex = (stepIndex + 1) % NUM_STEPS;
     }
@@ -158,6 +143,9 @@ int main(void) {
   // Initialize trace
   TraceInit();
 
+  // Set master tempo
+  sequencer_setBpm(120);
+
   // Create the semaphore before any button processing
   xButtonSemaphoreHandle =
       xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
@@ -169,16 +157,15 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 65, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_22k) != 0) {
 #ifdef LOG_TRICE
     TRice(iD(4708), "msg: Audio codec initialization failed\n");
 #endif
   }
 
-  // Set master tempo
-  sequencer_setBpm(120);
-
-  memset(playbackBuffer, 0, BUFFERSIZE * sizeof(int16_t));
+#ifdef LOG_TRICE
+  TRice(iD(3720), "msg: Audio setup complete\n");
+#endif
 
   // Start audio playback
   if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
@@ -187,18 +174,13 @@ int main(void) {
 #endif
   }
 
-#ifdef LOG_TRICE
-  TRice(iD(3720), "msg: Audio setup complete\n");
-#endif
-
   sampleButtonTaskHandle = xTaskCreateStatic(
-      vButtonSampleTask, "SampleButtonTask", SAMPLE_BUTTON_TASK_STACK_SIZE,
-      NULL, SAMPLE_BUTTON_TASK_PRIORITY, sampleButtonTaskStack,
-      &sampleButtonTaskBuffer);
+      vButtonSampleTask, "SampleButtonTask", SAMPLE_TASK_STACK_SIZE, NULL,
+      SAMPLE_TASK_PRIORITY, sampleButtonTaskStack, &sampleButtonTaskBuffer);
 
   stepButtonTaskHandle = xTaskCreateStatic(
-      vButtonStepTask, "StepButtonTask", STEP_BUTTON_TASK_STACK_SIZE, NULL,
-      STEP_BUTTON_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
+      vButtonStepTask, "StepButtonTask", STEP_TASK_STACK_SIZE, NULL,
+      STEP_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
   blinkTaskHandle =
       xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
@@ -219,25 +201,13 @@ int main(void) {
 }
 
 void vButtonSampleTask(void *p) {
-  uint8_t prevStatePA0 = Bit_RESET; // Previous state for PA0
   uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
   uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
 
   while (1) {
     // Read current states
-    uint8_t currentStatePA0 = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
     uint8_t currentStatePD1 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_1);
     uint8_t currentStatePD2 = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2);
-
-    // Handle PA0 (onboard button)
-    if (currentStatePA0 == Bit_SET && prevStatePA0 == Bit_RESET) {
-      GPIO_SetBits(GPIOD,
-                   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-
-      kBlinkDelay = MIN_BLINK_DELAY;
-      kBlinkStep = MIN_BLINK_DELAY;
-    }
-    prevStatePA0 = currentStatePA0;
 
     //  PD1 => PD5
     if (currentStatePD1 == Bit_RESET) {
@@ -250,9 +220,9 @@ void vButtonSampleTask(void *p) {
 
     // Handle PD1 (Trigger Playback for Sound 1)
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
-      sampleButtonState = 0x0000; // Toggle step 1
+      sampleButton = 0x0000;
 #ifdef LOG_TRICE
-      TRice(iD(7916), "Button 2 pressed: set playback for sound 2\n");
+      TRice(iD(5828), "Sample 0 (kick)\n");
 #endif
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
@@ -268,16 +238,16 @@ void vButtonSampleTask(void *p) {
 
     // Handle PD2 (Trigger Playback for Sound 2)
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
-      sampleButtonState = 0x0001; // Toggle step 2
+      sampleButton = 0x0001;
 #ifdef LOG_TRICE
-      TRice(iD(7521), "Button 3 pressed: set playback for sound 3\n");
+      TRice(iD(4156), "Sample 1 (hi-hat) \n");
 #endif
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
     }
     prevStatePD2 = currentStatePD2;
 
-    // Add a debounce delay
+    // Debounce delay
     vTaskDelay(pdMS_TO_TICKS(25));
   }
 
@@ -286,7 +256,7 @@ void vButtonSampleTask(void *p) {
 }
 
 void vButtonStepTask(void *pvParameters) {
-  stepButtonState = 0;
+  stepButton = 0;
   // wasPressed: 0 = released, 1 = pressed
   static uint8_t wasPressed = 0;
 
@@ -297,31 +267,29 @@ void vButtonStepTask(void *pvParameters) {
     // Wait a short time for the event semaphore
     if (xSemaphoreTake(xButtonSemaphoreHandle, pdMS_TO_TICKS(30)) == pdTRUE) {
       // Poll the button value
-      stepButtonState = interface_readButtonStep();
+      stepButton = interface_readButtonStep();
 
       // Process an event transitioning from idle to a valid state (0-3)
-      if ((stepButtonState != STEPIDLE_VALUE) && (wasPressed == 0)) {
+      if ((stepButton != STEPIDLE_VALUE) && (wasPressed == 0)) {
+        if (stepButton <= NUM_STEPS && sampleButton < NUM_SAMPLES) {
+          stepGrid[sampleButton][stepButton - 1] =
+              1 - stepGrid[sampleButton][stepButton - 1];
 #ifdef LOG_TRICE
-        TRice(iD(7943), "info: stepButtonState: %d\n", stepButtonState);
-#endif
-        if (stepButtonState <= NUM_STEPS && sampleButtonState < NUM_SAMPLES) {
-          stepGrid[sampleButtonState][stepButtonState - 1] =
-              1 - stepGrid[sampleButtonState][stepButtonState - 1];
-#ifdef LOG_TRICE
-          TRice(iD(5589), "info: Select step %d for sample %d\n",
-                stepButtonState, sampleButtonState);
+          TRice(iD(7398), "info: Select step %d | sample %d | state %d \n",
+                stepButton, sampleButton,
+                stepGrid[sampleButton][stepButton - 1]);
 #endif
         }
         wasPressed = 1; // Mark that this press has been processed
       }
       // When the button returns to idle, clear the flag
-      if (stepButtonState == STEPIDLE_VALUE) {
+      if (stepButton == STEPIDLE_VALUE) {
         wasPressed = 0;
       }
     }
 
-    // Delay for debouncing and to free CPU time for other tasks
-    vTaskDelay(pdMS_TO_TICKS(50));
+    // Debounce delay
+    vTaskDelay(pdMS_TO_TICKS(25));
 
     // Re-give the semaphore to trigger the next poll cycle
     xSemaphoreGive(xButtonSemaphoreHandle);
@@ -329,41 +297,44 @@ void vButtonStepTask(void *pvParameters) {
 }
 
 void vBlinkTask(void *p) {
+  const Led_TypeDef leds[NUM_STEPS] = {LED3, LED4, LED6, LED5};
+  uint8_t lastStepIndex = 0xFF; // Invalid initial value to force first update
+
   while (1) {
-    STM_EVAL_LEDOn(LED3);
-    vTaskDelay(kBlinkDelay);
+    // Get current step from the sequencer
+    uint8_t currentStep = playHeadStep;
 
-    STM_EVAL_LEDOff(LED3);
+    // Check if step changed
+    if (currentStep != lastStepIndex) {
+      // Turn off all LEDs first
+      for (uint8_t i = 0; i < NUM_STEPS; ++i) {
+        STM_EVAL_LEDOff(leds[i]);
+      }
 
-    STM_EVAL_LEDOn(LED4);
-    vTaskDelay(kBlinkDelay);
+      // Check if current step has any samples triggered
+      bool currentStepHasSample = false;
+      for (uint8_t s = 0; s < NUM_SAMPLES; ++s) {
+        if (stepGrid[s][currentStep]) {
+          currentStepHasSample = true;
+          break;
+        }
+      }
 
-    STM_EVAL_LEDOff(LED4);
+      // Turn on LED for current step only if it has samples
+      if (currentStepHasSample) {
+        STM_EVAL_LEDOn(leds[currentStep]);
+      }
 
-    STM_EVAL_LEDOn(LED6);
-    vTaskDelay(kBlinkDelay);
+      lastStepIndex = currentStep;
 
-    STM_EVAL_LEDOff(LED6);
-
-    STM_EVAL_LEDOn(LED5);
-    vTaskDelay(kBlinkDelay);
-
-    STM_EVAL_LEDOff(LED5);
-
-    // Adjust delay
-    kBlinkDelay += kBlinkStep;
-
-    if (kBlinkDelay >= MAX_BLINK_DELAY) {
-      kBlinkStep -= MIN_BLINK_DELAY; // Reverse step direction
-
-    } else if ((kBlinkDelay < MIN_BLINK_DELAY) || (kBlinkStep == 0)) {
-      kBlinkDelay = MIN_BLINK_DELAY;
-      kBlinkStep = MIN_BLINK_DELAY;
-    }
 #ifdef BLINK
-    TRice(iD(3768), "att:🐁 Blink LEDs cycle: blinkStep=%d; blinkDelay=%d\n",
-          kBlinkStep, kBlinkDelay);
+      TRice(iD(6506), "att:🐁 LED step: %d, active: %d\n", currentStep,
+            currentStepHasSample);
 #endif
+    }
+
+    // Poll frequently to catch step changes
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 
   vTaskDelete(NULL);
@@ -426,29 +397,32 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 }
 
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
-  memset(&playbackBuffer[0], 0, (BUFFERSIZE / 2) * sizeof(int16_t));
-  renderHalf(0);            /* renders first half-buffer */
-  playHeadStep = stepIndex; /* UI can flash LEDs exactly on beat */
+  // Render audio for first half of buffer
+  renderHalf(0);
 
-#ifdef LOG_TRICE
+  // Update play head position (atomic read of volatile)
+  playHeadStep = stepIndex;
+
+#ifdef LOG_AUDIO_BUFFER
   TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif
 }
 
 void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
-  memset(&playbackBuffer[BUFFERSIZE / 2], 0,
-         (BUFFERSIZE / 2) * sizeof(int16_t));
-  renderHalf(BUFFERSIZE / 2); /* renders second half-buffer */
+  // Render audio for second half of buffer
+  renderHalf(BUFFERSIZE / 2);
+
+  // Update play head position (atomic read of volatile)
   playHeadStep = stepIndex;
 
-#ifdef LOG_TRICE
+#ifdef LOG_AUDIO_BUFFER
   TRice(iD(7634), "TransferComplete. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif
 }
 
-void EVAL_AUDIO_Error_CallBack(void *pData) {
+void EVAL_AUDIO_Error_CallBack(void *pData, int32_t errorType) {
 #ifdef LOG_TRICE
-  TRice(iD(4389), "error: Error. pData: %x\n", pData);
+  TRice(iD(5387), "error: Error. pData: %x type: %x \n", pData, errorType);
 #endif
 }
 
