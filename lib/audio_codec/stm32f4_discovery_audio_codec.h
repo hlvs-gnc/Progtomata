@@ -70,7 +70,7 @@
 #define AUDIO_MAL_DMA_IT_HT_EN
 
 // Uncomment this line to enable DMA Transfer Error interrupt
-#define AUDIO_MAL_DMA_IT_TE_EN
+// #define AUDIO_MAL_DMA_IT_TE_EN
 
 /* Select the interrupt preemption priority and subpriority for the DMA
  * interrupt */
@@ -281,7 +281,7 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size);
 
 /* This function is called when an Interrupt due to transfer error on or
    peripheral error occurs. */
-void EVAL_AUDIO_Error_CallBack(void *pData);
+void EVAL_AUDIO_Error_CallBack(void *pData, int32_t errorType);
 
 /* Codec_TIMEOUT_UserCallback() function is called whenever a timeout condition
    occurs during communication (waiting on an event that doesn't occur, bus

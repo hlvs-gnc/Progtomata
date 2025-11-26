@@ -541,28 +541,18 @@ static void Audio_MAL_IRQHandler(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-  uint32_t dmaErrorFlags = 0;
+  int32_t dmaErrorFlags = 0;
 
   /* Error interrupt */
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE) != RESET) {
-#ifdef LOG_TRICE
-    TRice(iD(6222), "error: Transfer Error\n");
-#endif
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE)!=RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_TE;
   }
 
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE) != RESET) {
-#ifdef LOG_TRICE
-    TRice(iD(7940), "error: FIFO Error\n");
-#endif
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE)!=RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_FE;
   }
 
-  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) !=
-      RESET) {
-#ifdef LOG_TRICE
-    TRice(iD(6805), "error: Direct Mode Error\n");
-#endif
+  if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME)!=RESET) {
     dmaErrorFlags |= AUDIO_MAL_DMA_FLAG_DME;
   }
 
@@ -571,12 +561,20 @@ static void Audio_MAL_IRQHandler(void) {
     /* Manage the error generated on DMA FIFO: This function
        should be coded by user (its prototype is already declared in
        stm32f4_discovery_audio_codec.h) */
-    EVAL_AUDIO_Error_CallBack((uint32_t *)CurrentPos);
+    EVAL_AUDIO_Error_CallBack((uint32_t *)CurrentPos, dmaErrorFlags);
 
-    /* Clear the Interrupt flag */
-    DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE |
-                                            AUDIO_MAL_DMA_FLAG_FE |
-                                            AUDIO_MAL_DMA_FLAG_DME);
+    // Clear error flags
+    if (dmaErrorFlags & AUDIO_MAL_DMA_FLAG_TE) {
+      DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE);
+    }
+
+    if (dmaErrorFlags & AUDIO_MAL_DMA_FLAG_FE) {
+      DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_FE);
+    }
+
+    if (dmaErrorFlags & AUDIO_MAL_DMA_FLAG_DME) {
+      DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME);
+    }
   }
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 }
@@ -1360,7 +1358,7 @@ static void Audio_MAL_Init(void) {
 #error "AUDIO_MAL_MODE_NORMAL or AUDIO_MAL_MODE_CIRCULAR should be selected !!"
 #endif /* AUDIO_MAL_MODE_NORMAL */
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
     DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
@@ -1375,8 +1373,8 @@ static void Audio_MAL_Init(void) {
     DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_HT, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
-                 ENABLE);
+    /* Only enable transfer and direct mode errors  */
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
@@ -1419,8 +1417,8 @@ static void Audio_MAL_Init(void) {
 #error "AUDIO_MAL_MODE_NORMAL or AUDIO_MAL_MODE_CIRCULAR should be selected !!"
 #endif /* AUDIO_MAL_MODE_NORMAL */
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
-    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
@@ -1434,8 +1432,8 @@ static void Audio_MAL_Init(void) {
     DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_HT, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
-                 ENABLE);
+    /* Only enable transfer and direct mode errors */
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
@@ -1580,7 +1578,7 @@ static void Audio_MAL_Stop(void) {
   /* Clear all the DMA flags for the next transfer */
   DMA_ClearFlag(AUDIO_MAL_DMA_STREAM,
                 AUDIO_MAL_DMA_FLAG_TC | AUDIO_MAL_DMA_FLAG_HT |
-                    AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
+                AUDIO_MAL_DMA_FLAG_FE | AUDIO_MAL_DMA_FLAG_TE);
 
   /*
            The I2S DMA requests are not disabled here.
