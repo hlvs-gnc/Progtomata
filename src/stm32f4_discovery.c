@@ -109,7 +109,8 @@ NVIC_InitTypeDef NVIC_InitStructure;
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDInit(Led_TypeDef Led) {
+void STM_EVAL_LEDInit(Led_TypeDef Led)
+{
   GPIO_InitTypeDef GPIO_InitStructure;
 
   /* Enable the GPIO_LED Clock */
@@ -134,7 +135,10 @@ void STM_EVAL_LEDInit(Led_TypeDef Led) {
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDOn(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led]; }
+void STM_EVAL_LEDOn(Led_TypeDef Led)
+{
+  GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led];
+}
 
 /**
  * @brief  Turns selected LED Off.
@@ -146,7 +150,10 @@ void STM_EVAL_LEDOn(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led]; }
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDOff(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRH = GPIO_PIN[Led]; }
+void STM_EVAL_LEDOff(Led_TypeDef Led)
+{
+  GPIO_PORT[Led]->BSRRH = GPIO_PIN[Led];
+}
 
 /**
  * @brief  Toggles the selected LED.
@@ -158,7 +165,8 @@ void STM_EVAL_LEDOff(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRH = GPIO_PIN[Led]; }
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDToggle(Led_TypeDef Led) {
+void STM_EVAL_LEDToggle(Led_TypeDef Led)
+{
   GPIO_PORT[Led]->ODR ^= GPIO_PIN[Led];
 }
 
@@ -173,7 +181,8 @@ void STM_EVAL_LEDToggle(Led_TypeDef Led) {
  * interrupt generation capability
  * @retval None
  */
-void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode) {
+void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
+{
   GPIO_InitTypeDef GPIO_InitStruct;
   EXTI_InitTypeDef EXTI_InitStruct;
   NVIC_InitTypeDef NVIC_InitStruct;
@@ -216,7 +225,8 @@ void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode) {
  *   This parameter should be: BUTTON_USER
  * @retval The Button GPIO pin value.
  */
-uint32_t STM_EVAL_PBGetState(Button_TypeDef Button) {
+uint32_t STM_EVAL_PBGetState(Button_TypeDef Button)
+{
   return GPIO_ReadInputDataBit(BUTTON_PORT[Button], BUTTON_PIN[Button]);
 }
 

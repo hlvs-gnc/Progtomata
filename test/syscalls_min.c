@@ -23,13 +23,15 @@
 extern char _end; // end of BSS
 static char *heap_end;
 
-int _close(int fd) {
+int _close(int fd)
+{
   (void)fd;
   errno = ENOSYS;
   return -1;
 }
 
-int _fstat(int fd, struct stat *st) {
+int _fstat(int fd, struct stat *st)
+{
   (void)fd;
   if (st) {
     st->st_mode = S_IFCHR;
@@ -37,12 +39,14 @@ int _fstat(int fd, struct stat *st) {
   return 0;
 }
 
-int _isatty(int fd) {
+int _isatty(int fd)
+{
   (void)fd;
   return 1;
 }
 
-off_t _lseek(int fd, off_t off, int w) {
+off_t _lseek(int fd, off_t off, int w)
+{
   (void)fd;
   (void)off;
   (void)w;
@@ -50,7 +54,8 @@ off_t _lseek(int fd, off_t off, int w) {
   return -1;
 }
 
-int _read(int fd, void *buf, size_t n) {
+int _read(int fd, void *buf, size_t n)
+{
   (void)fd;
   (void)buf;
   (void)n;
@@ -58,13 +63,15 @@ int _read(int fd, void *buf, size_t n) {
   return -1;
 }
 
-int _write(int fd, const void *buf, size_t n) {
+int _write(int fd, const void *buf, size_t n)
+{
   (void)fd;
   (void)buf;
   return (int)n;
 }
 
-void *_sbrk(ptrdiff_t incr) {
+void *_sbrk(ptrdiff_t incr)
+{
   if (!heap_end) {
     heap_end = &_end;
   }

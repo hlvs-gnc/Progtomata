@@ -30,7 +30,8 @@
 
 #include <uart_driver.h>
 
-void uart_init(void) {
+void uart_init(void)
+{
   // GPIO Configuration
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -83,7 +84,8 @@ void uart_init(void) {
  *
  * @param c The character to send.
  */
-void uart_send_char(char c) {
+void uart_send_char(char c)
+{
   // Wait until transmit buffer is empty
   while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) {
   }
@@ -95,7 +97,8 @@ void uart_send_char(char c) {
  *
  * @param str Pointer to the null-terminated string to send.
  */
-static void uart_send_string(const char *str) {
+static void uart_send_string(const char *str)
+{
   while (*str) {
     uart_send_char(*str++);
   }
@@ -105,7 +108,8 @@ static void uart_send_string(const char *str) {
 /**
  * @brief Print a signed long integer (decimal) without recursion.
  */
-static void print_signed_long(long val) {
+static void print_signed_long(long val)
+{
   char buffer[12]; // Enough for "-2147483648\0"
   int i = 0;
   int is_negative = (val < 0);
@@ -146,7 +150,8 @@ static void print_signed_long(long val) {
 /**
  * @brief Print an unsigned long integer (decimal) without recursion.
  */
-static void print_unsigned_long(unsigned long val) {
+static void print_unsigned_long(unsigned long val)
+{
   char buffer[11]; // Enough for "4294967295\0"
   int i = 0;
 
@@ -175,7 +180,8 @@ static void print_unsigned_long(unsigned long val) {
 /**
  * @brief Print an unsigned long integer as hexadecimal without recursion.
  */
-static void print_hex(unsigned long val) {
+static void print_hex(unsigned long val)
+{
   char buffer[9]; // 8 hex digits + '\0'
   int i = 0;
 
@@ -209,7 +215,8 @@ static void print_hex(unsigned long val) {
  * @brief Print a floating-point number with a fixed number of decimal places
  *        (kDecimalPlaces), avoiding recursion.
  */
-static void print_float(double value) {
+static void print_float(double value)
+{
   const int kDecimalPlaces = 6;
 
   // Handle sign
@@ -265,7 +272,8 @@ static void print_float(double value) {
  * @param format The format specifier (PRINT_SIGNED_DEC, PRINT_UNSIGNED_DEC,
  * PRINT_HEX).
  */
-static void uart_print_type(double value, PrintFormat_t format) {
+static void uart_print_type(double value, PrintFormat_t format)
+{
   switch (format) {
   case PRINT_SIGNED_DEC:
     print_signed_long((long)value);
@@ -287,7 +295,8 @@ static void uart_print_type(double value, PrintFormat_t format) {
 
 // ------------------ Minimal Custom Print Formatted ------------------ //
 
-void uart_print(const char *format, ...) {
+void uart_print(const char *format, ...)
+{
   va_list args;
   va_start(args, format);
 

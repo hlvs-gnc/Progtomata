@@ -24,7 +24,8 @@ uint16_t DB5 = GPIO_Pin_11;
 uint16_t DB6 = GPIO_Pin_12;
 uint16_t DB7 = GPIO_Pin_13;
 
-static void LCD_WriteNibble(uint8_t nibble) {
+static void LCD_WriteNibble(uint8_t nibble)
+{
   // nibble is assumed to be in the low 4 bits
 
   // D4
@@ -68,7 +69,8 @@ static void LCD_WriteNibble(uint8_t nibble) {
     ;
 }
 
-static void LCD_Send(uint8_t value, uint8_t isData) {
+static void LCD_Send(uint8_t value, uint8_t isData)
+{
   if (isData) {
     LCD_RS_HIGH();
   } else {
@@ -82,14 +84,16 @@ static void LCD_Send(uint8_t value, uint8_t isData) {
   LCD_WriteNibble(value & 0x0F);
 }
 
-static void LCD_Command(uint8_t cmd) {
+static void LCD_Command(uint8_t cmd)
+{
   LCD_Send(cmd, 0 /* isData = false */);
   // Command writes often need extra delay
   for (volatile int i = 0; i < 4000; i++)
     ;
 }
 
-static void LCD_Data(uint8_t data) {
+static void LCD_Data(uint8_t data)
+{
   LCD_Send(data, 1 /* isData = true */);
   // Data writes typically need less delay
   for (volatile int i = 0; i < 2000; i++)
@@ -102,7 +106,8 @@ static void LCD_Data(uint8_t data) {
  * Prepares pins for output mode and sets them low. This is
  * necessary before calling @ref LCD_Init().
  */
-static void LCD_GPIO_Setup(void) {
+static void LCD_GPIO_Setup(void)
+{
   GPIO_InitTypeDef GPIO_InitStruct;
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
@@ -119,7 +124,8 @@ static void LCD_GPIO_Setup(void) {
                             GPIO_Pin_12 | GPIO_Pin_13);
 }
 
-void LCD_Init(void) {
+void LCD_Init(void)
+{
   LCD_GPIO_Setup();
 
   // Let the LCD power up
@@ -153,19 +159,22 @@ void LCD_Init(void) {
     ;
 }
 
-void LCD_Clear(void) {
+void LCD_Clear(void)
+{
   LCD_Command(0x01); // Clear display
   for (volatile int i = 0; i < 30000; i++)
     ;
 }
 
-void LCD_WriteString(const char *str) {
+void LCD_WriteString(const char *str)
+{
   while (*str) {
     LCD_Data((uint8_t)*str++);
   }
 }
 
-void LCD_GotoXY(uint8_t row, uint8_t col) {
+void LCD_GotoXY(uint8_t row, uint8_t col)
+{
   // For a typical 16x2:
   // row 0 address = 0x00, row 1 address = 0x40
   uint8_t address = (row == 0) ? 0x00 : 0x40;

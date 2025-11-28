@@ -25,7 +25,7 @@
  * @note  Adjust as needed for your system.
  */
 #define TRACE_TASK_STACK_SIZE 256
-#define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define TRACE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
 
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;
@@ -38,7 +38,8 @@ StaticTask_t traceTaskBuffer CCM_RAM;
  */
 static bool g_isTraceInitialized = false;
 
-static void DWT_Init(void) {
+static void DWT_Init(void)
+{
   // Enable trace and debug block
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -54,7 +55,8 @@ static void DWT_Init(void) {
  *
  * @param pvParameters Not used.
  */
-static void vTriceTask(void *pvParameters) {
+static void vTriceTask(void *pvParameters)
+{
   (void)pvParameters; // Unused parameter
 
   for (;;) {
@@ -66,7 +68,8 @@ static void vTriceTask(void *pvParameters) {
   }
 }
 
-void TraceInit(void) {
+void TraceInit(void)
+{
   DWT_Init();
 
   if (!g_isTraceInitialized) {
