@@ -33,7 +33,12 @@
 #define OLED_I2C_ADDR 0x78 // 0x3C << 1
 
 /* Error handling */
-typedef enum { OLED_OK = 0, OLED_ERROR, OLED_TIMEOUT, OLED_BUSY } OLED_Status;
+typedef enum {
+  OLED_OK = 0,
+  OLED_ERROR,
+  OLED_TIMEOUT,
+  OLED_BUSY
+} OLED_Status;
 
 /* I2C Configuration */
 #define OLED_I2C I2C1
@@ -172,8 +177,6 @@ static const uint8_t Font5x7[][5] = {
     {0x44, 0x64, 0x54, 0x4C, 0x44}, // z
 };
 
-/* Function Prototypes */
-
 /**
  * @brief Initializes the OLED display.
  *
@@ -227,6 +230,11 @@ void OLED_SetContrast(uint8_t contrast);
 void OLED_InvertDisplay(bool invert);
 
 /**
+ * @brief Updates the OLED display.
+ */
+void OLED_UpdateScreen(void);
+
+/**
  * @brief Draws a string on the OLED display.
  *
  * @param x the x-coordinate of the position
@@ -234,78 +242,6 @@ void OLED_InvertDisplay(bool invert);
  * @param str the string to draw
  */
 void OLED_DrawString(uint8_t x, uint8_t y, const char *str);
-
-/**
- * @brief Draws a rectangle on the OLED display.
- *
- * @param x the x-coordinate of the top-left of the rectangle
- * @param y the y-coordinate of the top-left of the rectangle
- * @param width the width of the rectangle
- * @param height the height of the rectangle
- * @param color the color of the rectangle, true for white, false for black
- */
-void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color);
-
-/**
- * @brief Fills a rectangle on the OLED display.
- *
- * @param x the x-coordinate of the top-left of the rectangle
- * @param y the y-coordinate of the top-left of the rectangle
- * @param width the width of the rectangle
- * @param height the height of the rectangle
- * @param color the color of the rectangle, true for white, false for black
- */
-void OLED_FillRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color);
-
-/**
- * @brief Draws a circle on the OLED display.
- *
- * @param x0 the x-coordinate of the center of the circle
- * @param y0 the y-coordinate of the center of the circle
- * @param radius the radius of the circle
- * @param color the color of the circle, true for white, false for black
- */
-void OLED_DrawCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color);
-
-/**
- * @brief Fills a circle on the OLED display.
- *
- * @param x0 the x-coordinate of the center of the circle
- * @param y0 the y-coordinate of the center of the circle
- * @param radius the radius of the circle
- * @param color the color of the circle, true for white, false for black
- */
-void OLED_FillCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color);
-
-/**
- * @brief Updates the OLED display.
- */
-void OLED_UpdateScreen(void);
-
-/**
- * @brief Scrolls the OLED display to the right.
- *
- * @param start_page the starting page number
- * @param end_page the ending page number
- * @param speed the scroll speed
- */
-void OLED_ScrollRight(uint8_t start_page, uint8_t end_page, uint8_t speed);
-
-/**
- * @brief Scrolls the OLED display to the left.
- *
- * @param start_page the starting page number
- * @param end_page the ending page number
- * @param speed the scroll speed
- */
-void OLED_ScrollLeft(uint8_t start_page, uint8_t end_page, uint8_t speed);
-
-/**
- * @brief Stops scrolling the OLED display.
- */
-void OLED_StopScroll(void);
 
 /**
  * @brief Draws a bitmap on the OLED display.
@@ -318,5 +254,27 @@ void OLED_StopScroll(void);
  */
 void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
                      uint8_t height);
+
+/**
+ * @brief Draws a line on the OLED display.
+ *
+ * @param x0 the x-coordinate of the starting point
+ * @param y0 the y-coordinate of the starting point
+ * @param x1 the x-coordinate of the ending point
+ * @param y1 the y-coordinate of the ending point
+ * @param color the color of the line, true for white, false for black
+ */
+void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color);
+
+/**
+ * @brief Draws a waveform visualization on the OLED display.
+ *
+ * @param audioBuffer pointer to the audio buffer to visualize
+ * @param bufferSize size of the audio buffer
+ * @param startX starting x-coordinate for the waveform
+ * @param width width of the waveform display area
+ */
+void OLED_DrawWaveform(const int16_t *audioBuffer, uint16_t bufferSize,
+                       uint8_t startX, uint8_t width);
 
 #endif // OLED_H_

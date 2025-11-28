@@ -32,46 +32,6 @@
 #endif
 
 /**
- * @brief
- *
- * Monitors the state of the user button connected to GPIOA Pin 0.
- * If a button press is detected, it resets the blink delay to its
- * minimum value. Designed as a FreeRTOS task that runs continuously.
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vButtonSampleTask(void *p);
-
-/**
- * @brief
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vButtonStepTask(void *pvParameters);
-
-/**
- * @brief Controls LED blinking behavior with variable delay.
- *
- * Cycles through four LEDs connected to GPIOD Pins 12, 13, 14, and 15.
- * Adjusts the blinking delay dynamically within defined limits.
- * Runs as a FreeRTOS task, demonstrating time-based scheduling.
- *
- * @param[in] p Pointer to task parameters (unused).
- */
-void vBlinkTask(void *p);
-
-/**
- * @brief Task to animate the OLED display.
- *
- * This task runs continuously and redraws the OLED display with an
- * animation. The animation is a bouncing ball that moves within the
- * display boundaries.
- *
- * @param[in] pvParameters Pointer to task parameters (unused).
- */
-void vOledAnimationTask(void *pvParameters);
-
-/**
  * @brief Configures the system clock to 168 MHz for STM32F4.
  *
  * This function enables the power interface clock, configures voltage

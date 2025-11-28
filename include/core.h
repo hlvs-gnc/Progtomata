@@ -23,9 +23,10 @@
 // Mono Audio samples
 #include <kick_22050_mono.h>
 #include <openhat_22050_mono.h>
+#include <kick_aether.h>
 
 /// @brief Size of the audio playback buffer in bytes
-#define BUFFERSIZE (4096)
+#define BUFFERSIZE (2048)
 
 /// @brief Number of audio samples available in the sequencer
 #define NUM_SAMPLES 2
@@ -42,8 +43,11 @@
 /// @brief Number of samples in open hat mono audio file
 #define SOUNDSIZE2 (9882)
 
+/// @brief Number of samples in open hat mono audio file
+#define SOUNDSIZE3 (12959)
+
 /// @brief I²S sample-rate
-#define SAMPLE_RATE 22050U
+#define SAMPLE_RATE I2S_AudioFreq_22k
 
 /// @brief Tempo limits
 #define MIN_BPM 40U
@@ -94,16 +98,13 @@ static uint32_t stepPos = 0;
 /// @brief Grid column currently playing (volatile - modified in interrupt)
 static volatile uint8_t stepIndex = 0;
 
-/// @brief Sample button - for N samples
+/// @brief Currently selected sample button index (0 to NUM_SAMPLES-1)
 static uint16_t sampleButton = 0;
 
-/// @brief Step button's - for N steps
-static uint16_t stepButton = 0;
-
 /// @brief Array of audio sample data pointers
-static const int16_t *const sampleData[NUM_SAMPLES] = {kick_mono, openhat_mono};
+static const int16_t *const sampleData[NUM_SAMPLES] = {kick_aether_mono, openhat_mono};
 
 /// @brief Array of sample lengths in bytes
-static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE1, SOUNDSIZE2};
+static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE3, SOUNDSIZE2};
 
 #endif // CORE_H_
