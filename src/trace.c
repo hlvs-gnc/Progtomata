@@ -25,7 +25,7 @@
  * @note  Adjust as needed for your system.
  */
 #define TRACE_TASK_STACK_SIZE 256
-#define TRACE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define TRACE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
 
 /// @brief Stack memory allocation for the button task stored in CCM
 StackType_t traceTaskStack[TRACE_TASK_STACK_SIZE] CCM_RAM;

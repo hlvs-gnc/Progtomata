@@ -16,17 +16,16 @@
 
 #include <oled.h>
 
-/* Private variables */
+// Private variables
 static uint8_t OLED_Buffer[OLED_WIDTH * OLED_HEIGHT / 8];
 static uint32_t OLED_Timeout = 10000;
 
-/* Private function prototypes */
+// Function prototypes
 static void OLED_DelayMs(uint32_t ms);
 static OLED_Status OLED_I2C_Write(uint8_t addr, uint8_t reg, uint8_t data);
 static OLED_Status OLED_I2C_WriteMulti(uint8_t addr, uint8_t reg, uint8_t *data,
                                        uint16_t count);
 
-/* Delay function */
 static void OLED_DelayMs(uint32_t ms) {
   volatile uint32_t nCount;
   RCC_ClocksTypeDef RCC_Clocks;
@@ -36,7 +35,6 @@ static void OLED_DelayMs(uint32_t ms) {
     ;
 }
 
-/* I2C Write Single Byte */
 static OLED_Status OLED_I2C_Write(uint8_t addr, uint8_t reg, uint8_t data) {
   uint32_t timeout = OLED_Timeout;
   uint32_t status = OLED_OK;
@@ -99,7 +97,6 @@ static OLED_Status OLED_I2C_Write(uint8_t addr, uint8_t reg, uint8_t data) {
   return status;
 }
 
-/* I2C Write Multiple Bytes */
 static OLED_Status OLED_I2C_WriteMulti(uint8_t addr, uint8_t reg, uint8_t *data,
                                        uint16_t count) {
   uint32_t timeout = OLED_Timeout;
@@ -165,12 +162,10 @@ static OLED_Status OLED_I2C_WriteMulti(uint8_t addr, uint8_t reg, uint8_t *data,
   return status;
 }
 
-/* Write command to OLED */
 static void OLED_WriteCommand(uint8_t cmd) {
   OLED_I2C_Write(OLED_I2C_ADDR, OLED_CONTROL_BYTE_CMD_SINGLE, cmd);
 }
 
-/* Initialize OLED Display */
 void OLED_Init(void) {
   GPIO_InitTypeDef GPIO_InitStruct;
   I2C_InitTypeDef I2C_InitStruct;
@@ -191,7 +186,7 @@ void OLED_Init(void) {
   GPIO_PinAFConfig(OLED_I2C_GPIO, OLED_I2C_SCL_SOURCE, OLED_I2C_AF);
   GPIO_PinAFConfig(OLED_I2C_GPIO, OLED_I2C_SDA_SOURCE, OLED_I2C_AF);
 
-/* Special handling for I2C3 if using PA8/PC9 configuration */
+  /* Special handling for I2C3 if using PA8/PC9 configuration */
 #ifdef OLED_I2C_GPIO2
   GPIO_InitStruct.GPIO_Pin = OLED_I2C_SDA_PIN;
   GPIO_Init(OLED_I2C_GPIO2, &GPIO_InitStruct);
@@ -245,57 +240,14 @@ void OLED_Init(void) {
   OLED_UpdateScreen();
 }
 
-/* Write data to OLED */
 void OLED_WriteData(uint8_t data) {
   OLED_I2C_Write(OLED_I2C_ADDR, OLED_CONTROL_BYTE_DATA_STREAM, data);
 }
 
-/* Write multiple data to OLED */
 static void OLED_WriteMultipleData(uint8_t *data, uint16_t size) {
   OLED_I2C_WriteMulti(OLED_I2C_ADDR, OLED_CONTROL_BYTE_DATA_STREAM, data, size);
 }
 
-/* Set cursor position */
-void OLED_SetCursor(uint8_t x, uint8_t y) {
-  OLED_WriteCommand(OLED_CMD_COLUMN_ADDR);
-  OLED_WriteCommand(x);
-  OLED_WriteCommand(OLED_WIDTH - 1);
-  OLED_WriteCommand(OLED_CMD_PAGE_ADDR);
-  OLED_WriteCommand(y);
-  OLED_WriteCommand(OLED_PAGES - 1);
-}
-
-/* Clear screen buffer */
-void OLED_Clear(void) { memset(OLED_Buffer, 0x00, sizeof(OLED_Buffer)); }
-
-/* Turn display on */
-void OLED_DisplayOn(void) { OLED_WriteCommand(OLED_CMD_DISPLAY_ON); }
-
-/* Turn display off */
-void OLED_DisplayOff(void) { OLED_WriteCommand(OLED_CMD_DISPLAY_OFF); }
-
-/* Set display contrast */
-void OLED_SetContrast(uint8_t contrast) {
-  OLED_WriteCommand(OLED_CMD_SET_CONTRAST);
-  OLED_WriteCommand(contrast);
-}
-
-/* Invert display */
-void OLED_InvertDisplay(bool invert) {
-  if (invert) {
-    OLED_WriteCommand(OLED_CMD_INVERT_DISPLAY);
-  } else {
-    OLED_WriteCommand(OLED_CMD_NORMAL_DISPLAY);
-  }
-}
-
-/**
- * @brief Draws a single pixel on the OLED display.
- *
- * @param x the x-coordinate of the pixel
- * @param y the y-coordinate of the pixel
- * @param color the color of the pixel, true for white, false for black
- */
 static void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
   if (x >= OLED_WIDTH || y >= OLED_HEIGHT) {
     return;
@@ -308,13 +260,6 @@ static void OLED_DrawPixel(uint8_t x, uint8_t y, bool color) {
   }
 }
 
-/**
- * @brief Draws a single character on the OLED display.
- *
- * @param x the x-coordinate of the position
- * @param y the y-coordinate of the position
- * @param c the character to draw
- */
 static void OLED_DrawChar(uint8_t x, uint8_t y, char c) {
   uint8_t i, j;
 
@@ -332,7 +277,52 @@ static void OLED_DrawChar(uint8_t x, uint8_t y, char c) {
   }
 }
 
-/* Draw string */
+void OLED_SetCursor(uint8_t x, uint8_t y) {
+  OLED_WriteCommand(OLED_CMD_COLUMN_ADDR);
+  OLED_WriteCommand(x);
+  OLED_WriteCommand(OLED_WIDTH - 1);
+  OLED_WriteCommand(OLED_CMD_PAGE_ADDR);
+  OLED_WriteCommand(y);
+  OLED_WriteCommand(OLED_PAGES - 1);
+}
+
+void OLED_Clear(void) {
+  memset(OLED_Buffer, 0x00, sizeof(OLED_Buffer));
+}
+
+void OLED_DisplayOn(void) {
+  OLED_WriteCommand(OLED_CMD_DISPLAY_ON);
+}
+
+void OLED_DisplayOff(void) {
+  OLED_WriteCommand(OLED_CMD_DISPLAY_OFF);
+}
+
+void OLED_SetContrast(uint8_t contrast) {
+  OLED_WriteCommand(OLED_CMD_SET_CONTRAST);
+  OLED_WriteCommand(contrast);
+}
+
+void OLED_InvertDisplay(bool invert) {
+  if (invert) {
+    OLED_WriteCommand(OLED_CMD_INVERT_DISPLAY);
+  } else {
+    OLED_WriteCommand(OLED_CMD_NORMAL_DISPLAY);
+  }
+}
+
+void OLED_UpdateScreen(void) {
+  uint8_t i;
+
+  for (i = 0; i < 8; i++) {
+    OLED_WriteCommand(0xB0 + i); // Set page address
+    OLED_WriteCommand(0x00);     // Set lower column address
+    OLED_WriteCommand(0x10);     // Set higher column address
+
+    OLED_WriteMultipleData(&OLED_Buffer[OLED_WIDTH * i], OLED_WIDTH);
+  }
+}
+
 void OLED_DrawString(uint8_t x, uint8_t y, const char *str) {
   while (*str) {
     OLED_DrawChar(x, y, *str);
@@ -348,36 +338,26 @@ void OLED_DrawString(uint8_t x, uint8_t y, const char *str) {
   }
 }
 
-/**
- * @brief Draws a single line on the OLED display.
- *
- * @param x0 the x-coordinate of the start of the line
- * @param y0 the y-coordinate of the start of the line
- * @param x1 the x-coordinate of the end of the line
- * @param y1 the y-coordinate of the end of the line
- * @param color the color of the line, true for white, false for black
- */
-static void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
-                          bool color) {
-  int16_t dx = abs(x1 - x0);
-  int16_t dy = abs(y1 - y0);
+void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color) {
+  int16_t dx = x1 > x0 ? x1 - x0 : x0 - x1;
+  int16_t dy = y1 > y0 ? y1 - y0 : y0 - y1;
   int16_t sx = x0 < x1 ? 1 : -1;
   int16_t sy = y0 < y1 ? 1 : -1;
   int16_t err = dx - dy;
+  int16_t e2;
 
   while (1) {
     OLED_DrawPixel(x0, y0, color);
 
-    if (x0 == x1 && y0 == y1)
+    if (x0 == x1 && y0 == y1) {
       break;
+    }
 
-    int16_t e2 = 2 * err;
-
+    e2 = 2 * err;
     if (e2 > -dy) {
       err -= dy;
       x0 += sx;
     }
-
     if (e2 < dx) {
       err += dx;
       y0 += sy;
@@ -385,120 +365,6 @@ static void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
   }
 }
 
-/* Draw rectangle */
-void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color) {
-  OLED_DrawLine(x, y, x + width - 1, y, color);
-  OLED_DrawLine(x, y + height - 1, x + width - 1, y + height - 1, color);
-  OLED_DrawLine(x, y, x, y + height - 1, color);
-  OLED_DrawLine(x + width - 1, y, x + width - 1, y + height - 1, color);
-}
-
-/* Fill rectangle */
-void OLED_FillRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color) {
-  uint8_t i, j;
-
-  for (i = x; i < x + width; i++) {
-    for (j = y; j < y + height; j++) {
-      OLED_DrawPixel(i, j, color);
-    }
-  }
-}
-
-/* Draw circle using Midpoint Circle Algorithm */
-void OLED_DrawCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color) {
-  int16_t x = radius;
-  int16_t y = 0;
-  int16_t err = 0;
-
-  while (x >= y) {
-    OLED_DrawPixel(x0 + x, y0 + y, color);
-    OLED_DrawPixel(x0 + y, y0 + x, color);
-    OLED_DrawPixel(x0 - y, y0 + x, color);
-    OLED_DrawPixel(x0 - x, y0 + y, color);
-    OLED_DrawPixel(x0 - x, y0 - y, color);
-    OLED_DrawPixel(x0 - y, y0 - x, color);
-    OLED_DrawPixel(x0 + y, y0 - x, color);
-    OLED_DrawPixel(x0 + x, y0 - y, color);
-
-    if (err <= 0) {
-      y += 1;
-      err += 2 * y + 1;
-    }
-
-    if (err > 0) {
-      x -= 1;
-      err -= 2 * x + 1;
-    }
-  }
-}
-
-/* Fill circle */
-void OLED_FillCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color) {
-  int16_t x = radius;
-  int16_t y = 0;
-  int16_t err = 0;
-
-  while (x >= y) {
-    OLED_DrawLine(x0 - x, y0 + y, x0 + x, y0 + y, color);
-    OLED_DrawLine(x0 - x, y0 - y, x0 + x, y0 - y, color);
-    OLED_DrawLine(x0 - y, y0 + x, x0 + y, y0 + x, color);
-    OLED_DrawLine(x0 - y, y0 - x, x0 + y, y0 - x, color);
-
-    if (err <= 0) {
-      y += 1;
-      err += 2 * y + 1;
-    }
-
-    if (err > 0) {
-      x -= 1;
-      err -= 2 * x + 1;
-    }
-  }
-}
-
-/* Update screen with buffer content */
-void OLED_UpdateScreen(void) {
-  uint8_t i;
-
-  for (i = 0; i < 8; i++) {
-    OLED_WriteCommand(0xB0 + i); // Set page address
-    OLED_WriteCommand(0x00);     // Set lower column address
-    OLED_WriteCommand(0x10);     // Set higher column address
-
-    OLED_WriteMultipleData(&OLED_Buffer[OLED_WIDTH * i], OLED_WIDTH);
-  }
-}
-
-/* Scroll right */
-void OLED_ScrollRight(uint8_t start_page, uint8_t end_page, uint8_t speed) {
-  OLED_WriteCommand(OLED_CMD_RIGHT_HORIZONTAL_SCROLL);
-  OLED_WriteCommand(0x00);       // Dummy byte
-  OLED_WriteCommand(start_page); // Start page
-  OLED_WriteCommand(speed);      // Time interval
-  OLED_WriteCommand(end_page);   // End page
-  OLED_WriteCommand(0x00);       // Dummy byte
-  OLED_WriteCommand(0xFF);       // Dummy byte
-  OLED_WriteCommand(OLED_CMD_ACTIVATE_SCROLL);
-}
-
-/* Scroll left */
-void OLED_ScrollLeft(uint8_t start_page, uint8_t end_page, uint8_t speed) {
-  OLED_WriteCommand(OLED_CMD_LEFT_HORIZONTAL_SCROLL);
-  OLED_WriteCommand(0x00);       // Dummy byte
-  OLED_WriteCommand(start_page); // Start page
-  OLED_WriteCommand(speed);      // Time interval
-  OLED_WriteCommand(end_page);   // End page
-  OLED_WriteCommand(0x00);       // Dummy byte
-  OLED_WriteCommand(0xFF);       // Dummy byte
-  OLED_WriteCommand(OLED_CMD_ACTIVATE_SCROLL);
-}
-
-/* Stop scrolling */
-void OLED_StopScroll(void) { OLED_WriteCommand(OLED_CMD_DEACTIVATE_SCROLL); }
-
-/* Draw bitmap */
 void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
                      uint8_t height) {
   uint8_t i, j;
@@ -510,5 +376,47 @@ void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
       uint8_t bit = byte & (0x80 >> (i % 8));
       OLED_DrawPixel(x + i, y + j, bit != 0);
     }
+  }
+}
+
+void OLED_DrawWaveform(const int16_t *audioBuffer, uint16_t bufferSize,
+                       uint8_t startX, uint8_t width) {
+  if (audioBuffer == NULL || bufferSize == 0 || width == 0) {
+    return;
+  }
+
+  // Calculate sampling interval to fit width
+  uint16_t sampleStep = bufferSize / width;
+  if (sampleStep == 0) {
+    sampleStep = 1;
+  }
+
+  // Draw waveform
+  uint8_t prevY = 32;
+  for (uint8_t i = 0; i < width; i++) {
+    // Get sample from buffer
+    uint16_t sampleIndex = i * sampleStep;
+    if (sampleIndex >= bufferSize) {
+      sampleIndex = bufferSize - 1;
+    }
+
+    // Convert 16-bit audio sample to Y coordinate (0-63)
+    // Audio range: -32768 to 32767
+    // Map to display range: 0 to 63, center at 32
+    int16_t sample = audioBuffer[sampleIndex];
+    int16_t scaledSample = (int16_t)((int32_t)sample * 28 / 32768);
+    uint8_t y = 32 - scaledSample;
+
+    // Clamp to display bounds
+    if (y > 63) {
+      y = 63;
+    }
+
+    // Draw line from previous point to current point
+    if (i > 0) {
+      OLED_DrawLine(startX + i - 1, prevY, startX + i, y, true);
+    }
+
+    prevY = y;
   }
 }

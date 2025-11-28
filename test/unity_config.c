@@ -25,7 +25,9 @@ void unityOutputStart(void) {
   }
 }
 
-void unityOutputChar(int c) { uart_send_char((char)c); }
+void unityOutputChar(int c) {
+  uart_send_char((char)c);
+}
 
 void unityOutputFlush(void) {}
 

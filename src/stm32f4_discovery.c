@@ -134,7 +134,9 @@ void STM_EVAL_LEDInit(Led_TypeDef Led) {
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDOn(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led]; }
+void STM_EVAL_LEDOn(Led_TypeDef Led) {
+  GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led];
+}
 
 /**
  * @brief  Turns selected LED Off.
@@ -146,7 +148,9 @@ void STM_EVAL_LEDOn(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRL = GPIO_PIN[Led]; }
  *     @arg LED6
  * @retval None
  */
-void STM_EVAL_LEDOff(Led_TypeDef Led) { GPIO_PORT[Led]->BSRRH = GPIO_PIN[Led]; }
+void STM_EVAL_LEDOff(Led_TypeDef Led) {
+  GPIO_PORT[Led]->BSRRH = GPIO_PIN[Led];
+}
 
 /**
  * @brief  Toggles the selected LED.

@@ -186,13 +186,13 @@ stream in stereo before playing). 5- Supports only 16-bit audio data size.
 /* Codec audio Standards */
 #ifdef I2S_STANDARD_PHILLIPS
 #define CODEC_STANDARD 0x04
-#define I2S_STANDARD I2S_Standard_Phillips
+#define I2S_STANDARD   I2S_Standard_Phillips
 #elif defined(I2S_STANDARD_MSB)
 #define CODEC_STANDARD 0x00
-#define I2S_STANDARD I2S_Standard_MSB
+#define I2S_STANDARD   I2S_Standard_MSB
 #elif defined(I2S_STANDARD_LSB)
 #define CODEC_STANDARD 0x08
-#define I2S_STANDARD I2S_Standard_LSB
+#define I2S_STANDARD   I2S_Standard_LSB
 #else
 #error "Error: No audio communication standard selected !"
 #endif /* I2S_STANDARD */
@@ -585,14 +585,18 @@ static void Audio_MAL_IRQHandler(void) {
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-void Audio_MAL_I2S_IRQHandler(void) { Audio_MAL_IRQHandler(); }
+void Audio_MAL_I2S_IRQHandler(void) {
+  Audio_MAL_IRQHandler();
+}
 
 /**
  * @brief  This function handles main DAC interrupt.
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-void Audio_MAL_DAC_IRQHandler(void) { Audio_MAL_IRQHandler(); }
+void Audio_MAL_DAC_IRQHandler(void) {
+  Audio_MAL_IRQHandler();
+}
 
 /**
  * @brief  I2S interrupt management
@@ -1374,9 +1378,12 @@ static void Audio_MAL_Init(void) {
     DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_HT, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-    /* Only enable transfer and direct mode errors  */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
-                 ENABLE);
+    /* Enable transfer and direct mode error interrupts */
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME, ENABLE);
+
+    if (DMA_InitStructure.DMA_FIFOMode == DMA_FIFOMode_Enable) {
+      DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_FE, ENABLE);
+    }
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
@@ -1434,9 +1441,12 @@ static void Audio_MAL_Init(void) {
     DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_HT, ENABLE);
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
-    /* Only enable transfer and direct mode errors */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_FE | DMA_IT_DME,
-                 ENABLE);
+    /* Enable transfer and direct mode error interrupts */
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME, ENABLE);
+
+    if (DMA_InitStructure.DMA_FIFOMode == DMA_FIFOMode_Enable) {
+      DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_FE, ENABLE);
+    }
 #endif /* AUDIO_MAL_DMA_IT_TE_EN */
 
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \

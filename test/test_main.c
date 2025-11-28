@@ -29,7 +29,9 @@ static void delay_ms(uint32_t ms) {
   }
 }
 
-void setUp(void) { systemClock_config(); }
+void setUp(void) {
+  systemClock_config();
+}
 
 void tearDown(void) {
   // clean stuff up here
@@ -48,8 +50,14 @@ int runUnityTests(void) {
   return rc;
 }
 
-int main(void) { return runUnityTests(); }
+int main(void) {
+  return runUnityTests();
+}
 
-void vApplicationTickHook(void) { ++tickTime; }
+void vApplicationTickHook(void) {
+  ++tickTime;
+}
 
-void vApplicationIdleHook(void) { ++u64IdleTicksCnt; }
+void vApplicationIdleHook(void) {
+  ++u64IdleTicksCnt;
+}

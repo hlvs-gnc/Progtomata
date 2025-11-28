@@ -100,7 +100,7 @@ static void renderHalf(uint32_t base) {
     stepPos += chunk;
     toRender -= chunk;
 
-    if (stepPos >= stepSamples) {
+    if (stepPos == stepSamples) {
       stepPos = 0;
       stepIndex = (stepIndex + 1) % NUM_STEPS;
     }
@@ -157,7 +157,7 @@ int main(void) {
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
-  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 90, I2S_AudioFreq_22k) != 0) {
+  if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, SAMPLE_RATE) != 0) {
 #ifdef LOG_TRICE
     TRice(iD(4708), "msg: Audio codec initialization failed\n");
 #endif
@@ -165,6 +165,9 @@ int main(void) {
 
 #ifdef LOG_TRICE
   TRice(iD(3720), "msg: Audio setup complete\n");
+
+  // Set master tempo
+  sequencer_setBpm(130);
 #endif
 
   // Start audio playback
@@ -186,9 +189,9 @@ int main(void) {
       xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
                         BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
 
-  animationTaskHandle = xTaskCreateStatic(
-      vOledAnimationTask, "OledAnimationTask", ANIMATION_TASK_STACK_SIZE, NULL,
-      ANIMATION_TASK_PRIORITY, animationTaskStack, &animationTaskBuffer);
+  waveformTaskHandle = xTaskCreateStatic(
+      vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
+      WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
 #ifdef LOG_TRICE
   TRice(iD(1106), "info: 🐛 PROGTOMATA2000 System initialized\n");
@@ -201,8 +204,8 @@ int main(void) {
 }
 
 void vButtonSampleTask(void *p) {
-  uint8_t prevStatePD1 = Bit_RESET; // Previous state for PD1
-  uint8_t prevStatePD2 = Bit_RESET; // Previous state for PD2
+  uint8_t prevStatePD1 = Bit_RESET;
+  uint8_t prevStatePD2 = Bit_RESET;
 
   while (1) {
     // Read current states
@@ -248,7 +251,7 @@ void vButtonSampleTask(void *p) {
     prevStatePD2 = currentStatePD2;
 
     // Debounce delay
-    vTaskDelay(pdMS_TO_TICKS(25));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 
   // Delete the task if it ever exits
@@ -256,8 +259,7 @@ void vButtonSampleTask(void *p) {
 }
 
 void vButtonStepTask(void *pvParameters) {
-  stepButton = 0;
-  // wasPressed: 0 = released, 1 = pressed
+  static uint16_t stepButton = 0;
   static uint8_t wasPressed = 0;
 
   // Initially, give the semaphore so the task doesn't block immediately
@@ -289,7 +291,7 @@ void vButtonStepTask(void *pvParameters) {
     }
 
     // Debounce delay
-    vTaskDelay(pdMS_TO_TICKS(25));
+    vTaskDelay(pdMS_TO_TICKS(10));
 
     // Re-give the semaphore to trigger the next poll cycle
     xSemaphoreGive(xButtonSemaphoreHandle);
@@ -340,53 +342,27 @@ void vBlinkTask(void *p) {
   vTaskDelete(NULL);
 }
 
-void vOledAnimationTask(void *pvParameters) {
-  int16_t x = 64;
-  int16_t y = 32;
-  int16_t radius = 10;
+void vWaveformTask(void *pvParameters) {
+  (void)pvParameters;
 
-  int16_t vx = 3; // initial velocity X
-  int16_t vy = 3; // initial velocity Y
+  // Small delay to allow system initialization
+  vTaskDelay(pdMS_TO_TICKS(100));
 
   while (1) {
-    // Clear previous frame
+    // Clear display
     OLED_Clear();
 
-    // Draw circle at new position
-    OLED_DrawCircle(x, y, radius, true);
+    // Draw waveform from playback buffer
+    // Display width: 128 pixels, use 126 to leave margins
+    OLED_DrawWaveform(playbackBuffer, BUFFERSIZE, 1, 126);
 
-    // Update screen
+    // Update screen with new content
     OLED_UpdateScreen();
 
-    // Move the circle
-    x += vx;
-    y += vy;
-
-    // Check for collisions with frame borders
-    if ((x - radius <= 0) || (x + radius >= 128)) {
-      vx = -vx;
-      // Clamp position inside the frame to avoid getting stuck
-      if (x - radius <= 0) {
-        x = radius + 1;
-      }
-
-      if (x + radius >= 128) {
-        x = 128 - radius - 1;
-      }
-    }
-
-    if ((y - radius <= 0) || (y + radius >= 64)) {
-      vy = -vy;
-      if (y - radius <= 0) {
-        y = radius + 1;
-      }
-      if (y + radius >= 64) {
-        y = 64 - radius - 1;
-      }
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
+
+  vTaskDelete(NULL);
 }
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
@@ -433,6 +409,10 @@ uint32_t Codec_TIMEOUT_UserCallback(void) {
   return 1;
 }
 
-void vApplicationTickHook(void) { ++tickTime; }
+void vApplicationTickHook(void) {
+  ++tickTime;
+}
 
-void vApplicationIdleHook(void) { ++u64IdleTicksCnt; }
+void vApplicationIdleHook(void) {
+  ++u64IdleTicksCnt;
+}

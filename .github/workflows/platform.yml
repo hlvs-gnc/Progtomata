@@ -56,11 +56,16 @@ jobs:
       - name: Verify formatting
         run: |
           # List all C files and make the job fail if any are wrongly formatted
-          # excluding external libraries
+          # excluding external libraries and config files
           FILES="$(git ls-files \
                 '*.c' '*.h' \
-                ':(exclude)lib/trice/**' ':(exclude)lib/framework_stm/**' ':(exclude)lib/freertos_kernel/**')"
-                clang-format -n --Werror $FILES
+                ':(exclude)lib/audio_codec/**' \
+                ':(exclude)lib/trice/**' \
+                ':(exclude)lib/framework_stm/**' \
+                ':(exclude)lib/freertos_kernel/**' \
+                ':(exclude)lib/Unity/**' \
+                ':(exclude)lib/sound_bank/**')"
+          clang-format -n --Werror $FILES
 
   build:
     name: Build project

@@ -27,54 +27,54 @@
 #include <stm32f4xx_rcc.h>
 
 /* OLED Display Configuration */
-#define OLED_WIDTH 132
-#define OLED_HEIGHT 64
-#define OLED_PAGES 8
+#define OLED_WIDTH    132
+#define OLED_HEIGHT   64
+#define OLED_PAGES    8
 #define OLED_I2C_ADDR 0x78 // 0x3C << 1
 
 /* Error handling */
 typedef enum { OLED_OK = 0, OLED_ERROR, OLED_TIMEOUT, OLED_BUSY } OLED_Status;
 
 /* I2C Configuration */
-#define OLED_I2C I2C1
-#define OLED_I2C_CLK RCC_APB1Periph_I2C1
-#define OLED_I2C_GPIO_CLK RCC_AHB1Periph_GPIOB
-#define OLED_I2C_GPIO GPIOB
-#define OLED_I2C_SCL_PIN GPIO_Pin_8
-#define OLED_I2C_SDA_PIN GPIO_Pin_9
+#define OLED_I2C            I2C1
+#define OLED_I2C_CLK        RCC_APB1Periph_I2C1
+#define OLED_I2C_GPIO_CLK   RCC_AHB1Periph_GPIOB
+#define OLED_I2C_GPIO       GPIOB
+#define OLED_I2C_SCL_PIN    GPIO_Pin_8
+#define OLED_I2C_SDA_PIN    GPIO_Pin_9
 #define OLED_I2C_SCL_SOURCE GPIO_PinSource8
 #define OLED_I2C_SDA_SOURCE GPIO_PinSource9
-#define OLED_I2C_AF GPIO_AF_I2C1
+#define OLED_I2C_AF         GPIO_AF_I2C1
 
 /* OLED Commands */
-#define OLED_CMD_DISPLAY_OFF 0xAE
-#define OLED_CMD_DISPLAY_ON 0xAF
-#define OLED_CMD_SET_DISPLAY_CLOCK 0xD5
-#define OLED_CMD_SET_MULTIPLEX 0xA8
-#define OLED_CMD_SET_DISPLAY_OFFSET 0xD3
-#define OLED_CMD_SET_START_LINE 0x40
-#define OLED_CMD_CHARGE_PUMP 0x8D
-#define OLED_CMD_MEMORY_MODE 0x20
-#define OLED_CMD_SEG_REMAP 0xA0
-#define OLED_CMD_COM_SCAN_DEC 0xC8
-#define OLED_CMD_SET_COM_PINS 0xDA
-#define OLED_CMD_SET_CONTRAST 0x81
-#define OLED_CMD_SET_PRECHARGE 0xD9
-#define OLED_CMD_SET_VCOM_DETECT 0xDB
-#define OLED_CMD_DISPLAY_ALL_ON_RESUME 0xA4
-#define OLED_CMD_NORMAL_DISPLAY 0xA6
-#define OLED_CMD_COLUMN_ADDR 0x21
-#define OLED_CMD_PAGE_ADDR 0x22
-#define OLED_CMD_INVERT_DISPLAY 0xA7
-#define OLED_CMD_ACTIVATE_SCROLL 0x2F
-#define OLED_CMD_DEACTIVATE_SCROLL 0x2E
-#define OLED_CMD_SET_VERTICAL_SCROLL 0xA3
+#define OLED_CMD_DISPLAY_OFF             0xAE
+#define OLED_CMD_DISPLAY_ON              0xAF
+#define OLED_CMD_SET_DISPLAY_CLOCK       0xD5
+#define OLED_CMD_SET_MULTIPLEX           0xA8
+#define OLED_CMD_SET_DISPLAY_OFFSET      0xD3
+#define OLED_CMD_SET_START_LINE          0x40
+#define OLED_CMD_CHARGE_PUMP             0x8D
+#define OLED_CMD_MEMORY_MODE             0x20
+#define OLED_CMD_SEG_REMAP               0xA0
+#define OLED_CMD_COM_SCAN_DEC            0xC8
+#define OLED_CMD_SET_COM_PINS            0xDA
+#define OLED_CMD_SET_CONTRAST            0x81
+#define OLED_CMD_SET_PRECHARGE           0xD9
+#define OLED_CMD_SET_VCOM_DETECT         0xDB
+#define OLED_CMD_DISPLAY_ALL_ON_RESUME   0xA4
+#define OLED_CMD_NORMAL_DISPLAY          0xA6
+#define OLED_CMD_COLUMN_ADDR             0x21
+#define OLED_CMD_PAGE_ADDR               0x22
+#define OLED_CMD_INVERT_DISPLAY          0xA7
+#define OLED_CMD_ACTIVATE_SCROLL         0x2F
+#define OLED_CMD_DEACTIVATE_SCROLL       0x2E
+#define OLED_CMD_SET_VERTICAL_SCROLL     0xA3
 #define OLED_CMD_RIGHT_HORIZONTAL_SCROLL 0x26
-#define OLED_CMD_LEFT_HORIZONTAL_SCROLL 0x27
+#define OLED_CMD_LEFT_HORIZONTAL_SCROLL  0x27
 
 /* Control byte */
-#define OLED_CONTROL_BYTE_CMD_SINGLE 0x80
-#define OLED_CONTROL_BYTE_CMD_STREAM 0x00
+#define OLED_CONTROL_BYTE_CMD_SINGLE  0x80
+#define OLED_CONTROL_BYTE_CMD_STREAM  0x00
 #define OLED_CONTROL_BYTE_DATA_STREAM 0x40
 
 /* Basic 5x7 font */
@@ -172,8 +172,6 @@ static const uint8_t Font5x7[][5] = {
     {0x44, 0x64, 0x54, 0x4C, 0x44}, // z
 };
 
-/* Function Prototypes */
-
 /**
  * @brief Initializes the OLED display.
  *
@@ -227,6 +225,11 @@ void OLED_SetContrast(uint8_t contrast);
 void OLED_InvertDisplay(bool invert);
 
 /**
+ * @brief Updates the OLED display.
+ */
+void OLED_UpdateScreen(void);
+
+/**
  * @brief Draws a string on the OLED display.
  *
  * @param x the x-coordinate of the position
@@ -234,78 +237,6 @@ void OLED_InvertDisplay(bool invert);
  * @param str the string to draw
  */
 void OLED_DrawString(uint8_t x, uint8_t y, const char *str);
-
-/**
- * @brief Draws a rectangle on the OLED display.
- *
- * @param x the x-coordinate of the top-left of the rectangle
- * @param y the y-coordinate of the top-left of the rectangle
- * @param width the width of the rectangle
- * @param height the height of the rectangle
- * @param color the color of the rectangle, true for white, false for black
- */
-void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color);
-
-/**
- * @brief Fills a rectangle on the OLED display.
- *
- * @param x the x-coordinate of the top-left of the rectangle
- * @param y the y-coordinate of the top-left of the rectangle
- * @param width the width of the rectangle
- * @param height the height of the rectangle
- * @param color the color of the rectangle, true for white, false for black
- */
-void OLED_FillRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height,
-                        bool color);
-
-/**
- * @brief Draws a circle on the OLED display.
- *
- * @param x0 the x-coordinate of the center of the circle
- * @param y0 the y-coordinate of the center of the circle
- * @param radius the radius of the circle
- * @param color the color of the circle, true for white, false for black
- */
-void OLED_DrawCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color);
-
-/**
- * @brief Fills a circle on the OLED display.
- *
- * @param x0 the x-coordinate of the center of the circle
- * @param y0 the y-coordinate of the center of the circle
- * @param radius the radius of the circle
- * @param color the color of the circle, true for white, false for black
- */
-void OLED_FillCircle(uint8_t x0, uint8_t y0, uint8_t radius, bool color);
-
-/**
- * @brief Updates the OLED display.
- */
-void OLED_UpdateScreen(void);
-
-/**
- * @brief Scrolls the OLED display to the right.
- *
- * @param start_page the starting page number
- * @param end_page the ending page number
- * @param speed the scroll speed
- */
-void OLED_ScrollRight(uint8_t start_page, uint8_t end_page, uint8_t speed);
-
-/**
- * @brief Scrolls the OLED display to the left.
- *
- * @param start_page the starting page number
- * @param end_page the ending page number
- * @param speed the scroll speed
- */
-void OLED_ScrollLeft(uint8_t start_page, uint8_t end_page, uint8_t speed);
-
-/**
- * @brief Stops scrolling the OLED display.
- */
-void OLED_StopScroll(void);
 
 /**
  * @brief Draws a bitmap on the OLED display.
@@ -318,5 +249,27 @@ void OLED_StopScroll(void);
  */
 void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
                      uint8_t height);
+
+/**
+ * @brief Draws a line on the OLED display.
+ *
+ * @param x0 the x-coordinate of the starting point
+ * @param y0 the y-coordinate of the starting point
+ * @param x1 the x-coordinate of the ending point
+ * @param y1 the y-coordinate of the ending point
+ * @param color the color of the line, true for white, false for black
+ */
+void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color);
+
+/**
+ * @brief Draws a waveform visualization on the OLED display.
+ *
+ * @param audioBuffer pointer to the audio buffer to visualize
+ * @param bufferSize size of the audio buffer
+ * @param startX starting x-coordinate for the waveform
+ * @param width width of the waveform display area
+ */
+void OLED_DrawWaveform(const int16_t *audioBuffer, uint16_t bufferSize,
+                       uint8_t startX, uint8_t width);
 
 #endif // OLED_H_
