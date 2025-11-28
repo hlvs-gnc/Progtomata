@@ -25,7 +25,6 @@
 #include <kick_aether.h>
 #include <openhat_22050_mono.h>
 
-
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (2048)
 
@@ -78,8 +77,20 @@ volatile uint64_t tickTime = 0;
 /// @brief Interval between BPM ticks in ms
 static uint32_t bpmInterval = 0;
 
+/// @brief Currently selected sample button index (0 to NUM_SAMPLES-1)
+static uint16_t sampleButton = 0;
+
 /// @brief Temporary storage for samples per step calculation
 uint32_t stepSamples = 0;
+
+/// @brief Current step index (volatile - accessed from interrupt)
+static volatile uint8_t playHeadStep = 0;
+
+/// @brief Grid column currently playing (volatile - modified in interrupt)
+static volatile uint8_t stepIndex = 0;
+
+/// @brief Samples already rendered in current beat-step
+static uint32_t stepPos = 0;
 
 /// @brief Remaining samples left to render in current step
 uint32_t leftInStep = 0;
@@ -89,18 +100,6 @@ uint32_t chunk = 0;
 
 /// @brief Number of samples remaining to render in current buffer half
 uint32_t toRender = 0;
-
-/// @brief Current step index (volatile - accessed from interrupt)
-static volatile uint8_t playHeadStep = 0;
-
-/// @brief Samples already rendered in current beat-step
-static uint32_t stepPos = 0;
-
-/// @brief Grid column currently playing (volatile - modified in interrupt)
-static volatile uint8_t stepIndex = 0;
-
-/// @brief Currently selected sample button index (0 to NUM_SAMPLES-1)
-static uint16_t sampleButton = 0;
 
 /// @brief Array of audio sample data pointers
 static const int16_t *const sampleData[NUM_SAMPLES] = {kick_aether_mono,
