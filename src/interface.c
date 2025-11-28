@@ -18,8 +18,7 @@
 Initialise all the GPIO pins being used
 They connect to the encoders (buttons) and shift registers (LEDs)
 */
-void interface_init()
-{
+void interface_init() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
@@ -120,8 +119,7 @@ uint8_t interface_readFxButton() {
 /**
 Determine which button from the 4-step grid has been pressed
 */
-uint8_t interface_readButtonStep()
-{
+uint8_t interface_readButtonStep() {
   uint8_t button_code = 0;
 
   if (GPIO_ReadInputDataBit(Encoder1_Port, Encoder1_Q0) != 0x00) {

@@ -14,8 +14,7 @@
 
 #include <progtomata_system.h>
 
-void systemClock_config(void)
-{
+void systemClock_config(void) {
   // Enable the power interface clock and configure voltage regulator
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   PWR_MainRegulatorModeConfig(PWR_Regulator_Voltage_Scale1);
@@ -61,8 +60,7 @@ void systemClock_config(void)
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
-void userButton_config(void)
-{
+void userButton_config(void) {
   // Enable clock for GPIOD
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
@@ -88,8 +86,7 @@ void userButton_config(void)
   GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-void boardLeds_config(void)
-{
+void boardLeds_config(void) {
   // Initialize board LEDs
   STM_EVAL_LEDInit(LED3);
   STM_EVAL_LEDInit(LED4);

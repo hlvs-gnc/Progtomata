@@ -5,7 +5,7 @@ ColumnLimit: 80
 AlignConsecutiveMacros: true
 AlignConsecutiveDeclarations: false
 AllowShortFunctionsOnASingleLine: Empty
-BreakBeforeBraces: Linux
+BreakBeforeBraces: Attach
 IndentCaseLabels: false
 PointerAlignment: Right
 SortIncludes: false

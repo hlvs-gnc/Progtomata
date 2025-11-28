@@ -297,8 +297,7 @@ uint32_t AUDIO_MAL_DMA_FLAG_DME = AUDIO_I2S_DMA_FLAG_DME;
  * @param  Interface: AUDIO_INTERFACE_I2S or AUDIO_INTERFACE_DAC
  * @retval None
  */
-void EVAL_AUDIO_SetAudioInterface(uint32_t Interface)
-{
+void EVAL_AUDIO_SetAudioInterface(uint32_t Interface) {
   CurrAudioInterface = Interface;
 
   if (CurrAudioInterface == AUDIO_INTERFACE_I2S) {
@@ -337,8 +336,7 @@ void EVAL_AUDIO_SetAudioInterface(uint32_t Interface)
  * @retval 0 if correct communication, else wrong communication
  */
 uint32_t EVAL_AUDIO_Init(uint16_t OutputDevice, uint8_t Volume,
-                         uint32_t AudioFreq)
-{
+                         uint32_t AudioFreq) {
   /* Perform low layer Codec initialization */
   if (Codec_Init(OutputDevice, VOLUME_CONVERT(Volume), AudioFreq) != 0) {
     return 1;
@@ -359,8 +357,7 @@ uint32_t EVAL_AUDIO_Init(uint16_t OutputDevice, uint8_t Volume,
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_DeInit(void)
-{
+uint32_t EVAL_AUDIO_DeInit(void) {
   /* DeInitialize the Media layer */
   Audio_MAL_DeInit();
 
@@ -376,8 +373,7 @@ uint32_t EVAL_AUDIO_DeInit(void)
  * @param  Size: Number of audio data BYTES.
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size)
-{
+uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size) {
   /* Set the total number of data to be played (count in half-word) */
   AudioTotalSize = Size;
   CurrentPos = pBuffer;
@@ -407,8 +403,7 @@ uint32_t EVAL_AUDIO_Play(uint16_t *pBuffer, uint32_t Size)
  * different from 0) to resume.
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_PauseResume(uint32_t Cmd)
-{
+uint32_t EVAL_AUDIO_PauseResume(uint32_t Cmd) {
   /* Call the Audio Codec Pause/Resume function */
   if (Codec_PauseResume(Cmd) != 0) {
     return 1;
@@ -431,8 +426,7 @@ uint32_t EVAL_AUDIO_PauseResume(uint32_t Cmd)
  *                            Then need to reconfigure the Codec after power on.
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_Stop(uint32_t Option)
-{
+uint32_t EVAL_AUDIO_Stop(uint32_t Option) {
   /* Call Audio Codec Stop function */
   if (Codec_Stop(Option) != 0) {
     return 1;
@@ -454,8 +448,7 @@ uint32_t EVAL_AUDIO_Stop(uint32_t Option)
  *         Mute and 100 for Max volume level).
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_VolumeCtl(uint8_t Volume)
-{
+uint32_t EVAL_AUDIO_VolumeCtl(uint8_t Volume) {
   /* Call the codec volume control function with converted volume value */
   return (Codec_VolumeCtrl(VOLUME_CONVERT(Volume)));
 }
@@ -466,8 +459,7 @@ uint32_t EVAL_AUDIO_VolumeCtl(uint8_t Volume)
  *         unmute the codec and restore previous volume level.
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t EVAL_AUDIO_Mute(uint32_t Cmd)
-{
+uint32_t EVAL_AUDIO_Mute(uint32_t Cmd) {
   /* Call the Codec Mute function */
   return (Codec_Mute(Cmd));
 }
@@ -477,8 +469,7 @@ uint32_t EVAL_AUDIO_Mute(uint32_t Cmd)
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-static void Audio_MAL_IRQHandler(void)
-{
+static void Audio_MAL_IRQHandler(void) {
 
 #ifdef AUDIO_MAL_DMA_IT_TC_EN
   /* Transfer complete interrupt */
@@ -594,8 +585,7 @@ static void Audio_MAL_IRQHandler(void)
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-void Audio_MAL_I2S_IRQHandler(void)
-{
+void Audio_MAL_I2S_IRQHandler(void) {
   Audio_MAL_IRQHandler();
 }
 
@@ -604,8 +594,7 @@ void Audio_MAL_I2S_IRQHandler(void)
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-void Audio_MAL_DAC_IRQHandler(void)
-{
+void Audio_MAL_DAC_IRQHandler(void) {
   Audio_MAL_IRQHandler();
 }
 
@@ -614,8 +603,7 @@ void Audio_MAL_DAC_IRQHandler(void)
  * @param  None
  * @retval None
  */
-void Audio_I2S_IRQHandler(void)
-{
+void Audio_I2S_IRQHandler(void) {
   /* Check on the I2S TXE flag */
   if (SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_TXE) != RESET) {
     if (CurrAudioInterface == AUDIO_INTERFACE_DAC) {
@@ -641,8 +629,7 @@ void Audio_I2S_IRQHandler(void)
  * @retval 0 if correct communication, else wrong communication
  */
 static uint32_t Codec_Init(__attribute__((unused)) uint16_t OutputDevice,
-                           uint8_t Volume, uint32_t AudioFreq)
-{
+                           uint8_t Volume, uint32_t AudioFreq) {
   uint32_t counter = 0;
 
   /* Configure the Codec related IOs */
@@ -721,8 +708,7 @@ static uint32_t Codec_Init(__attribute__((unused)) uint16_t OutputDevice,
  * @param  None
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_DeInit(void)
-{
+static uint32_t Codec_DeInit(void) {
   uint32_t counter = 0;
 
   /* Reset the Codec Registers */
@@ -766,8 +752,7 @@ static uint32_t Codec_Play(void) {
  * different from 0) to resume.
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_PauseResume(uint32_t Cmd)
-{
+static uint32_t Codec_PauseResume(uint32_t Cmd) {
   uint32_t counter = 0;
 
   /* Pause the audio file playing */
@@ -802,8 +787,7 @@ static uint32_t Codec_PauseResume(uint32_t Cmd)
  * re-Initialize the codec in order to play again the audio stream).
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_Stop(uint32_t CodecPdwnMode)
-{
+static uint32_t Codec_Stop(uint32_t CodecPdwnMode) {
   uint32_t counter = 0;
 
   /* Mute the output first */
@@ -833,8 +817,7 @@ static uint32_t Codec_Stop(uint32_t CodecPdwnMode)
  *         description for more details).
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_VolumeCtrl(uint8_t Volume)
-{
+static uint32_t Codec_VolumeCtrl(uint8_t Volume) {
   uint32_t counter = 0;
 
   if (Volume > 0xE6) {
@@ -856,8 +839,7 @@ static uint32_t Codec_VolumeCtrl(uint8_t Volume)
  * the mute mode.
  * @retval 0 if correct communication, else wrong communication
  */
-static uint32_t Codec_Mute(uint32_t Cmd)
-{
+static uint32_t Codec_Mute(uint32_t Cmd) {
   uint32_t counter = 0;
 
   /* Set the Mute mode */
@@ -879,8 +861,7 @@ static uint32_t Codec_Mute(uint32_t Cmd)
  * @param  None
  * @retval None
  */
-static void Codec_Reset(void)
-{
+static void Codec_Reset(void) {
   /* Power Down the codec */
   GPIO_WriteBit(AUDIO_RESET_GPIO, AUDIO_RESET_PIN, Bit_RESET);
 
@@ -899,8 +880,8 @@ static void Codec_Reset(void)
   register.
   * @retval 0 if correct communication, else wrong communication
   */
-static uint32_t Codec_WriteRegister(uint8_t RegisterAddr, uint8_t RegisterValue)
-{
+static uint32_t Codec_WriteRegister(uint8_t RegisterAddr,
+                                    uint8_t RegisterValue) {
   uint32_t result = 0;
 
   /*!< While the bus is busy */
@@ -970,8 +951,7 @@ static uint32_t Codec_WriteRegister(uint8_t RegisterAddr, uint8_t RegisterValue)
  * @retval Value of the register to be read or dummy value if the communication
  *         fails.
  */
-static uint32_t Codec_ReadRegister(uint8_t RegisterAddr)
-{
+static uint32_t Codec_ReadRegister(uint8_t RegisterAddr) {
   uint32_t result = 0;
 
   /*!< While the bus is busy */
@@ -1082,8 +1062,7 @@ static uint32_t Codec_ReadRegister(uint8_t RegisterAddr)
  * @param  None
  * @retval None
  */
-static void Codec_CtrlInterface_Init(void)
-{
+static void Codec_CtrlInterface_Init(void) {
   I2C_InitTypeDef I2C_InitStructure;
 
   /* Enable the CODEC_I2C peripheral clock */
@@ -1109,8 +1088,7 @@ static void Codec_CtrlInterface_Init(void)
  * @param  None
  * @retval None
  */
-static void Codec_CtrlInterface_DeInit(void)
-{
+static void Codec_CtrlInterface_DeInit(void) {
   /* Disable the I2C peripheral */ /* This step is not done here because
      the I2C interface can be used by other modules */
   /* I2C_DeInit(CODEC_I2C); */
@@ -1124,8 +1102,7 @@ static void Codec_CtrlInterface_DeInit(void)
  * @param  AudioFreq: Audio frequency to be configured for the I2S peripheral.
  * @retval None
  */
-static void Codec_AudioInterface_Init(uint32_t AudioFreq)
-{
+static void Codec_AudioInterface_Init(uint32_t AudioFreq) {
   I2S_InitTypeDef I2S_InitStructure;
   DAC_InitTypeDef DAC_InitStructure;
 
@@ -1183,8 +1160,7 @@ static void Codec_AudioInterface_Init(uint32_t AudioFreq)
  * @param  None
  * @retval None
  */
-static void Codec_AudioInterface_DeInit(void)
-{
+static void Codec_AudioInterface_DeInit(void) {
   /* Disable the CODEC_I2S peripheral (in case it hasn't already been disabled)
    */
   I2S_Cmd(CODEC_I2S, DISABLE);
@@ -1202,8 +1178,7 @@ static void Codec_AudioInterface_DeInit(void)
  * @param  None
  * @retval None
  */
-static void Codec_GPIO_Init(void)
-{
+static void Codec_GPIO_Init(void) {
   GPIO_InitTypeDef GPIO_InitStructure;
 
   /* Enable Reset GPIO Clock */
@@ -1280,8 +1255,7 @@ static void Codec_GPIO_Init(void)
  * @param  None
  * @retval None
  */
-static void Codec_GPIO_DeInit(void)
-{
+static void Codec_GPIO_DeInit(void) {
   GPIO_InitTypeDef GPIO_InitStructure;
 
   /* Deinitialize all the GPIOs used by the driver */
@@ -1314,8 +1288,7 @@ static void Codec_GPIO_DeInit(void)
  * @param  nCount: specifies the delay time length.
  * @retval None
  */
-static void Delay(__IO uint32_t nCount)
-{
+static void Delay(__IO uint32_t nCount) {
   for (; nCount != 0; nCount--)
     ;
 }
@@ -1326,8 +1299,7 @@ static void Delay(__IO uint32_t nCount)
  * @param  None
  * @retval None
  */
-uint32_t Codec_TIMEOUT_UserCallback(void)
-{
+uint32_t Codec_TIMEOUT_UserCallback(void) {
   /* Block communication and all processes */
   while (1) {
   }
@@ -1345,8 +1317,7 @@ uint32_t Codec_TIMEOUT_UserCallback(void)
  * @param  None
  * @retval None
  */
-static void Audio_MAL_Init(void)
-{
+static void Audio_MAL_Init(void) {
 #ifdef I2S_INTERRUPT
   NVIC_InitTypeDef NVIC_InitStructure;
 
@@ -1522,8 +1493,7 @@ static void Audio_MAL_Init(void)
  * @param  None
  * @retval None
  */
-static void Audio_MAL_DeInit(void)
-{
+static void Audio_MAL_DeInit(void) {
 #if defined(AUDIO_MAL_DMA_IT_TC_EN) || defined(AUDIO_MAL_DMA_IT_HT_EN) ||      \
     defined(AUDIO_MAL_DMA_IT_TE_EN)
   NVIC_InitTypeDef NVIC_InitStructure;
@@ -1552,8 +1522,7 @@ static void Audio_MAL_DeInit(void)
  * @param  None
  * @retval None
  */
-void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
-{
+void Audio_MAL_Play(uint32_t Addr, uint32_t Size) {
   if (CurrAudioInterface == AUDIO_INTERFACE_I2S) {
     /* Configure the buffer address and size */
     DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)Addr;
@@ -1579,8 +1548,7 @@ void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
  * @param  Addr: Address from/at which the audio stream should resume/pause.
  * @retval None
  */
-static void Audio_MAL_PauseResume(uint32_t Cmd, uint32_t Addr)
-{
+static void Audio_MAL_PauseResume(uint32_t Cmd, uint32_t Addr) {
   /* Pause the audio file playing */
   if (Cmd == AUDIO_PAUSE) {
     /* Disable the I2S DMA request */
@@ -1616,8 +1584,7 @@ static void Audio_MAL_PauseResume(uint32_t Cmd, uint32_t Addr)
  * @param  None
  * @retval None
  */
-static void Audio_MAL_Stop(void)
-{
+static void Audio_MAL_Stop(void) {
   /* Stop the Transfer on the I2S side: Stop and disable the DMA stream */
   DMA_Cmd(AUDIO_MAL_DMA_STREAM, DISABLE);
 
@@ -1639,8 +1606,7 @@ static void Audio_MAL_Stop(void)
  * @param  None
  * @retval None
  */
-void DAC_Config(void)
-{
+void DAC_Config(void) {
   DAC_InitTypeDef DAC_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure;
 

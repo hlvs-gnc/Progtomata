@@ -51,8 +51,7 @@
 void vApplicationTickHook(void) {}
 #endif
 
-void vApplicationMallocFailedHook(void)
-{
+void vApplicationMallocFailedHook(void) {
   taskDISABLE_INTERRUPTS();
   for (;;)
     ;
@@ -62,8 +61,7 @@ void vApplicationMallocFailedHook(void)
 void vApplicationIdleHook(void) {}
 #endif
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
-{
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
   (void)xTask;
   (void)pcTaskName;
   taskDISABLE_INTERRUPTS();
@@ -76,8 +74,7 @@ StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE] CCM_RAM;
 
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
                                    StackType_t **ppxIdleTaskStackBuffer,
-                                   uint32_t *pulIdleTaskStackSize)
-{
+                                   uint32_t *pulIdleTaskStackSize) {
   *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
   *ppxIdleTaskStackBuffer = uxIdleTaskStack;
   *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
@@ -88,8 +85,7 @@ StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH] CCM_RAM;
 
 void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
                                     StackType_t **ppxTimerTaskStackBuffer,
-                                    uint32_t *pulTimerTaskStackSize)
-{
+                                    uint32_t *pulTimerTaskStackSize) {
   *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
   *ppxTimerTaskStackBuffer = uxTimerTaskStack;
   *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;

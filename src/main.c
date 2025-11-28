@@ -40,8 +40,7 @@
 // Information logging
 #include <trace.h>
 
-static void sequencer_setBpm(uint16_t bpm)
-{
+static void sequencer_setBpm(uint16_t bpm) {
   if (bpm < MIN_BPM) {
     bpm = MIN_BPM;
   }
@@ -54,8 +53,7 @@ static void sequencer_setBpm(uint16_t bpm)
   bpmInterval = 60000 / currBpm;
 }
 
-static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs)
-{
+static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
   // Cache stepIndex to avoid race condition during rendering
   uint8_t currentStepIdx = stepIndex;
 
@@ -89,8 +87,7 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs)
   }
 }
 
-static void renderHalf(uint32_t base)
-{
+static void renderHalf(uint32_t base) {
   toRender = BUFFERSIZE / 2;
 
   while (toRender) {
@@ -110,8 +107,7 @@ static void renderHalf(uint32_t base)
   }
 }
 
-int main(void)
-{
+int main(void) {
   SystemInit();
   systemClock_config();
 
@@ -146,6 +142,9 @@ int main(void)
 
   // Initialize trace
   TraceInit();
+
+  // Set master tempo
+  sequencer_setBpm(120);
 
   // Create the semaphore before any button processing
   xButtonSemaphoreHandle =
@@ -204,8 +203,7 @@ int main(void)
   }
 }
 
-void vButtonSampleTask(void *p)
-{
+void vButtonSampleTask(void *p) {
   uint8_t prevStatePD1 = Bit_RESET;
   uint8_t prevStatePD2 = Bit_RESET;
 
@@ -260,8 +258,7 @@ void vButtonSampleTask(void *p)
   vTaskDelete(NULL);
 }
 
-void vButtonStepTask(void *pvParameters)
-{
+void vButtonStepTask(void *pvParameters) {
   static uint16_t stepButton = 0;
   static uint8_t wasPressed = 0;
 
@@ -301,8 +298,7 @@ void vButtonStepTask(void *pvParameters)
   }
 }
 
-void vBlinkTask(void *p)
-{
+void vBlinkTask(void *p) {
   const Led_TypeDef leds[NUM_STEPS] = {LED3, LED4, LED6, LED5};
   uint8_t lastStepIndex = 0xFF; // Invalid initial value to force first update
 
@@ -346,8 +342,7 @@ void vBlinkTask(void *p)
   vTaskDelete(NULL);
 }
 
-void vWaveformTask(void *pvParameters)
-{
+void vWaveformTask(void *pvParameters) {
   (void)pvParameters;
 
   // Small delay to allow system initialization
@@ -370,16 +365,14 @@ void vWaveformTask(void *pvParameters)
   vTaskDelete(NULL);
 }
 
-uint16_t EVAL_AUDIO_GetSampleCallBack(void)
-{
+uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 #ifdef LOG_TRICE
   TRice(iD(6204), "GetSample\n");
 #endif
   return 1;
 }
 
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
-{
+void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   // Render audio for first half of buffer
   renderHalf(0);
 
@@ -391,8 +384,7 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size)
 #endif
 }
 
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
-{
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
   // Render audio for second half of buffer
   renderHalf(BUFFERSIZE / 2);
 
@@ -404,27 +396,23 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
 #endif
 }
 
-void EVAL_AUDIO_Error_CallBack(void *pData, int32_t errorType)
-{
+void EVAL_AUDIO_Error_CallBack(void *pData, int32_t errorType) {
 #ifdef LOG_TRICE
   TRice(iD(5387), "error: Error. pData: %x type: %x \n", pData, errorType);
 #endif
 }
 
-uint32_t Codec_TIMEOUT_UserCallback(void)
-{
+uint32_t Codec_TIMEOUT_UserCallback(void) {
 #ifdef LOG_TRICE
   TRice(iD(1479), "Codec_TIMEOUT_User\n");
 #endif
   return 1;
 }
 
-void vApplicationTickHook(void)
-{
+void vApplicationTickHook(void) {
   ++tickTime;
 }
 
-void vApplicationIdleHook(void)
-{
+void vApplicationIdleHook(void) {
   ++u64IdleTicksCnt;
 }

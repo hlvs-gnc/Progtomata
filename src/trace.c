@@ -38,8 +38,7 @@ StaticTask_t traceTaskBuffer CCM_RAM;
  */
 static bool g_isTraceInitialized = false;
 
-static void DWT_Init(void)
-{
+static void DWT_Init(void) {
   // Enable trace and debug block
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -55,8 +54,7 @@ static void DWT_Init(void)
  *
  * @param pvParameters Not used.
  */
-static void vTriceTask(void *pvParameters)
-{
+static void vTriceTask(void *pvParameters) {
   (void)pvParameters; // Unused parameter
 
   for (;;) {
@@ -68,8 +66,7 @@ static void vTriceTask(void *pvParameters)
   }
 }
 
-void TraceInit(void)
-{
+void TraceInit(void) {
   DWT_Init();
 
   if (!g_isTraceInitialized) {
