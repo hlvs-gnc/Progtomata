@@ -22,8 +22,9 @@
 
 // Mono Audio samples
 #include <kick_22050_mono.h>
-#include <openhat_22050_mono.h>
 #include <kick_aether.h>
+#include <openhat_22050_mono.h>
+
 
 /// @brief Size of the audio playback buffer in bytes
 #define BUFFERSIZE (2048)
@@ -102,7 +103,8 @@ static volatile uint8_t stepIndex = 0;
 static uint16_t sampleButton = 0;
 
 /// @brief Array of audio sample data pointers
-static const int16_t *const sampleData[NUM_SAMPLES] = {kick_aether_mono, openhat_mono};
+static const int16_t *const sampleData[NUM_SAMPLES] = {kick_aether_mono,
+                                                       openhat_mono};
 
 /// @brief Array of sample lengths in bytes
 static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE3, SOUNDSIZE2};

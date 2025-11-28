@@ -1375,8 +1375,7 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
     /* Enable transfer and direct mode error interrupts */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME,
-                 ENABLE);
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME, ENABLE);
 
     if (DMA_InitStructure.DMA_FIFOMode == DMA_FIFOMode_Enable) {
       DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_FE, ENABLE);
@@ -1439,8 +1438,7 @@ static void Audio_MAL_Init(void) {
 #endif /* AUDIO_MAL_DMA_IT_HT_EN */
 #ifdef AUDIO_MAL_DMA_IT_TE_EN
     /* Enable transfer and direct mode error interrupts */
-    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME,
-                 ENABLE);
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TE | DMA_IT_DME, ENABLE);
 
     if (DMA_InitStructure.DMA_FIFOMode == DMA_FIFOMode_Enable) {
       DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_FE, ENABLE);

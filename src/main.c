@@ -88,14 +88,14 @@ static void mixSegment(uint32_t dst, uint32_t cnt, uint32_t ofs) {
 }
 
 static void renderHalf(uint32_t base) {
-  toRender = BUFFERSIZE/2;
+  toRender = BUFFERSIZE / 2;
 
   while (toRender) {
     stepSamples = nbrSamplesStep;
     leftInStep = stepSamples - stepPos;
     chunk = (leftInStep < toRender) ? leftInStep : toRender;
 
-    mixSegment(base + (BUFFERSIZE/2 - toRender), chunk, stepPos);
+    mixSegment(base + (BUFFERSIZE / 2 - toRender), chunk, stepPos);
 
     stepPos += chunk;
     toRender -= chunk;
@@ -162,7 +162,7 @@ int main(void) {
 
 #ifdef LOG_TRICE
   TRice(iD(3720), "msg: Audio setup complete\n");
-  
+
   // Set master tempo
   sequencer_setBpm(130);
 #endif
@@ -184,7 +184,7 @@ int main(void) {
 
   blinkTaskHandle =
       xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+                        BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
 
   waveformTaskHandle = xTaskCreateStatic(
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,

@@ -17,7 +17,7 @@
 #include <oled.h>
 
 // Private variables
-static uint8_t OLED_Buffer[OLED_WIDTH * OLED_HEIGHT/8];
+static uint8_t OLED_Buffer[OLED_WIDTH * OLED_HEIGHT / 8];
 static uint32_t OLED_Timeout = 10000;
 
 // Function prototypes

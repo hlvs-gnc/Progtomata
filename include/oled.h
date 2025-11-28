@@ -33,12 +33,7 @@
 #define OLED_I2C_ADDR 0x78 // 0x3C << 1
 
 /* Error handling */
-typedef enum {
-  OLED_OK = 0,
-  OLED_ERROR,
-  OLED_TIMEOUT,
-  OLED_BUSY
-} OLED_Status;
+typedef enum { OLED_OK = 0, OLED_ERROR, OLED_TIMEOUT, OLED_BUSY } OLED_Status;
 
 /* I2C Configuration */
 #define OLED_I2C I2C1
