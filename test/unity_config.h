@@ -11,11 +11,8 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef UNITY_CONFIG_H
+#define UNITY_CONFIG_H
 
 #include <stdio.h>
 
@@ -58,6 +55,4 @@ void unityOutputComplete();
 #define UNITY_OUTPUT_FLUSH()    unityOutputFlush()
 #define UNITY_OUTPUT_COMPLETE() unityOutputComplete()
 
-#ifdef __cplusplus
-}
 #endif

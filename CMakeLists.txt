@@ -1,4 +1,16 @@
 cmake_minimum_required(VERSION 3.22)
+
+# Option to build embedded system target (default ON)
+option(BUILD_EMBEDDED "Build for embedded ARM target" ON)
+
+# Set toolchain file based on target
+if(BUILD_EMBEDDED)
+  set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain-arm-none-eabi.cmake)
+else()
+  # For host system tests, use native toolchain
+  set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain-host.cmake)
+endif()
+
 project(progtomata LANGUAGES C ASM)
 
 # Project-wide options
@@ -7,12 +19,21 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Option to build embedded system target
-set(BUILD_EMBEDDED 1)
-
 # Global include directories
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/config)
+
+# Set compiler flags based on target
+if(BUILD_EMBEDDED)
+  # Embedded target flags are set in the ARM toolchain file
+else()
+  # Host system flags
+  if(MSVC)
+    add_compile_options(/Od /Zi)
+  else()
+    add_compile_options(-g -O0)
+  endif()
+endif()
 
 # Sub-directories that build libraries and object code
 add_subdirectory(lib)

@@ -1,90 +1,93 @@
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(platform_defs INTERFACE)
-target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
-target_compile_definitions(platform_defs INTERFACE BUILD_EMBEDDED=1 HSE_VALUE=8000000)
+# Only build embedded libraries when targeting embedded systems
+if(BUILD_EMBEDDED)
+    add_library(platform_defs INTERFACE)
+    target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
+    target_compile_definitions(platform_defs INTERFACE BUILD_EMBEDDED=1 HSE_VALUE=8000000)
 
-# Sound bank content
-include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
+    # Sound bank content
+    include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
 
-# FreeRTOS Kernel
-set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
-set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
-set(FREERTOS_PORT "GCC_ARM_CM4F")
+    # FreeRTOS Kernel
+    set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
+    set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
+    set(FREERTOS_PORT "GCC_ARM_CM4F")
 
-set(FREERTOS_SRC
-    ${FREERTOS_DIR}/event_groups.c
-    ${FREERTOS_DIR}/croutine.c
-    ${FREERTOS_DIR}/list.c
-    ${FREERTOS_DIR}/queue.c
-    ${FREERTOS_DIR}/tasks.c
-    ${FREERTOS_DIR}/timers.c
-    ${FREERTOS_PORT_DIR}/port.c)
+    set(FREERTOS_SRC
+        ${FREERTOS_DIR}/event_groups.c
+        ${FREERTOS_DIR}/croutine.c
+        ${FREERTOS_DIR}/list.c
+        ${FREERTOS_DIR}/queue.c
+        ${FREERTOS_DIR}/tasks.c
+        ${FREERTOS_DIR}/timers.c
+        ${FREERTOS_PORT_DIR}/port.c)
 
-add_library(kernel_freertos STATIC ${FREERTOS_SRC})
+    add_library(kernel_freertos STATIC ${FREERTOS_SRC})
 
-target_include_directories(kernel_freertos PUBLIC
-    ${FREERTOS_DIR}/include
-    ${FREERTOS_PORT_DIR})
+    target_include_directories(kernel_freertos PUBLIC
+        ${FREERTOS_DIR}/include
+        ${FREERTOS_PORT_DIR})
 
-target_link_libraries(kernel_freertos PUBLIC platform_defs)
+    target_link_libraries(kernel_freertos PUBLIC platform_defs)
 
-# Standard Peripheral Library
-set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
-file(GLOB SPL_SRC ${SPL_DIR}/src/*.c)
+    # Standard Peripheral Library
+    set(SPL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/spl/stm32f4)
+    file(GLOB SPL_SRC ${SPL_DIR}/src/*.c)
 
-# CMSIS
-set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/cmsis)
-file(GLOB CMSIS_SRC ${CMSIS_DIR}/stm32f4/*.c)
+    # CMSIS
+    set(CMSIS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework_stm/cmsis)
+    file(GLOB CMSIS_SRC ${CMSIS_DIR}/stm32f4/*.c)
 
-include_directories(${SPL_DIR}/inc
-                    ${CMSIS_DIR}/stm32f4
-                    ${CMSIS_DIR}/cores/stm32)
+    include_directories(${SPL_DIR}/inc
+                        ${CMSIS_DIR}/stm32f4
+                        ${CMSIS_DIR}/cores/stm32)
 
-add_library(stm32_framework STATIC ${SPL_SRC} ${CMSIS_SRC})
+    add_library(stm32_framework STATIC ${SPL_SRC} ${CMSIS_SRC})
 
-target_include_directories(stm32_framework PUBLIC
-    ${SPL_DIR}/inc
-    ${CMSIS_DIR}/stm32f4
-    ${CMSIS_DIR}/cores/stm32)
+    target_include_directories(stm32_framework PUBLIC
+        ${SPL_DIR}/inc
+        ${CMSIS_DIR}/stm32f4
+        ${CMSIS_DIR}/cores/stm32)
 
-target_link_libraries(stm32_framework PUBLIC platform_defs)
+    target_link_libraries(stm32_framework PUBLIC platform_defs)
 
-# Audio Codec
-set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
-file(GLOB AUDIO_CODEC_SRC ${AUDIO_CODEC_DIR}/*.c)
+    # Audio Codec
+    set(AUDIO_CODEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/audio_codec)
+    file(GLOB AUDIO_CODEC_SRC ${AUDIO_CODEC_DIR}/*.c)
 
-include_directories(${AUDIO_CODEC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
+    include_directories(${AUDIO_CODEC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
 
-add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
+    add_library(audio_codec STATIC ${AUDIO_CODEC_SRC})
 
-target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
+    target_include_directories(audio_codec PUBLIC ${AUDIO_CODEC_DIR})
 
-target_link_libraries(audio_codec PUBLIC)
+    target_link_libraries(audio_codec PUBLIC)
 
-# UART Driver
-set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
-file(GLOB UART_SRC ${UART_DIR}/*.c)
+    # UART Driver
+    set(UART_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers/UART)
+    file(GLOB UART_SRC ${UART_DIR}/*.c)
 
-include_directories(${UART_DIR})
+    include_directories(${UART_DIR})
 
-add_library(uart_driver STATIC ${UART_SRC})
+    add_library(uart_driver STATIC ${UART_SRC})
 
-target_include_directories(uart_driver PUBLIC ${UART_DIR})
+    target_include_directories(uart_driver PUBLIC ${UART_DIR})
 
-target_link_libraries(uart_driver PUBLIC)
+    target_link_libraries(uart_driver PUBLIC)
 
-# Trice Logger
-set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
-file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)
+    # Trice Logger
+    set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
+    file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)
 
-include_directories(${TRICE_DIR})
+    include_directories(${TRICE_DIR})
 
-add_library(trice STATIC ${TRICE_SRC})
+    add_library(trice STATIC ${TRICE_SRC})
 
-target_include_directories(trice PUBLIC ${TRICE_DIR})
+    target_include_directories(trice PUBLIC ${TRICE_DIR})
 
-target_link_libraries(trice PUBLIC core)
+    target_link_libraries(trice PUBLIC core)
+endif()
 
 # Unity framework
 set(UNITY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Unity/src
@@ -95,4 +98,8 @@ file(GLOB UNITY_SRC ${UNITY_DIR}/unity.c
 
 add_library(unity STATIC ${UNITY_SRC})
 
-target_include_directories(unity PUBLIC ${UNITY_DIR})
+target_include_directories(unity PUBLIC 
+    ${UNITY_DIR}
+    ${PROJECT_SOURCE_DIR}/test)
+
+target_compile_definitions(unity PUBLIC UNITY_INCLUDE_CONFIG_H)
