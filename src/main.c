@@ -184,9 +184,9 @@ int main(void) {
       vButtonStepTask, "StepButtonTask", STEP_TASK_STACK_SIZE, NULL,
       STEP_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
-  blinkTaskHandle =
-      xTaskCreateStatic(vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-                        BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+  blinkTaskHandle = xTaskCreateStatic(
+      vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
+      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
 
   waveformTaskHandle = xTaskCreateStatic(
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
