@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
+
+# Set toolchain file
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain-arm-none-eabi.cmake)
+
 project(progtomata LANGUAGES C ASM)
 
 # Project-wide options
