@@ -15,7 +15,6 @@
  */
 
 // System libraries
-#include <math.h>
 #include <stdbool.h>
 
 // System definition/ configuration
