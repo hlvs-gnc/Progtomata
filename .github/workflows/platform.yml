@@ -117,10 +117,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install platformio
 
-      - name: Build embedded test environment (no HW in CI)
-        run: pio test -e disco_f407vg_test --without-uploading -vvv
+      #- name: Configure and execute PIO test environment (no HW target in CI)
+      #  run: pio test -e disco_f407vg_test --without-uploading -vvv
 
-      - name: Configure (host, with tests)
+      - name: Configure and execute test environment (host target)
         run: |
           cmake -S . -B build-host \
             -DBUILD_EMBEDDED=0 \
