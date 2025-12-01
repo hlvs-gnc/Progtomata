@@ -13,6 +13,13 @@ target_include_directories(mocks PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/config)
 
+# Set BUILD_EMBEDDED definition for mocks
+if(BUILD_EMBEDDED)
+  target_compile_definitions(mocks PUBLIC BUILD_EMBEDDED=1)
+else()
+  target_compile_definitions(mocks PUBLIC BUILD_EMBEDDED=0)
+endif()
+
 # Enable CTest framework
 enable_testing()
 
@@ -29,6 +36,13 @@ target_include_directories(UnitTest_main PRIVATE
   ${TEST_DIR}
   ${PROJECT_ROOT}/include
   ${PROJECT_ROOT}/config)
+
+# Set BUILD_EMBEDDED definition based on the option
+if(BUILD_EMBEDDED)
+  target_compile_definitions(UnitTest_main PRIVATE BUILD_EMBEDDED=1)
+else()
+  target_compile_definitions(UnitTest_main PRIVATE BUILD_EMBEDDED=0)
+endif()
 
 target_link_libraries(UnitTest_main PRIVATE unity mocks)
 

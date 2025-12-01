@@ -23,7 +23,7 @@ static volatile uint64_t u64IdleTicksCnt = 0;
 static volatile uint64_t tickTime = 0;
 
 static void delay_ms(uint32_t ms) {
-#ifdef BUILD_EMBEDDED
+#if BUILD_EMBEDDED
   // crude delay @ ~16MHz HSI
   for (uint32_t i = 0; i < ms * 12000; ++i) {
     __asm__("nop");
@@ -37,7 +37,7 @@ static void delay_ms(uint32_t ms) {
 }
 
 void setUp(void) {
-#ifdef BUILD_EMBEDDED
+#if BUILD_EMBEDDED
   systemClock_config();
 #endif
 }
