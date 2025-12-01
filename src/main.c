@@ -184,9 +184,9 @@ int main(void) {
       vButtonStepTask, "StepButtonTask", STEP_TASK_STACK_SIZE, NULL,
       STEP_TASK_PRIORITY, stepButtonTaskStack, &stepButtonTaskBuffer);
 
-  blinkTaskHandle = xTaskCreateStatic(
-      vBlinkTask, "BlinkTask", BLINK_TASK_STACK_SIZE, NULL,
-      BLINK_TASK_PRIORITY, blinkTaskStack, &blinkTaskBuffer);
+  ledBlinkTaskHandle = xTaskCreateStatic(
+      vLedBlinkTask, "LedBlinkingTask", LEDBLINK_TASK_STACK_SIZE, NULL,
+      LEDBLINK_TASK_PRIORITY, ledBlinkTaskStack, &ledBlinkTaskBuffer);
 
   waveformTaskHandle = xTaskCreateStatic(
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
@@ -297,7 +297,7 @@ void vButtonStepTask(void *pvParameters) {
   }
 }
 
-void vBlinkTask(void *p) {
+void vLedBlinkTask(void *p) {
   const Led_TypeDef leds[NUM_STEPS] = {LED3, LED4, LED6, LED5};
   uint8_t lastStepIndex = 0xFF; // Invalid initial value to force first update
 

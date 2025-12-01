@@ -27,8 +27,8 @@
 /// @brief Stack size for the step button task in bytes
 #define STEP_TASK_STACK_SIZE 64
 
-/// @brief Stack size for the blink task in bytes
-#define BLINK_TASK_STACK_SIZE 64
+/// @brief Stack size for the LED task in bytes
+#define LEDBLINK_TASK_STACK_SIZE 64
 
 /// @brief Stack size for the animation task in bytes
 #define ANIMATION_TASK_STACK_SIZE 64
@@ -43,8 +43,8 @@
 /// @brief Priority level for the step button task (2 = medium)
 #define STEP_TASK_PRIORITY 2
 
-/// @brief Priority level for the blink task (1 = low)
-#define BLINK_TASK_PRIORITY 1
+/// @brief Priority level for the LED task (1 = low)
+#define LEDBLINK_TASK_PRIORITY 1
 
 /// @brief Priority level for the waveform visualization task (1 = low)
 #define WAVEFORM_TASK_PRIORITY 1
@@ -75,15 +75,15 @@ StaticTask_t stepButtonTaskBuffer CCM_RAM;
 /// @brief Handle for the step button task
 TaskHandle_t stepButtonTaskHandle;
 
-// --- Blink Task ---
-/// @brief Stack memory allocation for the blink task stored in CCM
-StackType_t blinkTaskStack[BLINK_TASK_STACK_SIZE] CCM_RAM;
+// --- LED Task ---
+/// @brief Stack memory allocation for the LED task stored in CCM
+StackType_t ledBlinkTaskStack[LEDBLINK_TASK_STACK_SIZE] CCM_RAM;
 
-/// @brief Task control block (TCB) for the blink task stored in CCM
-StaticTask_t blinkTaskBuffer CCM_RAM;
+/// @brief Task control block (TCB) for the LED task stored in CCM
+StaticTask_t ledBlinkTaskBuffer CCM_RAM;
 
-/// @brief Handle for the blink task
-TaskHandle_t blinkTaskHandle;
+/// @brief Handle for the LED task
+TaskHandle_t ledBlinkTaskHandle;
 
 // --- Animation Task ---
 /// @brief Stack memory allocation for the playback task stored in CCM
@@ -106,7 +106,7 @@ TaskHandle_t waveformTaskHandle;
  * @brief
  *
  * Monitors the state of the user button connected to GPIOA Pin 0.
- * If a button press is detected, it resets the blink delay to its
+ * If a button press is detected, it resets the LED delay to its
  * minimum value. Designed as a FreeRTOS task that runs continuously.
  *
  * @param[in] p Pointer to task parameters (unused).
@@ -129,7 +129,7 @@ void vButtonStepTask(void *pvParameters);
  *
  * @param[in] p Pointer to task parameters (unused).
  */
-void vBlinkTask(void *p);
+void vLedBlinkTask(void *p);
 
 /**
  * @brief Task to visualize audio waveform on the OLED display.
