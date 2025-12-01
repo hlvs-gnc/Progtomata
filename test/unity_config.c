@@ -13,22 +13,34 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#include <stdint.h>
-#include <uart_driver.h>
+#include <stdio.h>
 
+#ifdef BUILD_EMBEDDED
+#include <uart_driver.h>
 static int initialized = 0;
+#endif
 
 void unityOutputStart(void) {
+#ifdef BUILD_EMBEDDED
   if (!initialized) {
     uart_init();
     initialized = 1;
   }
+#endif
 }
 
 void unityOutputChar(int c) {
+#ifdef BUILD_EMBEDDED
   uart_send_char((char)c);
+#else
+  putchar(c);
+#endif
 }
 
-void unityOutputFlush(void) {}
+void unityOutputFlush(void) {
+#ifndef BUILD_EMBEDDED
+  fflush(stdout);
+#endif
+}
 
 void unityOutputComplete(void) {}

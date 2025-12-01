@@ -98,4 +98,8 @@ file(GLOB UNITY_SRC ${UNITY_DIR}/unity.c
 
 add_library(unity STATIC ${UNITY_SRC})
 
-target_include_directories(unity PUBLIC ${UNITY_DIR})
+target_include_directories(unity PUBLIC 
+    ${UNITY_DIR}
+    ${PROJECT_SOURCE_DIR}/test)
+
+target_compile_definitions(unity PUBLIC UNITY_INCLUDE_CONFIG_H)

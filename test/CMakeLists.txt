@@ -18,7 +18,8 @@ enable_testing()
 
 # Gather all test source files (currently only test_main.c)
 file(GLOB TEST_SRC
-  ${TEST_DIR}/test_main.c)
+  ${TEST_DIR}/test_main.c
+  ${TEST_DIR}/unity_config.c)
 
 # Create the main unit test executable
 add_executable(UnitTest_main ${TEST_SRC})
