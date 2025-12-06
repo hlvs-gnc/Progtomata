@@ -51,13 +51,36 @@ if (BUILD_EMBEDDED)
     stm32_framework
     audio_codec
     uart_driver
-    trice)
+    trice
+    tband)
 
   # Post-build: generate .bin and .hex files from ELF
   add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.bin
     COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${PROJECT_NAME}.hex
     COMMENT "Generating .bin and .hex from ELF")
+
+  # Find STM32CubeProgrammer CLI
+  find_program(STM32_PROGRAMMER_CLI 
+    NAMES STM32_Programmer_CLI STM32_Programmer_CLI.exe
+    PATHS 
+      "C:/ST/STM32CubeCLT_1.18.0/STM32CubeProgrammer/bin"
+    NO_DEFAULT_PATH)
+  
+  if(NOT STM32_PROGRAMMER_CLI)
+    find_program(STM32_PROGRAMMER_CLI STM32_Programmer_CLI)
+  endif()
+
+  if(STM32_PROGRAMMER_CLI)
+    # Upload target: flash firmware to STM32F407 via ST-Link
+    add_custom_target(upload
+      COMMAND ${STM32_PROGRAMMER_CLI} -c port=SWD -w $<TARGET_FILE:${PROJECT_NAME}.elf> -v -rst
+      DEPENDS ${PROJECT_NAME}.elf
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Uploading ${PROJECT_NAME}.elf to STM32F407VG via ST-Link")
+  else()
+    message(WARNING "STM32CubeProgrammer CLI not found. Upload target will not be available.")
+  endif()
 endif()
 
 # Test option

@@ -301,9 +301,22 @@ void vLedBlinkTask(void *p) {
   const Led_TypeDef leds[NUM_STEPS] = {LED3, LED4, LED6, LED5};
   uint8_t lastStepIndex = 0xFF; // Invalid initial value to force first update
 
+#ifdef TRACE_TONBANDGERAT
+  // Start Tonbandgerät streaming (called once from a task after scheduler starts)
+  TraceStart();
+#endif
+
   while (1) {
     // Get current step from the sequencer
     uint8_t currentStep = playHeadStep;
+
+#ifdef TRACE_TONBANDGERAT
+    // Do some work to generate trace events
+    volatile uint32_t work = 0;
+    for (int i = 0; i < 1000; i++) {
+      work += i;
+    }
+#endif
 
     // Check if step changed
     if (currentStep != lastStepIndex) {

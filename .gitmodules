@@ -4,3 +4,6 @@
 [submodule "lib/Unity"]
 	path = lib/Unity
 	url = https://github.com/ThrowTheSwitch/Unity
+[submodule "lib/Tonbandgerat"]
+	path = lib/Tonbandgerat
+	url = https://github.com/schilkp/Tonbandgeraet.git

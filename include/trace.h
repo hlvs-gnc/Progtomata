@@ -41,6 +41,17 @@ extern "C" {
  */
 void TraceInit(void);
 
+#ifdef TRACE_TONBANDGERAT
+/**
+ * @brief Start Tonbandgerät streaming.
+ *
+ * @details
+ *   Must be called AFTER vTaskStartScheduler() from within a task.
+ *   Initializes metadata gathering and starts real-time trace streaming.
+ */
+void TraceStart(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -20,21 +20,21 @@
 #include <hooks.h>
 #include <semphr.h>
 
-// Task stack sizes
+// Task stack sizes (increased for Tonbandgerät trace hooks)
 /// @brief Stack size for the sample button task in bytes
-#define SAMPLE_TASK_STACK_SIZE 64
+#define SAMPLE_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the step button task in bytes
-#define STEP_TASK_STACK_SIZE 64
+#define STEP_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the LED task in bytes
-#define LEDBLINK_TASK_STACK_SIZE 64
+#define LEDBLINK_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the animation task in bytes
-#define ANIMATION_TASK_STACK_SIZE 64
+#define ANIMATION_TASK_STACK_SIZE 128
 
 /// @brief Stack size for the waveform visualization task in bytes
-#define WAVEFORM_TASK_STACK_SIZE 64
+#define WAVEFORM_TASK_STACK_SIZE 128
 
 // Task priority levels
 /// @brief Priority level for the sample button task (2 = medium)

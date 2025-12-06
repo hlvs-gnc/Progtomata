@@ -130,6 +130,7 @@
 #define INCLUDE_vTaskSuspend          1
 #define INCLUDE_vTaskDelayUntil       1
 #define INCLUDE_vTaskDelay            1
+#define INCLUDE_xTaskGetIdleTaskHandle 1
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
@@ -173,5 +174,11 @@
 #define vPortSVCHandler     SVC_Handler
 #define xPortPendSVHandler  PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
+
+/* Tonbandgerät trace hooks - define config before including */
+#ifdef TRACE_TONBANDGERAT
+#include "tband_config.h"
+#include "tband.h"
+#endif
 
 #endif // CONFIG_FREERTOSCONFIG_H_
