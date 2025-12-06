@@ -302,7 +302,8 @@ void vLedBlinkTask(void *p) {
   uint8_t lastStepIndex = 0xFF; // Invalid initial value to force first update
 
 #ifdef TRACE_TONBANDGERAT
-  // Start Tonbandgerät streaming (called once from a task after scheduler starts)
+  // Start Tonbandgerät streaming (called once from a task after scheduler
+  // starts)
   TraceStart();
 #endif
 
