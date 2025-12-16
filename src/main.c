@@ -385,6 +385,7 @@ uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
   return 1;
 }
 
+// Audio codec user-defined functions
 void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   // Render audio for first half of buffer
   renderHalf(0);

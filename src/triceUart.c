@@ -5,9 +5,7 @@
  * communication used by the Trice library.
  *
  * @details
- *   - Provides initialization and handling routines for UART peripheral.
- *   - Supports sending and receiving TRICE data over UART.
- *   - Designed for integration with FreeRTOS and STM32F4 platform.
+ *   - Supports transmitting TRICE data over UART.
  */
 
 #include <triceUart.h>

@@ -2,9 +2,8 @@
  * @file trace.h
  * @brief Public header for the trace module.
  *
- * @details
- *   This header declares the \c TraceInit() function for setting up Trice
- *   in deferred mode and creating the associated FreeRTOS task.
+ * @details This header declares the \c TraceInit() function for setting
+ * up Trice in deferred mode and creating the associated FreeRTOS task.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons

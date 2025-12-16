@@ -5,38 +5,16 @@
  *
  * This file implements the hook functions required by FreeRTOS for system-level
  * event handling, including memory allocation failures, stack overflows, idle
- * tasks, and timer tasks. These hooks enhance system reliability and debugging
- * capabilities.
+ * tasks, and timer tasks.
  *
  * @details
- * - Tick Hook: Placeholder for periodic operations executed in each system
- * tick.
- * - Malloc Failed Hook: Handles memory allocation failures and enters a
- * safe state.
- * - Idle Hook: Custom behavior during idle time.
- * - Stack Overflow Hook: Handles stack overflow errors and prevents further
- * damage.
- * - Idle Task Memory Allocation: Provides static memory for the FreeRTOS
- * idle task.
- * - Timer Task Memory Allocation: Provides static memory for the FreeRTOS
- * timer task.
- *
- * Features:
- * - Implements all required FreeRTOS hook functions.
+ * - Implements required FreeRTOS hook functions.
  * - Static memory allocation for idle and timer tasks using Core Coupled Memory
  * (CCM).
- * - Failsafe mechanisms for stack overflow and memory allocation errors.
- * - Lightweight and optimized code for STM32F4 embedded systems.
- *
+ * 
  * Dependencies:
  * - STM32F4xx Standard Peripheral Library
  * - FreeRTOS Kernel
- *
- * Hardware:
- * - Board: STM32F4-Discovery or compatible STM32F4 boards.
- *
- * @note Ensure FreeRTOSConfig.h is correctly set to enable required hooks
- *       (e.g., configUSE_IDLE_HOOK, configUSE_TICK_HOOK).
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons

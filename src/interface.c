@@ -8,7 +8,6 @@
  *   - Provides initialization and access routines for GPIO pins connected to
  * encoders (buttons) and shift registers (LEDs).
  *   - Implements functions to read button states and control LED outputs.
- *   - Designed for STM32F4 platform integration.
  */
 
 #include <interface.h>

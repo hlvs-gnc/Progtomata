@@ -3,10 +3,8 @@
  *
  * @brief Core header file for the functional task instances.
  *
- * @details This file provides the core definitions, macros, and function
- * declarations for the FreeRTOS task instances. It includes the necessary
- * header files, defines the application constants and data elements
- * that are used in the application.
+ * @details Core definitions, macros, and function
+ * declarations for the FreeRTOS task instances.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
