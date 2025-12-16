@@ -27,7 +27,6 @@
 
 /**
  * @brief Stack size and priority for the Trice task.
- * @note  Adjust as needed for your system.
  */
 #define TRACE_TASK_STACK_SIZE 512 // Increased for Tonbandgerät
 #define TRACE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
@@ -124,6 +123,6 @@ bool traceport_stream_data(const uint8_t *buf, size_t len) {
     USART_SendData(USART2, buf[i]);
   }
 
-  return false; // Return false = no data dropped
+  return false;
 }
 #endif

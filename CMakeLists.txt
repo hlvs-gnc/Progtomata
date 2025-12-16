@@ -61,13 +61,25 @@ if (BUILD_EMBEDDED)
     COMMENT "Generating .bin and .hex from ELF")
 
   # Find STM32CubeProgrammer CLI
-  find_program(STM32_PROGRAMMER_CLI 
-    NAMES STM32_Programmer_CLI STM32_Programmer_CLI.exe
-    PATHS 
-      "C:/ST/STM32CubeCLT_1.18.0/STM32CubeProgrammer/bin"
-    NO_DEFAULT_PATH)
-  
+  if(DEFINED ENV{STM32_CUBE_PROGRAMMER_PATH})
+    find_program(STM32_PROGRAMMER_CLI 
+      NAMES STM32_Programmer_CLI STM32_Programmer_CLI.exe
+      PATHS "$ENV{STM32_CUBE_PROGRAMMER_PATH}"
+      NO_DEFAULT_PATH)
+  endif()
   if(NOT STM32_PROGRAMMER_CLI)
+    # Try common install locations (Windows, Linux) without hardcoding version
+    find_program(STM32_PROGRAMMER_CLI 
+      NAMES STM32_Programmer_CLI STM32_Programmer_CLI.exe
+      PATHS
+        "C:/ST/STM32CubeCLT/STM32CubeProgrammer/bin"
+        "C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin"
+        "$ENV{HOME}/ST/STM32CubeCLT/STM32CubeProgrammer/bin"
+        "/opt/st/stm32cubeclt/STM32CubeProgrammer/bin"
+      NO_DEFAULT_PATH)
+  endif()
+  if(NOT STM32_PROGRAMMER_CLI)
+    # Fallback: search in system PATH
     find_program(STM32_PROGRAMMER_CLI STM32_Programmer_CLI)
   endif()
 

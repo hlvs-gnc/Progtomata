@@ -29,7 +29,7 @@
 // Timestamp configuration
 uint64_t traceport_timestamp(void);
 #define tband_portTIMESTAMP()             traceport_timestamp()
-#define tband_portTIMESTAMP_RESOLUTION_NS 25 // Adjust for your system
+#define tband_portTIMESTAMP_RESOLUTION_NS 25
 
 // Streaming data handler (shares UART with Trice)
 bool traceport_stream_data(const uint8_t *buf, size_t len);

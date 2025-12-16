@@ -30,7 +30,6 @@ extern "C" {
 /**
  * @brief Toggle an LED for feedback (optional).
  *
- * Modify this to match your actual LED GPIO pin and port.
  */
 void ToggleOpticalFeedbackLED(void);
 
