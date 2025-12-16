@@ -5,8 +5,7 @@
  *
  * This header file declares hook functions and memory allocations required
  * by FreeRTOS for system-level operations, such as idle tasks, timer tasks,
- * and error handling. It supports static memory allocation using Core Coupled
- * Memory (CCM) for optimized performance on STM32F4 devices.
+ * and error handling.
  *
  * @details
  * - Provides declarations for FreeRTOS hooks including:
@@ -15,28 +14,6 @@
  *   - Idle Hook
  *   - Stack Overflow Hook
  * - Implements static memory allocation for Idle and Timer tasks using CCM.
- * - Ensures compatibility with FreeRTOS static memory management configuration.
- *
- * Features:
- * - Static memory management with Core Coupled Memory (CCM) for deterministic
- * behavior.
- * - Hook function declarations for robust error handling and debugging.
- * - Optimized for STM32F4-based embedded systems.
- *
- * Dependencies:
- * - STM32F4xx Standard Peripheral Library
- * - FreeRTOS Kernel
- *
- * Hardware:
- * - Board: STM32F4-Discovery or compatible STM32F4 boards.
- *
- * Configuration Requirements:
- * - Enable static memory allocation in FreeRTOSConfig.h:
- *   - configSUPPORT_STATIC_ALLOCATION = 1
- *   - configUSE_IDLE_HOOK = 1
- *   - configUSE_TICK_HOOK = 1
- *   - configCHECK_FOR_STACK_OVERFLOW = 2
- *   - configUSE_TIMERS = 1
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
@@ -51,7 +28,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-// Macro to use CCM (Core Coupled Memory) in STM32F4
+// Macro to use CCM (Core Coupled Memory)
 #define CCM_RAM __attribute__((section(".ccmram")))
 
 #define vAppTickHook 0

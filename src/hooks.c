@@ -3,18 +3,9 @@
  *
  * @brief FreeRTOS Hook Functions for STM32F4 Application.
  *
- * This file implements the hook functions required by FreeRTOS for system-level
- * event handling, including memory allocation failures, stack overflows, idle
- * tasks, and timer tasks.
- *
  * @details
- * - Implements required FreeRTOS hook functions.
- * - Static memory allocation for idle and timer tasks using Core Coupled Memory
- * (CCM).
- * 
- * Dependencies:
- * - STM32F4xx Standard Peripheral Library
- * - FreeRTOS Kernel
+ * Hook functions required by FreeRTOS for system-level event handling,
+ * including memory allocation failures, stack overflows, idle and timer tasks.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
