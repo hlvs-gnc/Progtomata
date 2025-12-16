@@ -3,11 +3,27 @@ set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # Only build embedded libraries when targeting embedded systems
 if(BUILD_EMBEDDED)
     add_library(platform_defs INTERFACE)
-    target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG)
+    target_compile_definitions(platform_defs INTERFACE STM32F407xx STM32F40_41xxx USE_STDPERIPH_DRIVER DEBUG LOG_TRICE)
     target_compile_definitions(platform_defs INTERFACE BUILD_EMBEDDED=1 HSE_VALUE=8000000)
 
     # Sound bank content
     include_directories(${PROJECT_SOURCE_DIR}/lib/sound_bank)
+
+    # Tonbandgerät
+    set(TBAND_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Tonbandgerat/tband)
+    file(GLOB TBAND_SRC 
+        ${TBAND_DIR}/src/tband.c
+        ${TBAND_DIR}/src/tband_backend.c
+        ${TBAND_DIR}/src/tband_freertos.c)
+
+    add_library(tband STATIC ${TBAND_SRC})
+
+    target_include_directories(tband PUBLIC 
+        ${TBAND_DIR}/inc
+        ${TBAND_DIR}/portable/GCC_ARM_CM4F_FREERTOS
+        ${PROJECT_SOURCE_DIR}/config)
+
+    target_link_libraries(tband PUBLIC platform_defs kernel_freertos)
 
     # FreeRTOS Kernel
     set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/freertos_kernel)
@@ -27,7 +43,8 @@ if(BUILD_EMBEDDED)
 
     target_include_directories(kernel_freertos PUBLIC
         ${FREERTOS_DIR}/include
-        ${FREERTOS_PORT_DIR})
+        ${FREERTOS_PORT_DIR}
+        ${TBAND_DIR}/inc)
 
     target_link_libraries(kernel_freertos PUBLIC platform_defs)
 

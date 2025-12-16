@@ -16,7 +16,8 @@ if(BUILD_EMBEDDED)
         ${PROJECT_SOURCE_DIR}/config
         ${PROJECT_SOURCE_DIR}/lib/audio_codec
         ${PROJECT_SOURCE_DIR}/lib/sound_bank
-        ${PROJECT_SOURCE_DIR}/lib/trice/src)
+        ${PROJECT_SOURCE_DIR}/lib/trice/src
+        ${PROJECT_SOURCE_DIR}/lib/Tonbandgerat/tband/src)
 
     # Link the library with FreeRTOS kernel, STM32 framework, and hardware platform definitions
     target_link_libraries(core PUBLIC kernel_freertos stm32_framework platform_defs)

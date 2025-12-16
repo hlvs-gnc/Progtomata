@@ -16,6 +16,8 @@ CMakeCache.txt
 staticAnalysis_report
 Doxyfile.bak
 cppcheck-result.xml
+*.json
+*.bin
 
 # Modified submodule files
 lib/Unity/library.json

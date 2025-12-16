@@ -3,9 +3,9 @@
  *
  * @brief Source file for LCD interface implementation.
  *
- * @details This file provides the implementation of the functions required to
- * initialize and control an LCD screen using STM32F4 microcontrollers. It
- * includes GPIO configuration, delays, and data transfer methods.
+ * @details This file provides the implementation of the functions required
+ * to initialize and control a 16x2 screen. Includes GPIO configuration
+ * and data transfer methods.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons

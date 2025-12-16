@@ -2,9 +2,8 @@
  * @file trace.h
  * @brief Public header for the trace module.
  *
- * @details
- *   This header declares the \c TraceInit() function for setting up Trice
- *   in deferred mode and creating the associated FreeRTOS task.
+ * @details This header declares the \c TraceInit() function for setting
+ * up Trice in deferred mode and creating the associated FreeRTOS task.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
@@ -40,6 +39,17 @@ extern "C" {
  *   - Ensures it is only initialized once.
  */
 void TraceInit(void);
+
+#ifdef TRACE_TONBANDGERAT
+/**
+ * @brief Start Tonbandgerät streaming.
+ *
+ * @details
+ *   Must be called AFTER vTaskStartScheduler() from within a task.
+ *   Initializes metadata gathering and starts real-time trace streaming.
+ */
+void TraceStart(void);
+#endif
 
 #ifdef __cplusplus
 }
