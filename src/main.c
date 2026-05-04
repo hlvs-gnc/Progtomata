@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 // System definition/ configuration
-#include <core.h>
+#include <audio_cfg.h>
 #include <progtomata_system.h>
 #include <tasks.h>
 
@@ -35,6 +35,9 @@
 
 // Communication drivers
 #include <uart_driver.h>
+
+// USB MIDI
+#include <usb_midi.h>
 
 // Information logging
 #include <trace.h>
@@ -150,20 +153,27 @@ int main(void) {
       xSemaphoreCreateBinaryStatic(&xButtonSemaphoreStatic);
   if (xButtonSemaphoreHandle == NULL) {
 #ifdef LOG_TRICE
-    TRice(iD(3926), "error: Button semaphore creation failed\n");
+    TRice(iD(6559), "error: Button semaphore creation failed\n");
 #endif
   }
+
+  // Create the MIDI semaphore
+  xMidiSemaphoreHandle =
+      xSemaphoreCreateBinaryStatic(&xMidiSemaphoreStatic);
+
+  // Initialize USB MIDI device
+  USB_MIDI_Init();
 
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
 
   if (EVAL_AUDIO_Init(OUTPUT_DEVICE_HEADPHONE, 85, SAMPLE_RATE) != 0) {
 #ifdef LOG_TRICE
-    TRice(iD(4708), "msg: Audio codec initialization failed\n");
+    TRice(iD(2733), "msg: Audio codec initialization failed\n");
 #endif
   }
 
 #ifdef LOG_TRICE
-  TRice(iD(3720), "msg: Audio setup complete\n");
+  TRice(iD(7849), "msg: Audio setup complete\n");
 
   // Set master tempo
   sequencer_setBpm(130);
@@ -172,7 +182,7 @@ int main(void) {
   // Start audio playback
   if (EVAL_AUDIO_Play((uint16_t *)playbackBuffer, BUFFERSIZE) != 0) {
 #ifdef LOG_TRICE
-    TRice(iD(3630), "error: Failed to start audio playback\n");
+    TRice(iD(6639), "error: Failed to start audio playback\n");
 #endif
   }
 
@@ -192,8 +202,12 @@ int main(void) {
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
       WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
+  midiTaskHandle = xTaskCreateStatic(
+      vMidiTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
+      MIDI_TASK_PRIORITY, midiTaskStack, &midiTaskBuffer);
+
 #ifdef LOG_TRICE
-  TRice(iD(1106), "info: 🐛 PROGTOMATA2000 System initialized\n");
+  TRice(iD(3469), "info: 🐛 PROGTOMATA2000 System initialized\n");
 #endif
 
   vTaskStartScheduler(); // This shall never return
@@ -224,7 +238,7 @@ void vButtonSampleTask(void *p) {
     if (currentStatePD1 == Bit_RESET && prevStatePD1 == Bit_SET) {
       sampleButton = 0x0000;
 #ifdef LOG_TRICE
-      TRice(iD(5828), "Sample 0 (kick)\n");
+      TRice(iD(4234), "Sample 0 (kick)\n");
 #endif
       // Turn on external LED on PD5 to indicate Button 1 action
       GPIO_SetBits(GPIOD, GPIO_Pin_5);
@@ -242,7 +256,7 @@ void vButtonSampleTask(void *p) {
     if (currentStatePD2 == Bit_RESET && prevStatePD2 == Bit_SET) {
       sampleButton = 0x0001;
 #ifdef LOG_TRICE
-      TRice(iD(4156), "Sample 1 (hi-hat) \n");
+      TRice(iD(6817), "Sample 1 (hi-hat) \n");
 #endif
       // Turn on external LED on PD6 to indicate Button 2 action
       GPIO_SetBits(GPIOD, GPIO_Pin_6);
@@ -276,7 +290,7 @@ void vButtonStepTask(void *pvParameters) {
           stepGrid[sampleButton][stepButton - 1] =
               1 - stepGrid[sampleButton][stepButton - 1];
 #ifdef LOG_TRICE
-          TRice(iD(7398), "info: Select step %d | sample %d | state %d \n",
+          TRice(iD(2501), "info: Select step %d | sample %d | state %d \n",
                 stepButton, sampleButton,
                 stepGrid[sampleButton][stepButton - 1]);
 #endif
@@ -343,7 +357,7 @@ void vLedBlinkTask(void *p) {
       lastStepIndex = currentStep;
 
 #ifdef BLINK
-      TRice(iD(6506), "att:🐁 LED step: %d, active: %d\n", currentStep,
+      TRice(iD(7002), "att:🐁 LED step: %d, active: %d\n", currentStep,
             currentStepHasSample);
 #endif
     }
@@ -380,7 +394,7 @@ void vWaveformTask(void *pvParameters) {
 
 uint16_t EVAL_AUDIO_GetSampleCallBack(void) {
 #ifdef LOG_TRICE
-  TRice(iD(6204), "GetSample\n");
+  TRice(iD(4331), "GetSample\n");
 #endif
   return 1;
 }
@@ -394,7 +408,7 @@ void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size) {
   playHeadStep = stepIndex;
 
 #ifdef LOG_AUDIO_BUFFER
-  TRice(iD(4918), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
+  TRice(iD(2115), "HalfTransfer. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif
 }
 
@@ -406,19 +420,19 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size) {
   playHeadStep = stepIndex;
 
 #ifdef LOG_AUDIO_BUFFER
-  TRice(iD(7634), "TransferComplete. pBuffer: %x; Size: %d\n", pBuffer, Size);
+  TRice(iD(7065), "TransferComplete. pBuffer: %x; Size: %d\n", pBuffer, Size);
 #endif
 }
 
 void EVAL_AUDIO_Error_CallBack(void *pData, int32_t errorType) {
 #ifdef LOG_TRICE
-  TRice(iD(5387), "error: Error. pData: %x type: %x \n", pData, errorType);
+  TRice(iD(5288), "error: Error. pData: %x type: %x \n", pData, errorType);
 #endif
 }
 
 uint32_t Codec_TIMEOUT_UserCallback(void) {
 #ifdef LOG_TRICE
-  TRice(iD(1479), "Codec_TIMEOUT_User\n");
+  TRice(iD(4835), "Codec_TIMEOUT_User\n");
 #endif
   return 1;
 }

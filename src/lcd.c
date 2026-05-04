@@ -58,7 +58,7 @@ static void LCD_WriteNibble(uint8_t nibble) {
   // Pulse Enable
   LCD_E_HIGH();
   // A short delay so LCD can latch the data
-  // Use a simple for-loop or a microsecond delay if you have it
+  // Use a simple for-loop or a microsecond delay
   for (volatile int i = 0; i < 500; i++)
     ;
 

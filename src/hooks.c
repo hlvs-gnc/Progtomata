@@ -15,6 +15,25 @@
  */
 
 #include <hooks.h>
+#include <stm32f4xx.h>
+#include <triceUart.h>
+
+/* Emergency busy-wait UART print for fault handlers (no scheduler / no trice deferred). */
+static void fault_emit(const char *tag) {
+  /* Send a recognizable raw ASCII marker on USART2 (trice port).
+   * It will appear as junk between trice frames but is human-readable. */
+  const char *p = "\r\n*** FAULT: ";
+  while (*p) { triceTransmitData8UartA((uint8_t)*p++); }
+  while (*tag) { triceTransmitData8UartA((uint8_t)*tag++); }
+  triceTransmitData8UartA('\r');
+  triceTransmitData8UartA('\n');
+  for (;;) { }
+}
+
+void HardFault_Handler(void)  { fault_emit("HARD"); }
+void BusFault_Handler(void)   { fault_emit("BUS"); }
+void UsageFault_Handler(void) { fault_emit("USAGE"); }
+void MemManage_Handler(void)  { fault_emit("MEM"); }
 
 #if (vAppTickHook == 1)
 void vApplicationTickHook(void) {}
@@ -22,8 +41,7 @@ void vApplicationTickHook(void) {}
 
 void vApplicationMallocFailedHook(void) {
   taskDISABLE_INTERRUPTS();
-  for (;;)
-    ;
+  fault_emit("MALLOC");
 }
 
 #if (vAppIdleHook == 1)
@@ -34,8 +52,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
   (void)xTask;
   (void)pcTaskName;
   taskDISABLE_INTERRUPTS();
-  for (;;)
-    ;
+  fault_emit(pcTaskName ? pcTaskName : "STACK");
 }
 
 StaticTask_t xIdleTaskTCB CCM_RAM;

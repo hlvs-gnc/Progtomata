@@ -1,7 +1,7 @@
 /**
- * @file core.h
+ * @file audio_cfg.h
  *
- * @brief Core header file for the functional task instances.
+ * @brief Header file for the functional task instances.
  *
  * @details Core definitions, macros, and function
  * declarations for the FreeRTOS task instances.
@@ -13,8 +13,8 @@
  * @author Radar2000
  */
 
-#ifndef CORE_H_
-#define CORE_H_
+#ifndef AUDIO_CFG_H_
+#define AUDIO_CFG_H_
 
 #include <stdint.h>
 
@@ -106,4 +106,4 @@ static const int16_t *const sampleData[NUM_SAMPLES] = {kick_aether_mono,
 /// @brief Array of sample lengths in bytes
 static const uint32_t sampleLen[NUM_SAMPLES] = {SOUNDSIZE3, SOUNDSIZE2};
 
-#endif // CORE_H_
+#endif // AUDIO_CFG_H_

@@ -75,6 +75,9 @@ void TraceInit(void) {
 
 #ifdef LOG_TRICE
   if (!g_isTraceInitialized) {
+    // Initialize Trice library
+    TriceInit();
+
     // Create the FreeRTOS task for periodic TriceTransfer
     xTaskCreateStatic(vTriceTask, "TriceTask", TRACE_TASK_STACK_SIZE, NULL,
                       TRACE_TASK_PRIORITY, traceTaskStack, &traceTaskBuffer);

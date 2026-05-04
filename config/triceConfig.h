@@ -23,10 +23,6 @@ extern "C" {
 #include <stm32f4xx.h>
 
 #ifndef TRICE_CLEAN
-// TRICE_CLEAN, when found in triceConfig.h is set to 0 with command "trice
-// insert". and set to 1 with command "trice clean" to get rid of potential
-// editor warnings in the trice clean state.
-// Do not define this at an other place! But you can delete this here.
 #define TRICE_CLEAN 0
 #endif
 
