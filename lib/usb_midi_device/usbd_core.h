@@ -1,16 +1,16 @@
 /**
-  ******************************************************************************
-  * @file    usbd_core.h
-  * @brief   USB Device Core — types, state machine, and API for EP0 control
-  *          transfers and standard device requests.
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usbd_core.h
+ * @brief   USB Device Core — types, state machine, and API for EP0 control
+ *          transfers and standard device requests.
+ ******************************************************************************
+ */
 
 #ifndef USBD_CORE_H
 #define USBD_CORE_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include "stm32f4xx_usb_otg_fs.h"
@@ -18,16 +18,16 @@
 
 // USB Standard Request Codes
 
-#define USB_REQ_GET_STATUS          0x00U
-#define USB_REQ_CLEAR_FEATURE       0x01U
-#define USB_REQ_SET_FEATURE         0x03U
-#define USB_REQ_SET_ADDRESS         0x05U
-#define USB_REQ_GET_DESCRIPTOR      0x06U
-#define USB_REQ_SET_DESCRIPTOR      0x07U
-#define USB_REQ_GET_CONFIGURATION   0x08U
-#define USB_REQ_SET_CONFIGURATION   0x09U
-#define USB_REQ_GET_INTERFACE       0x0AU
-#define USB_REQ_SET_INTERFACE       0x0BU
+#define USB_REQ_GET_STATUS        0x00U
+#define USB_REQ_CLEAR_FEATURE     0x01U
+#define USB_REQ_SET_FEATURE       0x03U
+#define USB_REQ_SET_ADDRESS       0x05U
+#define USB_REQ_GET_DESCRIPTOR    0x06U
+#define USB_REQ_SET_DESCRIPTOR    0x07U
+#define USB_REQ_GET_CONFIGURATION 0x08U
+#define USB_REQ_SET_CONFIGURATION 0x09U
+#define USB_REQ_GET_INTERFACE     0x0AU
+#define USB_REQ_SET_INTERFACE     0x0BU
 
 // Descriptor Types
 
@@ -54,33 +54,30 @@
 
 // Device State
 
-typedef enum
-{
-  USBD_STATE_DEFAULT    = 0,
-  USBD_STATE_ADDRESSED  = 1,
+typedef enum {
+  USBD_STATE_DEFAULT = 0,
+  USBD_STATE_ADDRESSED = 1,
   USBD_STATE_CONFIGURED = 2,
-  USBD_STATE_SUSPENDED  = 3
+  USBD_STATE_SUSPENDED = 3
 } USBD_StateTypeDef;
 
 // EP0 Control Transfer State
 
-typedef enum
-{
-  USBD_EP0_IDLE       = 0,
-  USBD_EP0_SETUP      = 1,
-  USBD_EP0_DATA_IN    = 2,
-  USBD_EP0_DATA_OUT   = 3,
-  USBD_EP0_STATUS_IN  = 4,
+typedef enum {
+  USBD_EP0_IDLE = 0,
+  USBD_EP0_SETUP = 1,
+  USBD_EP0_DATA_IN = 2,
+  USBD_EP0_DATA_OUT = 3,
+  USBD_EP0_STATUS_IN = 4,
   USBD_EP0_STATUS_OUT = 5,
-  USBD_EP0_STALL      = 6
+  USBD_EP0_STALL = 6
 } USBD_EP0StateTypeDef;
 
 // SETUP Packet
 
-typedef struct
-{
-  uint8_t  bmRequest;
-  uint8_t  bRequest;
+typedef struct {
+  uint8_t bmRequest;
+  uint8_t bRequest;
   uint16_t wValue;
   uint16_t wIndex;
   uint16_t wLength;
@@ -88,23 +85,22 @@ typedef struct
 
 // USB Device Handle
 
-typedef struct
-{
-  USBD_StateTypeDef       dev_state;
-  USBD_EP0StateTypeDef    ep0_state;
+typedef struct {
+  USBD_StateTypeDef dev_state;
+  USBD_EP0StateTypeDef ep0_state;
 
-  uint8_t                 dev_address;     /* Pending address (applied after STATUS IN) */
-  uint8_t                 dev_config;      /* Current configuration value               */
+  uint8_t dev_address; /* Pending address (applied after STATUS IN) */
+  uint8_t dev_config;  /* Current configuration value               */
 
-  USB_SetupReqTypeDef     request;         /* Parsed SETUP packet                       */
-  uint8_t                 setup_buf[8];    /* Raw SETUP data from FIFO                  */
+  USB_SetupReqTypeDef request; /* Parsed SETUP packet                       */
+  uint8_t setup_buf[8];        /* Raw SETUP data from FIFO                  */
 
-  USB_OTG_EPTypeDef       in_ep[USB_OTG_FS_MAX_EP_NUM];
-  USB_OTG_EPTypeDef       out_ep[USB_OTG_FS_MAX_EP_NUM];
+  USB_OTG_EPTypeDef in_ep[USB_OTG_FS_MAX_EP_NUM];
+  USB_OTG_EPTypeDef out_ep[USB_OTG_FS_MAX_EP_NUM];
 
-  uint8_t                *ep0_tx_ptr;      /* Data pointer for EP0 IN multi-packet xfer */
-  uint32_t                ep0_tx_rem;      /* Remaining bytes for EP0 IN transfer       */
-  uint32_t                ep0_tx_total;    /* Total length requested by host             */
+  uint8_t *ep0_tx_ptr;   /* Data pointer for EP0 IN multi-packet xfer */
+  uint32_t ep0_tx_rem;   /* Remaining bytes for EP0 IN transfer       */
+  uint32_t ep0_tx_total; /* Total length requested by host             */
 } USBD_HandleTypeDef;
 
 // Public API
