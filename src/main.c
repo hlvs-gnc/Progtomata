@@ -158,8 +158,7 @@ int main(void) {
   }
 
   // Create the MIDI semaphore
-  xMidiSemaphoreHandle =
-      xSemaphoreCreateBinaryStatic(&xMidiSemaphoreStatic);
+  xMidiSemaphoreHandle = xSemaphoreCreateBinaryStatic(&xMidiSemaphoreStatic);
 
   // Initialize USB MIDI device
   USB_MIDI_Init();
@@ -202,9 +201,9 @@ int main(void) {
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
       WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
-  midiTaskHandle = xTaskCreateStatic(
-      vMidiTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
-      MIDI_TASK_PRIORITY, midiTaskStack, &midiTaskBuffer);
+  midiTaskHandle =
+      xTaskCreateStatic(vMidiTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
+                        MIDI_TASK_PRIORITY, midiTaskStack, &midiTaskBuffer);
 
 #ifdef LOG_TRICE
   TRice(iD(3469), "info: 🐛 PROGTOMATA2000 System initialized\n");

@@ -1,15 +1,15 @@
 /**
-  ******************************************************************************
-  * @file    usbd_midi.h
-  * @brief   USB MIDI Streaming class — endpoint management & data reception.
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usbd_midi.h
+ * @brief   USB MIDI Streaming class — endpoint management & data reception.
+ ******************************************************************************
+ */
 
 #ifndef USBD_MIDI_H
 #define USBD_MIDI_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include "usbd_core.h"

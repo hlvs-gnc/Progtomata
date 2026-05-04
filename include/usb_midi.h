@@ -1,16 +1,16 @@
 /**
-  ******************************************************************************
-  * @file    usb_midi.h
-  * @brief   Application-level USB MIDI interface — init, FreeRTOS task, and
-  *          MIDI note/CC callbacks for the Progtomata audio engine.
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usb_midi.h
+ * @brief   Application-level USB MIDI interface — init, FreeRTOS task, and
+ *          MIDI note/CC callbacks for the Progtomata audio engine.
+ ******************************************************************************
+ */
 
 #ifndef USB_MIDI_H
 #define USB_MIDI_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #include <stdint.h>
