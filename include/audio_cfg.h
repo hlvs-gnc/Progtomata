@@ -24,7 +24,7 @@
 #include <openhat_22050_mono.h>
 
 /// @brief Size of the audio playback buffer in bytes
-#define BUFFERSIZE (2048)
+#define BUFFERSIZE (1024)
 
 /// @brief Number of audio samples available in the sequencer
 #define NUM_SAMPLES 2

@@ -14,6 +14,7 @@ if(BUILD_EMBEDDED)
       PUBLIC
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/config
+        ${PROJECT_SOURCE_DIR}/lib/usb_midi
         ${PROJECT_SOURCE_DIR}/lib/audio_codec
         ${PROJECT_SOURCE_DIR}/lib/sound_bank
         ${PROJECT_SOURCE_DIR}/lib/trice/src

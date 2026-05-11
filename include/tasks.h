@@ -148,7 +148,6 @@ void vLedBlinkTask(void *p);
  *
  * This task runs continuously and displays a real-time waveform
  * visualization of the audio playback buffer on the OLED screen.
- * Updates at approximately 10 Hz to match audio buffer refresh rate.
  *
  * @param[in] pvParameters Pointer to task parameters (unused).
  */

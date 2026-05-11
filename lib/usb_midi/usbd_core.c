@@ -10,9 +10,9 @@
  ******************************************************************************
  */
 
-#include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_midi.h"
+
 #include "stm32f4xx_usb_otg_fs.h"
 #include <string.h>
 #include <trice.h>
@@ -495,8 +495,8 @@ static void USBD_StdDevReq(USBD_HandleTypeDef *hdev) {
 
       /* Initialise MIDI class (open endpoints) */
       USBD_MIDI_Init(hdev);
-      TRICE(ID(3837), "USB: Device CONFIGURED - MIDI endpoints open\n");
-      TRICE(ID(2684), "USB: EP1 OUT DOEPCTL=%08x DOEPTSIZ=%08x DAINTMSK=%08x\n",
+      TRICE(ID(5320), "USB: Device CONFIGURED - MIDI endpoints open\n");
+      TRICE(ID(7656), "USB: EP1 OUT DOEPCTL=%08x DOEPTSIZ=%08x DAINTMSK=%08x\n",
             (uint32_t)USB_OTG_FS_OUTEP(1)->DOEPCTL,
             (uint32_t)USB_OTG_FS_OUTEP(1)->DOEPTSIZ,
             (uint32_t)USB_OTG_FS_DEV->DAINTMSK);

@@ -12,7 +12,6 @@
  */
 
 #include "usb_midi.h"
-#include "usbd_core.h"
 #include "usbd_midi.h"
 #include "midi_ringbuf.h"
 
@@ -105,7 +104,7 @@ void vMidiTask(void *pvParameters) {
        * pkt[1] = MIDI status byte
        * pkt[2] = data1 (e.g. note number)
        * pkt[3] = data2 (e.g. velocity)                                       */
-      TRICE(ID(5642), "MIDI rx: %02x %02x %02x %02x\n", pkt[0], pkt[1], pkt[2],
+      TRICE(ID(5598), "MIDI rx: %02x %02x %02x %02x\n", pkt[0], pkt[1], pkt[2],
             pkt[3]);
     }
   }

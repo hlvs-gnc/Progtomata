@@ -12,20 +12,21 @@
 
 #include <interface.h>
 
-// @TODO: check
 /**
 Initialise all the GPIO pins being used
 They connect to the encoders (buttons) and shift registers (LEDs)
 */
 void interface_init() {
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
   GPIO_InitTypeDef GPIO_InitStruct;
 
-  // Initialize encoder
+  // Initialize encoder (PE0/PE1/PE2)
   GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  // Pull-down so floating Q lines read as STEPIDLE_VALUE (0) when no button
+  // is pressed.
+  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
   GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 
   GPIO_InitStruct.GPIO_Pin = Encoder1_Q0 | Encoder1_Q1 | Encoder1_Q2;
