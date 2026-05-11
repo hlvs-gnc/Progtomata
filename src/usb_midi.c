@@ -7,7 +7,7 @@
  *  - GPIO / RCC / NVIC initialisation for USB OTG FS (PA11, PA12)
  *  - OTG_FS_IRQHandler (calls into the USB device core, then yields)
  *  - USBD_MIDI_RxReadyCallback override (signals FreeRTOS semaphore)
- *  - vMidiDeviceTask — consumes ring buffer and maps MIDI events to audio engine
+ *  - MIDI task consumes ring buffer, map MIDI events to audio engine
  ******************************************************************************
  */
 
