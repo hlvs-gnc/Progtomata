@@ -25,7 +25,7 @@ void USB_MIDI_Init(void);
  * @brief  FreeRTOS task that blocks on a semaphore and processes
  *         incoming USB-MIDI event packets from the ring buffer.
  */
-void vMidiTask(void *pvParameters);
+void vMidiDeviceTask(void *pvParameters);
 
 #ifdef __cplusplus
 }

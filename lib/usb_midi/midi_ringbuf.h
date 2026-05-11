@@ -5,7 +5,7 @@
  *          event packets (4 bytes each).
  *
  * @details Producer: OTG_FS_IRQHandler (ISR context)
- *          Consumer: vMidiTask (FreeRTOS task context)
+ *          Consumer: vMidiDeviceTask (FreeRTOS task context)
  *          No mutex required — head written only by ISR, tail only by task.
  ******************************************************************************
  */

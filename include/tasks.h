@@ -106,13 +106,13 @@ TaskHandle_t waveformTaskHandle;
 
 // --- MIDI Task ---
 /// @brief Stack memory allocation for the MIDI task stored in CCM
-StackType_t midiTaskStack[MIDI_TASK_STACK_SIZE] CCM_RAM;
+StackType_t midiDeviceTaskStack[MIDI_TASK_STACK_SIZE] CCM_RAM;
 
 /// @brief Task control block (TCB) for the MIDI task stored in CCM
-StaticTask_t midiTaskBuffer CCM_RAM;
+StaticTask_t midiDeviceTaskBuffer CCM_RAM;
 
 /// @brief Handle for the MIDI task
-TaskHandle_t midiTaskHandle;
+TaskHandle_t midiDeviceTaskHandle;
 
 /**
  * @brief
@@ -162,6 +162,6 @@ void vWaveformTask(void *pvParameters);
  *
  * @param[in] pvParameters Pointer to task parameters (unused).
  */
-void vMidiTask(void *pvParameters);
+void vMidiDeviceTask(void *pvParameters);
 
 #endif // TASKS_H_

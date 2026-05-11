@@ -201,9 +201,9 @@ int main(void) {
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
       WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
-  midiTaskHandle = xTaskCreateStatic(
-      vMidiTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
-      MIDI_TASK_PRIORITY, midiTaskStack, &midiTaskBuffer);
+  midiDeviceTaskHandle = xTaskCreateStatic(
+      vMidiDeviceTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
+      MIDI_TASK_PRIORITY, midiDeviceTaskStack, &midiDeviceTaskBuffer);
 
 #ifdef LOG_TRICE
   TRice(iD(1425), "info: 🐛 PROGTOMATA2000 System initialized\n");
