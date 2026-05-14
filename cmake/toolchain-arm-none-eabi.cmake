@@ -29,8 +29,10 @@ set(CMAKE_OBJCOPY ${ARM_objcopy})
 set(CMAKE_SIZE    ${ARM_size})
 
 set(ARCH_FLAGS -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard)
-set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} -nostartfiles -T${CMAKE_SOURCE_DIR}/stm32f407vg.ld")
-set(CMAKE_ASM_FLAGS "${CPU_FLAGS} -x assembler-with-cpp")
+# Note: ARCH_FLAGS is a CMake list; expand to a space-separated string for *_FLAGS variables.
+string(REPLACE ";" " " ARCH_FLAGS_STR "${ARCH_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS_STR} -nostartfiles -T${CMAKE_SOURCE_DIR}/stm32f407vg.ld")
+set(CMAKE_ASM_FLAGS "${ARCH_FLAGS_STR} -x assembler-with-cpp")
 
 add_compile_options(${ARCH_FLAGS} -Og -g3 -ffunction-sections -fdata-sections)
 add_link_options   (${ARCH_FLAGS} -specs=nosys.specs -Wl,--gc-sections)
