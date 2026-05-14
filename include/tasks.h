@@ -33,6 +33,9 @@
 /// @brief Stack size for the waveform visualization task in bytes
 #define WAVEFORM_TASK_STACK_SIZE 128
 
+/// @brief Stack size for the USB MIDI task in words
+#define MIDI_TASK_STACK_SIZE 512
+
 // Task priority levels
 /// @brief Priority level for the sample button task (2 = medium)
 #define SAMPLE_TASK_PRIORITY 2
@@ -46,11 +49,20 @@
 /// @brief Priority level for the waveform visualization task (1 = low)
 #define WAVEFORM_TASK_PRIORITY 1
 
+/// @brief Priority level for the MIDI task (3 = high, time-critical)
+#define MIDI_TASK_PRIORITY 3
+
 /// @brief Binary semaphore for button events
 StaticSemaphore_t xButtonSemaphoreStatic;
 
 /// @brief Binary semaphore handle for button events
 SemaphoreHandle_t xButtonSemaphoreHandle;
+
+/// @brief Binary semaphore for MIDI data available (ISR → task)
+StaticSemaphore_t xMidiSemaphoreStatic;
+
+/// @brief Binary semaphore handle for MIDI data
+SemaphoreHandle_t xMidiSemaphoreHandle;
 
 // --- Sample buttons Task ---
 /// @brief Stack memory allocation for the sample button task stored in CCM
@@ -92,6 +104,16 @@ StaticTask_t waveformTaskBuffer CCM_RAM;
 /// @brief Handle for the waveform task
 TaskHandle_t waveformTaskHandle;
 
+// --- MIDI Task ---
+/// @brief Stack memory allocation for the MIDI task stored in CCM
+StackType_t midiDeviceTaskStack[MIDI_TASK_STACK_SIZE] CCM_RAM;
+
+/// @brief Task control block (TCB) for the MIDI task stored in CCM
+StaticTask_t midiDeviceTaskBuffer CCM_RAM;
+
+/// @brief Handle for the MIDI task
+TaskHandle_t midiDeviceTaskHandle;
+
 /**
  * @brief
  *
@@ -126,10 +148,20 @@ void vLedBlinkTask(void *p);
  *
  * This task runs continuously and displays a real-time waveform
  * visualization of the audio playback buffer on the OLED screen.
- * Updates at approximately 10 Hz to match audio buffer refresh rate.
  *
  * @param[in] pvParameters Pointer to task parameters (unused).
  */
 void vWaveformTask(void *pvParameters);
+
+/**
+ * @brief USB MIDI processing task.
+ *
+ * Blocks on a binary semaphore signalled by the OTG_FS ISR.
+ * Consumes 4-byte USB-MIDI event packets from a ring buffer
+ * and routes Note On/Off and CC to the audio engine.
+ *
+ * @param[in] pvParameters Pointer to task parameters (unused).
+ */
+void vMidiDeviceTask(void *pvParameters);
 
 #endif // TASKS_H_

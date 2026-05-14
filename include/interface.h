@@ -28,10 +28,10 @@
  * The definitions are based on the STM32F4DISCOVERY board pinout.
  * @{
  */
-#define Encoder1_Port GPIOA       /*!< GPIO port for encoder 1 */
-#define Encoder1_Q0   GPIO_Pin_8  /*!< Pin number for encoder 1 Q0 */
-#define Encoder1_Q1   GPIO_Pin_9  /*!< Pin number for encoder 1 Q1 */
-#define Encoder1_Q2   GPIO_Pin_15 /*!< Pin number for encoder 1 Q2 */
+#define Encoder1_Port GPIOE      /*!< GPIO port for encoder 1 */
+#define Encoder1_Q0   GPIO_Pin_0 /*!< Pin number for encoder 1 Q0 (PE0) */
+#define Encoder1_Q1   GPIO_Pin_1 /*!< Pin number for encoder 1 Q1 (PE1) */
+#define Encoder1_Q2   GPIO_Pin_2 /*!< Pin number for encoder 1 Q2 (PE2) */
 // #define Encoder1_EN GPIO_Pin_8 /*!< Pin number for encoder 1 enable */
 
 #define Shifter1_Port GPIOB       /*!< GPIO port for shifter 1 */

@@ -93,6 +93,18 @@ if(BUILD_EMBEDDED)
 
     target_link_libraries(uart_driver PUBLIC)
 
+    # USB/ MIDI Device
+    set(USB_MIDI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/usb_midi)
+    file(GLOB USB_MIDI_SRC ${USB_MIDI_DIR}/*.c)
+
+    include_directories(${USB_MIDI_DIR})
+
+    add_library(usb_midi STATIC ${USB_MIDI_SRC})
+
+    target_include_directories(usb_midi PUBLIC ${USB_MIDI_DIR})
+
+    target_link_libraries(usb_midi PUBLIC)
+
     # Trice Logger
     set(TRICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/trice/src)
     file(GLOB TRICE_SRC ${TRICE_DIR}/*.c)

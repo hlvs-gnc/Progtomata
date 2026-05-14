@@ -24,8 +24,8 @@ void systemClock_config(void) {
   while (RCC_WaitForHSEStartUp() == ERROR)
     ;
 
-  // Configure Flash wait states
-  FLASH_SetLatency(FLASH_Latency_1);
+  // Configure Flash wait states (5 WS required for 168 MHz at 2.7–3.6 V)
+  FLASH_SetLatency(FLASH_Latency_5);
   FLASH_PrefetchBufferCmd(ENABLE);
 
   // Configure AHB, APB1, and APB2 prescalers
@@ -36,6 +36,21 @@ void systemClock_config(void) {
 
   // Set up main PLL to 168 MHz system clock
   // (HSE=8 MHz, VCO=336 MHz, /2 => 168 MHz, /7 => 48 MHz USB)
+  //
+  // RM0090: PLLCFGR is read-only while PLL is enabled. SystemInit() may have
+  // already enabled it with the CMSIS default M=25 (assuming 25 MHz HSE).
+  // We must therefore: switch SYSCLK back to HSI, disable PLL, reconfigure,
+  // then re-enable PLL and switch SYSCLK back to it.
+  RCC_HSICmd(ENABLE);
+  while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET)
+    ;
+  RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+  while (RCC_GetSYSCLKSource() != 0x00)
+    ; // 0x00 = HSI used as sysclk
+
+  RCC_PLLCmd(DISABLE);
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != RESET)
+    ;
   RCC_PLLConfig(RCC_PLLSource_HSE, 8, 336, 2, 7);
   RCC_PLLCmd(ENABLE);
   while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)

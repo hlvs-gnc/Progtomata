@@ -49,6 +49,7 @@ if (BUILD_EMBEDDED)
     kernel_freertos
     core
     stm32_framework
+    usb_midi
     audio_codec
     uart_driver
     trice
