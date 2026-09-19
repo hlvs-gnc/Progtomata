@@ -27,7 +27,8 @@ void vGifDemoTask(void *pvParameters) {
   while (1) {
     for (uint16_t i = 0; i < GIFDEMO_FRAME_COUNT; i++) {
       SSD1362_Clear();
-      SSD1362_DrawBitmap4(0, 0, GifDemo_Frames[i], GIFDEMO_WIDTH, GIFDEMO_HEIGHT);
+      SSD1362_DrawBitmap4(0, 0, GifDemo_Frames[i], GIFDEMO_WIDTH,
+                          GIFDEMO_HEIGHT);
       SSD1362_UpdateScreen();
 
       vTaskDelay(pdMS_TO_TICKS(GifDemo_FrameDelayMs[i]));
