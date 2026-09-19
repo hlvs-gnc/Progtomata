@@ -61,6 +61,22 @@ void interface_init();
  */
 uint8_t interface_readButtonStep();
 
+/**
+ * @brief Configures the user button GPIO (PA0) as an input.
+ *
+ * Initializes GPIO settings, enabling input mode without pull-up or
+ * pull-down resistors. Prepares the pin to detect user button presses.
+ */
+void interfaceButton_config(void);
+
+/**
+ * @brief Initializes GPIO pins connected to LEDs.
+ *
+ * Prepares GPIOD Pins 12, 13, 14, and 15 for output mode. Ensures
+ * proper configuration for controlling LED states.
+ */
+void boardLeds_config(void);
+
 // void interface_setRegister(uint8_t bits);
 
 // uint8_t interface_readFxButton();

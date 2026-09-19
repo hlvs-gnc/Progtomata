@@ -12,7 +12,7 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#include <progtomata_system.h>
+#include <progtomata_sys.h>
 
 void systemClock_config(void) {
   // Enable the power interface clock and configure voltage regulator
@@ -75,7 +75,7 @@ void systemClock_config(void) {
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 }
 
-void userButton_config(void) {
+void interfaceButton_config(void) {
   // Enable clock for GPIOD
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
