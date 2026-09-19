@@ -19,7 +19,11 @@
 
 // System definition/ configuration
 #include <audio_cfg.h>
+<<<<<<< HEAD
 #include <progtomata_sys.h>
+=======
+#include <progtomata_system.h>
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
 #include <tasks.h>
 
 // Real-time operating system
@@ -200,10 +204,13 @@ int main(void) {
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
       WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
+<<<<<<< HEAD
   gifDemoTaskHandle = xTaskCreateStatic(
       vGifDemoTask, "GifDemoTask", GIF_DEMO_TASK_STACK_SIZE, NULL,
       GIF_DEMO_TASK_PRIORITY, gifDemoTaskStack, &gifDemoTaskBuffer);
 
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
   midiDeviceTaskHandle = xTaskCreateStatic(
       vMidiDeviceTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
       MIDI_TASK_PRIORITY, midiDeviceTaskStack, &midiDeviceTaskBuffer);

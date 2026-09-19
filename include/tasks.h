@@ -33,9 +33,12 @@
 /// @brief Stack size for the waveform visualization task in bytes
 #define WAVEFORM_TASK_STACK_SIZE 128
 
+<<<<<<< HEAD
 /// @brief Stack size for the GIF demo task in bytes
 #define GIF_DEMO_TASK_STACK_SIZE 128
 
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
 /// @brief Stack size for the USB MIDI task in words
 #define MIDI_TASK_STACK_SIZE 512
 
@@ -52,9 +55,12 @@
 /// @brief Priority level for the waveform visualization task (1 = low)
 #define WAVEFORM_TASK_PRIORITY 1
 
+<<<<<<< HEAD
 /// @brief Priority level for the GIF demo task (1 = low)
 #define GIF_DEMO_TASK_PRIORITY 1
 
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
 /// @brief Priority level for the MIDI task (3 = high, time-critical)
 #define MIDI_TASK_PRIORITY 3
 
@@ -110,6 +116,7 @@ StaticTask_t waveformTaskBuffer CCM_RAM;
 /// @brief Handle for the waveform task
 TaskHandle_t waveformTaskHandle;
 
+<<<<<<< HEAD
 // --- GIF Demo Task ---
 /// @brief Stack memory allocation for the GIF demo task stored in CCM
 StackType_t gifDemoTaskStack[GIF_DEMO_TASK_STACK_SIZE] CCM_RAM;
@@ -120,6 +127,8 @@ StaticTask_t gifDemoTaskBuffer CCM_RAM;
 /// @brief Handle for the GIF demo task
 TaskHandle_t gifDemoTaskHandle;
 
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
 // --- MIDI Task ---
 /// @brief Stack memory allocation for the MIDI task stored in CCM
 StackType_t midiDeviceTaskStack[MIDI_TASK_STACK_SIZE] CCM_RAM;
@@ -170,6 +179,7 @@ void vLedBlinkTask(void *p);
 void vWaveformTask(void *pvParameters);
 
 /**
+<<<<<<< HEAD
  * @brief Task to loop a GIF animation on the SSD1362 display.
  *
  * Cycles through the pre-converted frames in gif_demo_data.h.
@@ -179,6 +189,8 @@ void vWaveformTask(void *pvParameters);
 void vGifDemoTask(void *pvParameters);
 
 /**
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
  * @brief USB MIDI processing task.
  *
  * Blocks on a binary semaphore signalled by the OTG_FS ISR.
