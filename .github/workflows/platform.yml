@@ -85,16 +85,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-none-eabi cmake ninja-build
 
-      - name: Configure (CMake)
+      - name: Configure
         run: |
           cmake -S . -B build -G Ninja \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DBUILD_EMBEDDED=ON
 
-      - name: Build (CMake)
+      - name: Build
         run: cmake --build build --parallel
 
-      - name: Upload firmware artifacts
+      - name: Upload resulting binaries
         uses: actions/upload-artifact@v4
         with:
           name: progtomata-firmware

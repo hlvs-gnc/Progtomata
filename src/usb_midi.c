@@ -15,7 +15,7 @@
 #include "usbd_midi.h"
 #include "midi_ringbuf.h"
 
-#include <progtomata_system.h>
+#include <progtomata_sys.h>
 #include <trice.h>
 
 #include <FreeRTOS.h>

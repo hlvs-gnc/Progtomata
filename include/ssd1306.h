@@ -1,10 +1,10 @@
 /**
- * @file oled.h
+ * @file ssd1306.h
  *
- * @brief Header file for OLED interface functions.
+ * @brief Header file for SSD1306 interface functions.
  *
- * @details This file defines initialization and control functions for
- * managing an OLED display using STM32F4 microcontrollers.
+ * @details This file defines initialization and control functions for managing
+ * the SSD1306 display.
  *
  * @copyright Radar2000
  * This work is licensed under Creative Commons
@@ -13,8 +13,8 @@
  * @author Radar2000
  */
 
-#ifndef OLED_H_
-#define OLED_H_
+#ifndef SSD1306_H_
+#define SSD1306_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -26,56 +26,61 @@
 #include <stm32f4xx_i2c.h>
 #include <stm32f4xx_rcc.h>
 
-/* OLED Display Configuration */
-#define OLED_WIDTH    132
-#define OLED_HEIGHT   64
-#define OLED_PAGES    8
-#define OLED_I2C_ADDR 0x78 // 0x3C << 1
+/* SSD1306 Display Configuration */
+#define SSD1306_WIDTH    132
+#define SSD1306_HEIGHT   64
+#define SSD1306_PAGES    8
+#define SSD1306_I2C_ADDR 0x78 // 0x3C << 1
 
 /* Error handling */
-typedef enum { OLED_OK = 0, OLED_ERROR, OLED_TIMEOUT, OLED_BUSY } OLED_Status;
+typedef enum {
+  SSD1306_OK = 0,
+  SSD1306_ERROR,
+  SSD1306_TIMEOUT,
+  SSD1306_BUSY
+} SSD1306_Status;
 
 /* I2C Configuration */
-#define OLED_I2C            I2C1
-#define OLED_I2C_CLK        RCC_APB1Periph_I2C1
-#define OLED_I2C_GPIO_CLK   RCC_AHB1Periph_GPIOB
-#define OLED_I2C_GPIO       GPIOB
-#define OLED_I2C_SCL_PIN    GPIO_Pin_8
-#define OLED_I2C_SDA_PIN    GPIO_Pin_9
-#define OLED_I2C_SCL_SOURCE GPIO_PinSource8
-#define OLED_I2C_SDA_SOURCE GPIO_PinSource9
-#define OLED_I2C_AF         GPIO_AF_I2C1
+#define SSD1306_I2C            I2C1
+#define SSD1306_I2C_CLK        RCC_APB1Periph_I2C1
+#define SSD1306_I2C_GPIO_CLK   RCC_AHB1Periph_GPIOB
+#define SSD1306_I2C_GPIO       GPIOB
+#define SSD1306_I2C_SCL_PIN    GPIO_Pin_8
+#define SSD1306_I2C_SDA_PIN    GPIO_Pin_9
+#define SSD1306_I2C_SCL_SOURCE GPIO_PinSource8
+#define SSD1306_I2C_SDA_SOURCE GPIO_PinSource9
+#define SSD1306_I2C_AF         GPIO_AF_I2C1
 
-/* OLED Commands */
-#define OLED_CMD_DISPLAY_OFF             0xAE
-#define OLED_CMD_DISPLAY_ON              0xAF
-#define OLED_CMD_SET_DISPLAY_CLOCK       0xD5
-#define OLED_CMD_SET_MULTIPLEX           0xA8
-#define OLED_CMD_SET_DISPLAY_OFFSET      0xD3
-#define OLED_CMD_SET_START_LINE          0x40
-#define OLED_CMD_CHARGE_PUMP             0x8D
-#define OLED_CMD_MEMORY_MODE             0x20
-#define OLED_CMD_SEG_REMAP               0xA0
-#define OLED_CMD_COM_SCAN_DEC            0xC8
-#define OLED_CMD_SET_COM_PINS            0xDA
-#define OLED_CMD_SET_CONTRAST            0x81
-#define OLED_CMD_SET_PRECHARGE           0xD9
-#define OLED_CMD_SET_VCOM_DETECT         0xDB
-#define OLED_CMD_DISPLAY_ALL_ON_RESUME   0xA4
-#define OLED_CMD_NORMAL_DISPLAY          0xA6
-#define OLED_CMD_COLUMN_ADDR             0x21
-#define OLED_CMD_PAGE_ADDR               0x22
-#define OLED_CMD_INVERT_DISPLAY          0xA7
-#define OLED_CMD_ACTIVATE_SCROLL         0x2F
-#define OLED_CMD_DEACTIVATE_SCROLL       0x2E
-#define OLED_CMD_SET_VERTICAL_SCROLL     0xA3
-#define OLED_CMD_RIGHT_HORIZONTAL_SCROLL 0x26
-#define OLED_CMD_LEFT_HORIZONTAL_SCROLL  0x27
+/* SSD1306 Commands */
+#define SSD1306_CMD_DISPLAY_OFF             0xAE
+#define SSD1306_CMD_DISPLAY_ON              0xAF
+#define SSD1306_CMD_SET_DISPLAY_CLOCK       0xD5
+#define SSD1306_CMD_SET_MULTIPLEX           0xA8
+#define SSD1306_CMD_SET_DISPLAY_OFFSET      0xD3
+#define SSD1306_CMD_SET_START_LINE          0x40
+#define SSD1306_CMD_CHARGE_PUMP             0x8D
+#define SSD1306_CMD_MEMORY_MODE             0x20
+#define SSD1306_CMD_SEG_REMAP               0xA0
+#define SSD1306_CMD_COM_SCAN_DEC            0xC8
+#define SSD1306_CMD_SET_COM_PINS            0xDA
+#define SSD1306_CMD_SET_CONTRAST            0x81
+#define SSD1306_CMD_SET_PRECHARGE           0xD9
+#define SSD1306_CMD_SET_VCOM_DETECT         0xDB
+#define SSD1306_CMD_DISPLAY_ALL_ON_RESUME   0xA4
+#define SSD1306_CMD_NORMAL_DISPLAY          0xA6
+#define SSD1306_CMD_COLUMN_ADDR             0x21
+#define SSD1306_CMD_PAGE_ADDR               0x22
+#define SSD1306_CMD_INVERT_DISPLAY          0xA7
+#define SSD1306_CMD_ACTIVATE_SCROLL         0x2F
+#define SSD1306_CMD_DEACTIVATE_SCROLL       0x2E
+#define SSD1306_CMD_SET_VERTICAL_SCROLL     0xA3
+#define SSD1306_CMD_RIGHT_HORIZONTAL_SCROLL 0x26
+#define SSD1306_CMD_LEFT_HORIZONTAL_SCROLL  0x27
 
 /* Control byte */
-#define OLED_CONTROL_BYTE_CMD_SINGLE  0x80
-#define OLED_CONTROL_BYTE_CMD_STREAM  0x00
-#define OLED_CONTROL_BYTE_DATA_STREAM 0x40
+#define SSD1306_CONTROL_BYTE_CMD_SINGLE  0x80
+#define SSD1306_CONTROL_BYTE_CMD_STREAM  0x00
+#define SSD1306_CONTROL_BYTE_DATA_STREAM 0x40
 
 /* Basic 5x7 font */
 static const uint8_t Font5x7[][5] = {
@@ -173,73 +178,73 @@ static const uint8_t Font5x7[][5] = {
 };
 
 /**
- * @brief Initializes the OLED display.
+ * @brief Initializes the SSD1306 display.
  *
- * This function initializes the OLED display and sets it up for use. It must
+ * This function initializes the SSD1306 display and sets it up for use. It must
  * be called before any other function in this module.
  */
-void OLED_Init(void);
+void SSD1306_Init(void);
 
 /**
- * @brief Writes a single data byte to the OLED display.
+ * @brief Writes a single data byte to the SSD1306 display.
  *
  * @param data the data to write
  */
-void OLED_WriteData(uint8_t data);
+void SSD1306_WriteData(uint8_t data);
 
 /**
- * @brief Sets the cursor position of the OLED display.
+ * @brief Sets the cursor position of the SSD1306 display.
  *
  * @param x the x-coordinate of the position
  * @param y the y-coordinate of the position
  */
-void OLED_SetCursor(uint8_t x, uint8_t y);
+void SSD1306_SetCursor(uint8_t x, uint8_t y);
 
 /**
- * @brief Clears the OLED display.
+ * @brief Clears the SSD1306 display.
  */
-void OLED_Clear(void);
+void SSD1306_Clear(void);
 
 /**
- * @brief Turns the OLED display on.
+ * @brief Turns the SSD1306 display on.
  */
-void OLED_DisplayOn(void);
+void SSD1306_DisplayOn(void);
 
 /**
- * @brief Turns the OLED display off.
+ * @brief Turns the SSD1306 display off.
  */
-void OLED_DisplayOff(void);
+void SSD1306_DisplayOff(void);
 
 /**
- * @brief Sets the contrast of the OLED display.
+ * @brief Sets the contrast of the SSD1306 display.
  *
  * @param contrast the contrast value, valid range is 0-255
  */
-void OLED_SetContrast(uint8_t contrast);
+void SSD1306_SetContrast(uint8_t contrast);
 
 /**
- * @brief Inverts the display of the OLED display.
+ * @brief Inverts the display of the SSD1306 display.
  *
  * @param invert if true, the display is inverted
  */
-void OLED_InvertDisplay(bool invert);
+void SSD1306_InvertDisplay(bool invert);
 
 /**
- * @brief Updates the OLED display.
+ * @brief Updates the SSD1306 display.
  */
-void OLED_UpdateScreen(void);
+void SSD1306_UpdateScreen(void);
 
 /**
- * @brief Draws a string on the OLED display.
+ * @brief Draws a string on the SSD1306 display.
  *
  * @param x the x-coordinate of the position
  * @param y the y-coordinate of the position
  * @param str the string to draw
  */
-void OLED_DrawString(uint8_t x, uint8_t y, const char *str);
+void SSD1306_DrawString(uint8_t x, uint8_t y, const char *str);
 
 /**
- * @brief Draws a bitmap on the OLED display.
+ * @brief Draws a bitmap on the SSD1306 display.
  *
  * @param x the x-coordinate of the top-left of the bitmap
  * @param y the y-coordinate of the top-left of the bitmap
@@ -247,11 +252,11 @@ void OLED_DrawString(uint8_t x, uint8_t y, const char *str);
  * @param width the width of the bitmap
  * @param height the height of the bitmap
  */
-void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
-                     uint8_t height);
+void SSD1306_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap,
+                        uint8_t width, uint8_t height);
 
 /**
- * @brief Draws a line on the OLED display.
+ * @brief Draws a line on the SSD1306 display.
  *
  * @param x0 the x-coordinate of the starting point
  * @param y0 the y-coordinate of the starting point
@@ -259,17 +264,18 @@ void OLED_DrawBitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t width,
  * @param y1 the y-coordinate of the ending point
  * @param color the color of the line, true for white, false for black
  */
-void OLED_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool color);
+void SSD1306_DrawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+                      bool color);
 
 /**
- * @brief Draws a waveform visualization on the OLED display.
+ * @brief Draws a waveform visualization on the SSD1306 display.
  *
  * @param audioBuffer pointer to the audio buffer to visualize
  * @param bufferSize size of the audio buffer
  * @param startX starting x-coordinate for the waveform
  * @param width width of the waveform display area
  */
-void OLED_DrawWaveform(const int16_t *audioBuffer, uint16_t bufferSize,
-                       uint8_t startX, uint8_t width);
+void SSD1306_DrawWaveform(const int16_t *audioBuffer, uint16_t bufferSize,
+                          uint8_t startX, uint8_t width);
 
-#endif // OLED_H_
+#endif // SSD1306_H_

@@ -14,7 +14,7 @@
  * Attribution-NonCommercial-ShareAlike 4.0 International License.
  */
 
-#include <progtomata_system.h>
+#include <progtomata_sys.h>
 #include <unity.h>
 
 // Replicate system timing variables

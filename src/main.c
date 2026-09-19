@@ -19,7 +19,11 @@
 
 // System definition/ configuration
 #include <audio_cfg.h>
+<<<<<<< HEAD
+#include <progtomata_sys.h>
+=======
 #include <progtomata_system.h>
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
 #include <tasks.h>
 
 // Real-time operating system
@@ -30,8 +34,8 @@
 
 // Displays
 #include <interface.h>
-#include <lcd.h>
-#include <oled.h>
+#include <ssd1306.h>
+#include <ssd1362.h>
 
 // Communication drivers
 #include <uart_driver.h>
@@ -113,29 +117,28 @@ int main(void) {
   SystemInit();
   systemClock_config();
 
-  // Initialize OLED display
-  OLED_Init();
+  // Initialize SSD1306 display
+  SSD1306_Init();
 
   // Clear the display buffer
-  OLED_Clear();
+  SSD1306_Clear();
 
   // Text width: 16 characters * 6 pixels = 96 pixels
   // Starting X position: (132 - 96) / 2 = 18
-  OLED_DrawString(18, 16, "*PROGTOMATA2000*");
+  SSD1306_DrawString(18, 16, "*PROGTOMATA2000*");
 
   // Update the display to show the content
-  OLED_UpdateScreen();
+  SSD1306_UpdateScreen();
 
-  // Initialize LCD display
-  LCD_Init();
+  // Initialize SSD1362 display
+  SSD1362_Init();
 
-  LCD_GotoXY(0, 0);
-  LCD_WriteString("****************");
-  LCD_GotoXY(1, 0);
-  LCD_WriteString("*PROGTOMATA2000*");
+  SSD1362_Clear();
+  SSD1362_DrawString(0, 0, "*PROGTOMATA2000*", 0x0F);
+  SSD1362_UpdateScreen();
 
   // Initialize system interface
-  userButton_config();
+  interfaceButton_config();
   boardLeds_config();
   interface_init();
 
@@ -201,6 +204,13 @@ int main(void) {
       vWaveformTask, "WaveformTask", WAVEFORM_TASK_STACK_SIZE, NULL,
       WAVEFORM_TASK_PRIORITY, waveformTaskStack, &waveformTaskBuffer);
 
+<<<<<<< HEAD
+  gifDemoTaskHandle = xTaskCreateStatic(
+      vGifDemoTask, "GifDemoTask", GIF_DEMO_TASK_STACK_SIZE, NULL,
+      GIF_DEMO_TASK_PRIORITY, gifDemoTaskStack, &gifDemoTaskBuffer);
+
+=======
+>>>>>>> b4c10399a7b2bb7c606d9356390134c05e31a0fc
   midiDeviceTaskHandle = xTaskCreateStatic(
       vMidiDeviceTask, "MidiTask", MIDI_TASK_STACK_SIZE, NULL,
       MIDI_TASK_PRIORITY, midiDeviceTaskStack, &midiDeviceTaskBuffer);
@@ -376,14 +386,14 @@ void vWaveformTask(void *pvParameters) {
 
   while (1) {
     // Clear display
-    OLED_Clear();
+    SSD1306_Clear();
 
     // Draw waveform from playback buffer
     // Display width: 128 pixels, use 126 to leave margins
-    OLED_DrawWaveform(playbackBuffer, BUFFERSIZE, 1, 126);
+    SSD1306_DrawWaveform(playbackBuffer, BUFFERSIZE, 1, 126);
 
     // Update screen with new content
-    OLED_UpdateScreen();
+    SSD1306_UpdateScreen();
 
     vTaskDelay(pdMS_TO_TICKS(10));
   }
